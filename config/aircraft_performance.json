@@ -1,0 +1,350 @@
+{
+    "aircraft_performance": {
+        "PMDG_737_700": {
+            "name": "PMDG Boeing 737-700",
+            "category": "narrow_body_jet",
+            "base_weight_kg": 50000,
+            "max_landing_weight_kg": 58060,
+            "flaps_30": {
+                "base_vref": 120,
+                "weight_coefficient": 2.3,
+                "min_vref": 115,
+                "max_vref": 145
+            },
+            "flaps_40": {
+                "base_vref": 115,
+                "weight_coefficient": 2.1,
+                "min_vref": 110,
+                "max_vref": 140
+            },
+            "min_runway_length_m": 1500,
+            "preferred_flaps": 30
+        },
+        "PMDG_737_800": {
+            "name": "PMDG Boeing 737-800",
+            "category": "narrow_body_jet",
+            "base_weight_kg": 55000,
+            "max_landing_weight_kg": 66360,
+            "flaps_30": {
+                "base_vref": 125,
+                "weight_coefficient": 2.5,
+                "min_vref": 120,
+                "max_vref": 155
+            },
+            "flaps_40": {
+                "base_vref": 120,
+                "weight_coefficient": 2.3,
+                "min_vref": 115,
+                "max_vref": 150
+            },
+            "min_runway_length_m": 1600,
+            "preferred_flaps": 30
+        },
+        "PMDG_737_900": {
+            "name": "PMDG Boeing 737-900",
+            "category": "narrow_body_jet",
+            "base_weight_kg": 58000,
+            "max_landing_weight_kg": 71350,
+            "flaps_30": {
+                "base_vref": 130,
+                "weight_coefficient": 2.6,
+                "min_vref": 125,
+                "max_vref": 160
+            },
+            "flaps_40": {
+                "base_vref": 125,
+                "weight_coefficient": 2.4,
+                "min_vref": 120,
+                "max_vref": 155
+            },
+            "min_runway_length_m": 1700,
+            "preferred_flaps": 30
+        },
+        "PMDG_777_200": {
+            "name": "PMDG Boeing 777-200",
+            "category": "wide_body_jet",
+            "base_weight_kg": 180000,
+            "max_landing_weight_kg": 213200,
+            "flaps_25": {
+                "base_vref": 145,
+                "weight_coefficient": 3.0,
+                "min_vref": 140,
+                "max_vref": 175
+            },
+            "flaps_30": {
+                "base_vref": 140,
+                "weight_coefficient": 2.8,
+                "min_vref": 135,
+                "max_vref": 170
+            },
+            "min_runway_length_m": 2200,
+            "preferred_flaps": 30
+        },
+        "PMDG_777_300": {
+            "name": "PMDG Boeing 777-300ER",
+            "category": "wide_body_jet",
+            "base_weight_kg": 200000,
+            "max_landing_weight_kg": 251300,
+            "flaps_25": {
+                "base_vref": 150,
+                "weight_coefficient": 3.2,
+                "min_vref": 145,
+                "max_vref": 180
+            },
+            "flaps_30": {
+                "base_vref": 145,
+                "weight_coefficient": 3.0,
+                "min_vref": 140,
+                "max_vref": 175
+            },
+            "min_runway_length_m": 2400,
+            "preferred_flaps": 30
+        },
+        "FENIX_A320": {
+            "name": "Fenix Airbus A320",
+            "category": "narrow_body_jet",
+            "base_weight_kg": 60000,
+            "max_landing_weight_kg": 67400,
+            "conf_3": {
+                "base_vref": 130,
+                "weight_coefficient": 2.0,
+                "min_vref": 125,
+                "max_vref": 150
+            },
+            "conf_full": {
+                "base_vref": 125,
+                "weight_coefficient": 1.8,
+                "min_vref": 120,
+                "max_vref": 145
+            },
+            "min_runway_length_m": 1500,
+            "preferred_flaps": "conf_3"
+        },
+        "FBW_A32NX": {
+            "name": "FlyByWire A320neo",
+            "category": "narrow_body_jet",
+            "base_weight_kg": 60000,
+            "max_landing_weight_kg": 67400,
+            "conf_3": {
+                "base_vref": 130,
+                "weight_coefficient": 2.0,
+                "min_vref": 125,
+                "max_vref": 150
+            },
+            "conf_full": {
+                "base_vref": 125,
+                "weight_coefficient": 1.8,
+                "min_vref": 120,
+                "max_vref": 145
+            },
+            "min_runway_length_m": 1500,
+            "preferred_flaps": "conf_3"
+        },
+        "ASOBO_A320NEO": {
+            "name": "Asobo Airbus A320neo",
+            "category": "narrow_body_jet",
+            "base_weight_kg": 60000,
+            "max_landing_weight_kg": 67400,
+            "flaps_full": {
+                "base_vref": 130,
+                "weight_coefficient": 2.0,
+                "min_vref": 125,
+                "max_vref": 150
+            },
+            "min_runway_length_m": 1500,
+            "preferred_flaps": "flaps_full"
+        },
+        "ASOBO_B747_8": {
+            "name": "Asobo Boeing 747-8",
+            "category": "wide_body_jet",
+            "base_weight_kg": 250000,
+            "max_landing_weight_kg": 312100,
+            "flaps_25": {
+                "base_vref": 155,
+                "weight_coefficient": 3.5,
+                "min_vref": 150,
+                "max_vref": 185
+            },
+            "flaps_30": {
+                "base_vref": 150,
+                "weight_coefficient": 3.3,
+                "min_vref": 145,
+                "max_vref": 180
+            },
+            "min_runway_length_m": 2500,
+            "preferred_flaps": 30
+        },
+        "ASOBO_B787_10": {
+            "name": "Asobo Boeing 787-10",
+            "category": "wide_body_jet",
+            "base_weight_kg": 160000,
+            "max_landing_weight_kg": 192800,
+            "flaps_25": {
+                "base_vref": 145,
+                "weight_coefficient": 2.8,
+                "min_vref": 140,
+                "max_vref": 170
+            },
+            "flaps_30": {
+                "base_vref": 140,
+                "weight_coefficient": 2.6,
+                "min_vref": 135,
+                "max_vref": 165
+            },
+            "min_runway_length_m": 2100,
+            "preferred_flaps": 30
+        },
+        "ASOBO_CJ4": {
+            "name": "Asobo Cessna Citation CJ4",
+            "category": "business_jet",
+            "base_weight_kg": 7500,
+            "max_landing_weight_kg": 7711,
+            "flaps_full": {
+                "base_vref": 105,
+                "weight_coefficient": 1.5,
+                "min_vref": 100,
+                "max_vref": 115
+            },
+            "min_runway_length_m": 900,
+            "preferred_flaps": "flaps_full"
+        },
+        "ASOBO_TBM930": {
+            "name": "Asobo TBM 930",
+            "category": "turboprop",
+            "base_weight_kg": 2800,
+            "max_landing_weight_kg": 3354,
+            "flaps_full": {
+                "base_vref": 85,
+                "weight_coefficient": 1.0,
+                "min_vref": 80,
+                "max_vref": 95
+            },
+            "min_runway_length_m": 700,
+            "preferred_flaps": "flaps_full"
+        },
+        "ASOBO_KING_AIR_350": {
+            "name": "Asobo Beechcraft King Air 350",
+            "category": "turboprop",
+            "base_weight_kg": 5000,
+            "max_landing_weight_kg": 6804,
+            "flaps_full": {
+                "base_vref": 95,
+                "weight_coefficient": 1.2,
+                "min_vref": 90,
+                "max_vref": 105
+            },
+            "min_runway_length_m": 800,
+            "preferred_flaps": "flaps_full"
+        },
+        "ASOBO_C172": {
+            "name": "Asobo Cessna 172 Skyhawk",
+            "category": "general_aviation",
+            "base_weight_kg": 1000,
+            "max_landing_weight_kg": 1111,
+            "flaps_full": {
+                "base_vref": 60,
+                "weight_coefficient": 0.8,
+                "min_vref": 55,
+                "max_vref": 70
+            },
+            "min_runway_length_m": 400,
+            "preferred_flaps": "flaps_full"
+        },
+        "ASOBO_C152": {
+            "name": "Asobo Cessna 152",
+            "category": "general_aviation",
+            "base_weight_kg": 700,
+            "max_landing_weight_kg": 757,
+            "flaps_full": {
+                "base_vref": 50,
+                "weight_coefficient": 0.6,
+                "min_vref": 45,
+                "max_vref": 60
+            },
+            "min_runway_length_m": 350,
+            "preferred_flaps": "flaps_full"
+        },
+        "ASOBO_DA62": {
+            "name": "Asobo Diamond DA62",
+            "category": "general_aviation",
+            "base_weight_kg": 1800,
+            "max_landing_weight_kg": 2300,
+            "flaps_full": {
+                "base_vref": 75,
+                "weight_coefficient": 0.9,
+                "min_vref": 70,
+                "max_vref": 85
+            },
+            "min_runway_length_m": 500,
+            "preferred_flaps": "flaps_full"
+        },
+        "DEFAULT_JET": {
+            "name": "Default Jet Aircraft",
+            "category": "narrow_body_jet",
+            "base_weight_kg": 60000,
+            "max_landing_weight_kg": 70000,
+            "flaps_full": {
+                "base_vref": 135,
+                "weight_coefficient": 2.0,
+                "min_vref": 130,
+                "max_vref": 155
+            },
+            "min_runway_length_m": 1500,
+            "preferred_flaps": "flaps_full"
+        },
+        "DEFAULT_TURBOPROP": {
+            "name": "Default Turboprop Aircraft",
+            "category": "turboprop",
+            "base_weight_kg": 4000,
+            "max_landing_weight_kg": 5000,
+            "flaps_full": {
+                "base_vref": 90,
+                "weight_coefficient": 1.0,
+                "min_vref": 85,
+                "max_vref": 100
+            },
+            "min_runway_length_m": 700,
+            "preferred_flaps": "flaps_full"
+        },
+        "DEFAULT_GA": {
+            "name": "Default General Aviation",
+            "category": "general_aviation",
+            "base_weight_kg": 1200,
+            "max_landing_weight_kg": 1500,
+            "flaps_full": {
+                "base_vref": 65,
+                "weight_coefficient": 0.8,
+                "min_vref": 60,
+                "max_vref": 75
+            },
+            "min_runway_length_m": 400,
+            "preferred_flaps": "flaps_full"
+        }
+    },
+    "matching_rules": {
+        "PMDG 737-700": "PMDG_737_700",
+        "PMDG 737-800": "PMDG_737_800",
+        "PMDG 737-900": "PMDG_737_900",
+        "PMDG 777-200": "PMDG_777_200",
+        "PMDG 777-300": "PMDG_777_300",
+        "Fenix A320": "FENIX_A320",
+        "FlyByWire A320": "FBW_A32NX",
+        "A32NX": "FBW_A32NX",
+        "Airbus A320neo": "ASOBO_A320NEO",
+        "Boeing 747-8": "ASOBO_B747_8",
+        "Boeing 787-10": "ASOBO_B787_10",
+        "Citation CJ4": "ASOBO_CJ4",
+        "TBM 930": "ASOBO_TBM930",
+        "King Air 350": "ASOBO_KING_AIR_350",
+        "Cessna 172": "ASOBO_C172",
+        "Cessna 152": "ASOBO_C152",
+        "Diamond DA62": "ASOBO_DA62"
+    },
+    "category_defaults": {
+        "narrow_body_jet": "DEFAULT_JET",
+        "wide_body_jet": "DEFAULT_JET",
+        "business_jet": "DEFAULT_JET",
+        "turboprop": "DEFAULT_TURBOPROP",
+        "general_aviation": "DEFAULT_GA"
+    }
+}

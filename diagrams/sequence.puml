@@ -1,0 +1,202 @@
+@startuml MSFS_AutoLand_Sequence
+
+title MSFS AutoLand System - Последовательность выполнения захода
+
+actor "Пользователь" as User
+participant "GUI" as GUI
+participant "AutoLandSystem" as Main
+participant "Telemetry" as Telem
+participant "AircraftAdapter" as Adapter
+participant "Navigation/ILS" as Nav
+participant "WindCorrection" as Wind
+participant "StabilizedMonitor" as Stab
+participant "Control/Autothrottle" as Control
+participant "MSFS" as MSFS
+
+== Подключение ==
+
+User -> GUI: Нажимает "Connect"
+activate GUI
+GUI -> Main: connect()
+activate Main
+
+Main -> Telem: connect()
+activate Telem
+Telem -> MSFS: SimConnect.connect()
+activate MSFS
+MSFS --> Telem: Connected
+deactivate MSFS
+Telem --> Main: Connected
+deactivate Telem
+
+Main -> Adapter: detect_and_configure()
+activate Adapter
+Adapter -> Telem: get_aircraft_info()
+activate Telem
+Telem --> Adapter: Aircraft data
+deactivate Telem
+Adapter -> Adapter: Загрузка профиля
+Adapter --> Main: Profile configured
+deactivate Adapter
+
+Main --> GUI: Connected ✓
+deactivate Main
+GUI --> User: Статус "Connected"
+deactivate GUI
+
+== Настройка захода ==
+
+User -> GUI: Нажимает "Start Approach"
+activate GUI
+GUI -> GUI: Открывает ApproachDialog
+User -> GUI: Выбирает параметры
+GUI -> Main: configure_approach(config)
+activate Main
+Main -> Main: Сохранение конфигурации
+Main --> GUI: Configured
+deactivate Main
+
+GUI -> Main: start_approach()
+activate Main
+
+Main -> Control: set_autopilot_master(True)
+activate Control
+Control -> MSFS: Включение автопилота
+deactivate Control
+
+Main -> Adapter: engage_autopilot()
+activate Adapter
+Adapter -> MSFS: Команды автопилота
+deactivate Adapter
+
+Main -> Main: phase = INITIAL
+Main -> Main: Запуск execute_approach()
+
+== Цикл выполнения (каждые 0.5 сек) ==
+
+loop Пока running == True
+
+    Main -> Telem: get_all_data()
+    activate Telem
+    Telem -> MSFS: Запрос телеметрии
+    activate MSFS
+    MSFS --> Telem: Position, Speed, Attitude, Nav
+    deactivate MSFS
+    Telem --> Main: Telemetry data
+    deactivate Telem
+
+    alt ILS заход
+        Main -> Nav: calculate_ils_approach(data)
+        activate Nav
+        Nav -> Nav: Расчёт localizer/glideslope
+        Nav --> Main: ILS approach data
+        deactivate Nav
+    else VOR/NDB заход
+        Main -> Nav: calculate_vor_approach(data)
+        activate Nav
+        Nav -> Nav: Расчёт курса/расстояния
+        Nav --> Main: VOR approach data
+        deactivate Nav
+    end
+
+    Main -> Wind: apply_wind_corrections(data)
+    activate Wind
+    Wind -> Wind: Расчёт drift/crab angle
+    Wind --> Main: Corrected heading/VS
+    deactivate Wind
+
+    alt Фаза INITIAL
+        Main -> Main: Перехват курса
+        Main -> Control: set_heading_hold(corrected_heading)
+        activate Control
+        Control -> MSFS: Установка курса
+        deactivate Control
+
+        alt Курс перехвачен и DME < 15nm
+            Main -> Main: phase = INTERMEDIATE
+        end
+    end
+
+    alt Фаза INTERMEDIATE
+        Main -> Main: Следование по курсу
+        Main -> Control: set_heading_hold(corrected_heading)
+        activate Control
+        Control -> MSFS: Установка курса
+        deactivate Control
+
+        Main -> Control: set_vertical_speed(-500)
+        activate Control
+        Control -> MSFS: Установка VS
+        deactivate Control
+
+        alt Distance < 8nm и высота близка
+            Main -> Main: phase = FINAL
+            Main -> Control: Активация Autothrottle
+            activate Control
+            Control --> Main: Autothrottle active
+            deactivate Control
+        end
+    end
+
+    alt Фаза FINAL
+        Main -> Stab: check_stabilization(data)
+        activate Stab
+        Stab -> Stab: Проверка критериев
+
+        alt Нарушение стабилизации
+            Stab --> Main: UNSTABLE
+            deactivate Stab
+            Main -> Main: execute_go_around()
+            Main -> Control: Full throttle + Climb
+            activate Control
+            Control -> MSFS: Команды ухода на второй круг
+            deactivate Control
+            Main -> Main: phase = IDLE
+        else Стабильно
+            Stab --> Main: STABLE
+            deactivate Stab
+            Main -> Control: Точное следование глиссаде
+            activate Control
+            Control -> MSFS: Команды управления
+            deactivate Control
+
+            alt Radio height < 50ft
+                Main -> Main: phase = LANDING
+                Main -> Control: Активация Flare
+                activate Control
+                Control --> Main: Flare active
+                deactivate Control
+            end
+        end
+    end
+
+    alt Фаза LANDING
+        Main -> Control: flare_controller.update()
+        activate Control
+        Control -> Control: Увеличение тангажа
+        Control -> Control: Снижение VS
+        Control -> MSFS: Команды выравнивания
+        deactivate Control
+
+        alt На земле
+            Main -> Main: phase = COMPLETED
+            Main -> Main: stop_approach()
+        end
+    end
+
+    Main --> GUI: Обновление телеметрии
+    activate GUI
+    GUI --> User: Отображение данных
+    deactivate GUI
+
+end
+
+== Завершение ==
+
+Main --> GUI: Approach completed
+deactivate Main
+activate GUI
+GUI --> User: Статус "COMPLETED"
+deactivate GUI
+
+@enduml

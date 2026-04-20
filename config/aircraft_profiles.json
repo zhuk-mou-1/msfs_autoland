@@ -1,0 +1,334 @@
+{
+  "aircraft_profiles": {
+    "PMDG_737": {
+      "name": "PMDG 737",
+      "manufacturer": "PMDG",
+      "type": "Boeing 737",
+      "requires_lvars": true,
+      "autopilot": {
+        "type": "custom",
+        "commands": {
+          "autopilot_master": {
+            "method": "event",
+            "event": "PMDG_737_MCP_AP_ENGAGE",
+            "event_off": "PMDG_737_MCP_AP_DISENGAGE"
+          },
+          "heading": {
+            "method": "lvar",
+            "variable": "PMDG_737_MCP_Course",
+            "event": "PMDG_737_MCP_COURSE_SELECTOR"
+          },
+          "altitude": {
+            "method": "lvar",
+            "variable": "PMDG_737_MCP_Altitude",
+            "event": "PMDG_737_MCP_ALT_SELECTOR"
+          },
+          "vertical_speed": {
+            "method": "lvar",
+            "variable": "PMDG_737_MCP_VertSpeed",
+            "event": "PMDG_737_MCP_VS_SELECTOR"
+          },
+          "approach_mode": {
+            "method": "event",
+            "event": "PMDG_737_MCP_APP_SWITCH"
+          },
+          "nav_mode": {
+            "method": "event",
+            "event": "PMDG_737_MCP_LNAV_SWITCH"
+          },
+          "localizer_mode": {
+            "method": "event",
+            "event": "PMDG_737_MCP_LOC_SWITCH"
+          }
+        },
+        "status_variables": {
+          "autopilot_engaged": "PMDG_737_MCP_AP_Engaged",
+          "approach_armed": "PMDG_737_MCP_APP_Armed",
+          "nav_armed": "PMDG_737_MCP_LNAV_Armed"
+        }
+      },
+      "autothrottle": {
+        "supported": true,
+        "commands": {
+          "set_speed": {
+            "method": "lvar",
+            "variable": "PMDG_737_MCP_IASMach",
+            "event": "PMDG_737_MCP_SPEED_SELECTOR"
+          },
+          "engage": {
+            "method": "event",
+            "event": "PMDG_737_MCP_AT_ARM_SWITCH"
+          }
+        }
+      },
+      "limitations": {
+        "max_bank_angle": 25,
+        "min_approach_speed": 130,
+        "max_approach_speed": 160,
+        "requires_fms_programming": true
+      }
+    },
+    "PMDG_777": {
+      "name": "PMDG 777",
+      "manufacturer": "PMDG",
+      "type": "Boeing 777",
+      "requires_lvars": true,
+      "autopilot": {
+        "type": "custom",
+        "commands": {
+          "heading": {
+            "method": "lvar",
+            "variable": "PMDG_777_MCP_Course",
+            "event": "PMDG_777_MCP_COURSE_SELECTOR"
+          },
+          "altitude": {
+            "method": "lvar",
+            "variable": "PMDG_777_MCP_Altitude",
+            "event": "PMDG_777_MCP_ALT_SELECTOR"
+          },
+          "approach_mode": {
+            "method": "event",
+            "event": "PMDG_777_MCP_APP_SWITCH"
+          }
+        }
+      },
+      "limitations": {
+        "max_bank_angle": 25,
+        "min_approach_speed": 140,
+        "max_approach_speed": 170
+      }
+    },
+    "FENIX_A320": {
+      "name": "Fenix A320",
+      "manufacturer": "FENIX",
+      "type": "Airbus A320",
+      "requires_lvars": true,
+      "autopilot": {
+        "type": "custom",
+        "commands": {
+          "autopilot_master": {
+            "method": "event",
+            "event": "FENIX_FCU_AP1_PUSH"
+          },
+          "heading": {
+            "method": "lvar",
+            "variable": "S_FCU_HEADING",
+            "event": "FENIX_FCU_HDG_SET"
+          },
+          "altitude": {
+            "method": "lvar",
+            "variable": "S_FCU_ALTITUDE",
+            "event": "FENIX_FCU_ALT_SET"
+          },
+          "vertical_speed": {
+            "method": "lvar",
+            "variable": "S_FCU_VS",
+            "event": "FENIX_FCU_VS_SET"
+          },
+          "approach_mode": {
+            "method": "event",
+            "event": "FENIX_FCU_APPR_PUSH"
+          },
+          "localizer_mode": {
+            "method": "event",
+            "event": "FENIX_FCU_LOC_PUSH"
+          }
+        },
+        "status_variables": {
+          "autopilot_1_engaged": "S_OH_AUTOPILOT_1",
+          "autopilot_2_engaged": "S_OH_AUTOPILOT_2",
+          "approach_armed": "S_FCU_APPR_MODE",
+          "loc_armed": "S_FCU_LOC_MODE"
+        }
+      },
+      "autothrottle": {
+        "supported": true,
+        "commands": {
+          "set_speed": {
+            "method": "lvar",
+            "variable": "S_FCU_SPEED",
+            "event": "FENIX_FCU_SPD_SET"
+          },
+          "engage": {
+            "method": "event",
+            "event": "FENIX_FCU_ATHR_PUSH"
+          }
+        }
+      },
+      "limitations": {
+        "max_bank_angle": 25,
+        "min_approach_speed": 130,
+        "max_approach_speed": 160,
+        "requires_fms_programming": true,
+        "requires_ils_tuned": true
+      }
+    },
+    "FSLABS_A32X": {
+      "name": "FSLabs A320 Family",
+      "manufacturer": "FSLABS",
+      "type": "Airbus A320/A319/A321",
+      "requires_lvars": true,
+      "autopilot": {
+        "type": "custom",
+        "commands": {
+          "heading": {
+            "method": "lvar",
+            "variable": "FSLA320_FCU_HDG",
+            "event": "FSLA320_FCU_HDG_SET"
+          },
+          "altitude": {
+            "method": "lvar",
+            "variable": "FSLA320_FCU_ALT",
+            "event": "FSLA320_FCU_ALT_SET"
+          },
+          "approach_mode": {
+            "method": "event",
+            "event": "FSLA320_FCU_APPR"
+          }
+        }
+      },
+      "limitations": {
+        "max_bank_angle": 25,
+        "min_approach_speed": 130,
+        "max_approach_speed": 160,
+        "requires_fms_programming": true
+      }
+    },
+    "INIBUILDS_A300": {
+      "name": "iniBuilds A300",
+      "manufacturer": "INIBUILDS",
+      "type": "Airbus A300",
+      "requires_lvars": true,
+      "autopilot": {
+        "type": "custom",
+        "commands": {
+          "heading": {
+            "method": "lvar",
+            "variable": "INI_A300_FCU_HDG"
+          },
+          "altitude": {
+            "method": "lvar",
+            "variable": "INI_A300_FCU_ALT"
+          },
+          "approach_mode": {
+            "method": "event",
+            "event": "INI_A300_FCU_APPR"
+          }
+        }
+      },
+      "limitations": {
+        "max_bank_angle": 25,
+        "min_approach_speed": 135,
+        "max_approach_speed": 165
+      }
+    },
+    "INIBUILDS_A310": {
+      "name": "iniBuilds A310",
+      "manufacturer": "INIBUILDS",
+      "type": "Airbus A310",
+      "requires_lvars": true,
+      "autopilot": {
+        "type": "custom",
+        "commands": {
+          "heading": {
+            "method": "lvar",
+            "variable": "INI_A310_FCU_HDG"
+          },
+          "altitude": {
+            "method": "lvar",
+            "variable": "INI_A310_FCU_ALT"
+          }
+        }
+      },
+      "limitations": {
+        "max_bank_angle": 25,
+        "min_approach_speed": 135,
+        "max_approach_speed": 165
+      }
+    },
+    "FBW_A32NX": {
+      "name": "FlyByWire A32NX",
+      "manufacturer": "FLYBYWIRE",
+      "type": "Airbus A320neo",
+      "requires_lvars": true,
+      "autopilot": {
+        "type": "custom",
+        "commands": {
+          "autopilot_master": {
+            "method": "event",
+            "event": "A32NX_FCU_AP_1_PUSH"
+          },
+          "heading": {
+            "method": "lvar",
+            "variable": "A32NX_FCU_HDG_SET"
+          },
+          "altitude": {
+            "method": "lvar",
+            "variable": "A32NX_FCU_ALT_SET"
+          },
+          "vertical_speed": {
+            "method": "lvar",
+            "variable": "A32NX_FCU_VS_SET"
+          },
+          "approach_mode": {
+            "method": "event",
+            "event": "A32NX_FCU_APPR_PUSH"
+          },
+          "localizer_mode": {
+            "method": "event",
+            "event": "A32NX_FCU_LOC_PUSH"
+          }
+        },
+        "status_variables": {
+          "autopilot_1_engaged": "A32NX_AUTOPILOT_1_ACTIVE",
+          "autopilot_2_engaged": "A32NX_AUTOPILOT_2_ACTIVE",
+          "approach_armed": "A32NX_FCU_APPR_MODE_ACTIVE"
+        }
+      },
+      "autothrottle": {
+        "supported": true,
+        "commands": {
+          "set_speed": {
+            "method": "lvar",
+            "variable": "A32NX_FCU_SPD_SET"
+          }
+        }
+      },
+      "limitations": {
+        "max_bank_angle": 25,
+        "min_approach_speed": 130,
+        "max_approach_speed": 160,
+        "requires_fms_programming": true
+      }
+    }
+  },
+  "fallback": {
+    "name": "Standard MSFS",
+    "type": "standard",
+    "autopilot": {
+      "type": "simconnect",
+      "commands": {
+        "heading": {
+          "method": "simconnect",
+          "event": "HEADING_BUG_SET"
+        },
+        "altitude": {
+          "method": "simconnect",
+          "event": "AP_ALT_VAR_SET_ENGLISH"
+        },
+        "vertical_speed": {
+          "method": "simconnect",
+          "event": "AP_VS_VAR_SET_ENGLISH"
+        },
+        "approach_mode": {
+          "method": "simconnect",
+          "event": "AP_APR_HOLD"
+        },
+        "nav_mode": {
+          "method": "simconnect",
+          "event": "AP_NAV1_HOLD"
+        }
+      }
+    }
+  }
+}

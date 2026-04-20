@@ -1,0 +1,23 @@
+# MSFS AutoLand System - Requirements
+
+# Основные зависимости
+# SimConnect - требуется установка отдельно
+# https://github.com/odwdinc/Python-SimConnect
+
+# Опциональные зависимости для расширенной функциональности
+
+# vJoy интеграция (для точного управления)
+pyvjoy>=1.0.0
+
+# Звуковые предупреждения (опционально)
+gtts>=2.3.0
+pygame>=2.5.0
+
+# Примечания:
+# - SimConnect должен быть установлен вручную
+# - pyvjoy требует установленный vJoy драйвер
+# - gtts и pygame опциональны, система работает без них
+# - tkinter входит в стандартную поставку Python
+
+# Установка:
+# pip install -r requirements.txt

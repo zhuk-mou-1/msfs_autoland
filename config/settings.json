@@ -1,0 +1,18 @@
+{
+  "navigraph": {
+    "database_path": null,
+    "auto_refresh": false,
+    "cache_enabled": false,
+    "cache_ttl_seconds": 3600
+  },
+  "gui": {
+    "theme": "default",
+    "window_width": 1200,
+    "window_height": 800
+  },
+  "logging": {
+    "level": "INFO",
+    "console_output": true,
+    "file_output": true
+  }
+}

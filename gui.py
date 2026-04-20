@@ -56,6 +56,22 @@ class AutoLandGUI:
     def create_widgets(self):
         """Создание виджетов интерфейса"""
 
+        # Меню
+        menubar = tk.Menu(self.root)
+        self.root.config(menu=menubar)
+
+        # Меню File
+        file_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="File", menu=file_menu)
+        file_menu.add_command(label="Settings", command=self.open_settings)
+        file_menu.add_separator()
+        file_menu.add_command(label="Exit", command=self.root.quit)
+
+        # Меню Help
+        help_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Help", menu=help_menu)
+        help_menu.add_command(label="About", command=self.show_about)
+
         # Верхняя панель - статус и управление
         top_frame = ttk.Frame(self.root, padding="10")
         top_frame.pack(side=tk.TOP, fill=tk.X)
@@ -1223,7 +1239,7 @@ class AutoLandGUI:
                     )
 
             except Exception as e:
-                logging.error(f"Error checking WASM version: {e}")
+                logging.error("Error checking WASM version: %s", e)
                 self.root.after(0, lambda: self.wasm_version_var.set("Check failed"))
                 self.root.after(
                     0, lambda: self.wasm_version_label.config(foreground="gray")
@@ -1311,7 +1327,7 @@ class AutoLandGUI:
                     )
 
             except Exception as e:
-                logging.error(f"Error checking WASM updates: {e}")
+                logging.error("Error checking WASM updates: %s", e)
                 error_msg = str(e)
                 self.root.after(
                     0,
@@ -1465,12 +1481,135 @@ class AutoLandGUI:
         if self.system:
             self.system.audio_alerts_enabled = self.audio_alerts_var.get()
             status = "enabled" if self.audio_alerts_var.get() else "disabled"
-            logging.info(f"Audio alerts {status}")
+            logging.info("Audio alerts %s", status)
 
     def go_around(self):
         """Уход на второй круг"""
         if self.system:
             self.system.execute_go_around()
+
+    def _get_compatibility_info(self, adapter):
+        """Получить информацию о совместимости адаптера"""
+        compatibility_status = "Compatible"
+        compatibility_color = "green"
+        compatibility_details = []
+
+        compat = adapter.check_compatibility()
+
+        if compat.get("compatible"):
+            if compat.get("limited"):
+                compatibility_status = "Limited Compatibility"
+                compatibility_color = "orange"
+                compatibility_details.append(compat.get("reason", ""))
+                compatibility_details.append(compat.get("recommendation", ""))
+                compatibility_details.append(f"Fallback: {compat.get('fallback', 'SimConnect')}")
+            else:
+                compatibility_status = "Full Compatibility"
+                compatibility_color = "green"
+                if compat.get("full_functionality"):
+                    compatibility_details.append("✓ WASM support available")
+                    compatibility_details.append("✓ Custom autopilot commands")
+                if compat.get("autothrottle"):
+                    compatibility_details.append("✓ Autothrottle supported")
+        else:
+            compatibility_status = "Not Compatible"
+            compatibility_color = "red"
+            compatibility_details.append(compat.get("reason", "Unknown reason"))
+
+        return compatibility_status, compatibility_color, compatibility_details
+
+    def _get_version_info(self, adapter, title):
+        """Получить версию самолёта из конфигурационных файлов"""
+        if not adapter.config_reader:
+            return "N/A"
+
+        try:
+            details = adapter.config_reader.get_aircraft_details(title)
+            if details.get("found"):
+                manifest = details.get("manifest")
+                if manifest:
+                    version = manifest.get("package_version", "N/A")
+                    if version == "N/A":
+                        version = manifest.get("version", "N/A")
+                    return version
+        except Exception as e:
+            logging.debug("Could not get version info: %s", e)
+
+        return "N/A"
+
+    def _build_report_lines(self, aircraft_data, profile_data, compat_data, ap_caps):
+        """Построить строки отчёта"""
+        report_lines = [
+            "=" * 60,
+            "AIRCRAFT DETECTION REPORT",
+            "=" * 60,
+            "",
+            f"Aircraft Title: {aircraft_data['title']}",
+            f"Type: {aircraft_data['type']}",
+            f"Manufacturer: {aircraft_data['manufacturer']}",
+            f"Version: {aircraft_data['version']}",
+            "",
+            "--- Autopilot Profile ---",
+            f"Profile: {profile_data['name']}",
+            f"Developer: {profile_data['manufacturer']}",
+            f"SimConnect Type: {aircraft_data['autopilot_type']}",
+            "",
+            "--- Compatibility Status ---",
+            f"Status: {compat_data['status']}",
+        ]
+
+        if compat_data['details']:
+            report_lines.append("")
+            for detail in compat_data['details']:
+                if detail:
+                    report_lines.append(f"  {detail}")
+
+        if ap_caps:
+            report_lines.append("")
+            report_lines.append("--- Autopilot Capabilities ---")
+            if ap_caps.get("available"):
+                report_lines.append("✓ Autopilot Available")
+
+                ap_state = self.system.telemetry.get_autopilot_state()
+                available_modes = ["Master (AP)", "Heading Hold (HDG)", "Altitude Hold (ALT)"]
+
+                if ap_state is not None:
+                    available_modes.extend(["Navigation (NAV)", "Approach (APP)"])
+
+                if ap_caps.get("has_autothrottle"):
+                    available_modes.append("Autothrottle (AT)")
+
+                max_bank = ap_caps.get("max_bank")
+                if max_bank:
+                    report_lines.append(f"  Max Bank Angle: {max_bank:.1f}°")
+
+                report_lines.append("  Available Modes:")
+                for mode in available_modes:
+                    report_lines.append(f"    • {mode}")
+            else:
+                report_lines.append("✗ No Autopilot Available")
+
+        report_lines.extend(["", "=" * 60, ""])
+        return report_lines
+
+    def _update_gui_panels(self, aircraft_data, profile_data, compat_data, ap_caps):
+        """Обновить GUI панели"""
+        title = aircraft_data['title']
+        self.aircraft_name_var.set(title[:40] + "..." if len(title) > 40 else title)
+        self.ap_profile_var.set(profile_data['name'])
+        self.compat_status_var.set(compat_data['status'])
+        self.compat_status_label.config(foreground=compat_data['color'])
+
+        if ap_caps and ap_caps.get("available"):
+            ap_state = self.system.telemetry.get_autopilot_state()
+            available_modes_short = ["AP", "HDG", "ALT"]
+            if ap_state is not None:
+                available_modes_short.extend(["NAV", "APP"])
+            if ap_caps.get("has_autothrottle"):
+                available_modes_short.append("AT")
+            self.ap_available_modes_var.set(" | ".join(available_modes_short))
+        else:
+            self.ap_available_modes_var.set("No autopilot")
 
     def display_aircraft_report(self):
         """Отобразить отчёт о самолёте после подключения"""
@@ -1478,9 +1617,7 @@ class AutoLandGUI:
             return
 
         try:
-            # Получить информацию о самолёте
             aircraft_info = self.system.telemetry.get_aircraft_info()
-
             if not aircraft_info:
                 logging.warning("Failed to get aircraft info")
                 return
@@ -1490,11 +1627,9 @@ class AutoLandGUI:
             manufacturer = aircraft_info.get("aircraft_manufacturer", "Unknown")
             autopilot_type = aircraft_info.get("autopilot_type", "Unknown")
             is_custom = aircraft_info.get("is_custom_aircraft", False)
-
-            # Определить тип (дефолт или кастом)
             aircraft_type = "Custom Aircraft" if is_custom else "Default MSFS Aircraft"
 
-            # Получить информацию о профиле и совместимости
+            # Информация о профиле и совместимости
             profile_name = "Standard MSFS"
             profile_manufacturer = "Microsoft/Asobo"
             compatibility_status = "Compatible"
@@ -1502,197 +1637,99 @@ class AutoLandGUI:
             compatibility_details = []
             version_info = "N/A"
 
-            # Если есть aircraft_adapter, получить детальную информацию
-            if (
-                hasattr(self.system, "aircraft_adapter")
-                and self.system.aircraft_adapter
-            ):
+            if hasattr(self.system, "aircraft_adapter") and self.system.aircraft_adapter:
                 adapter = self.system.aircraft_adapter
 
-                # Информация о профиле
                 profile_info = adapter.get_profile_info()
                 if profile_info:
                     profile_name = profile_info.get("name", "Standard MSFS")
                     profile_manufacturer = profile_info.get("manufacturer", "Unknown")
 
-                # Проверка совместимости
-                compat = adapter.check_compatibility()
+                compatibility_status, compatibility_color, compatibility_details = self._get_compatibility_info(adapter)
+                version_info = self._get_version_info(adapter, title)
 
-                if compat.get("compatible"):
-                    if compat.get("limited"):
-                        compatibility_status = "Limited Compatibility"
-                        compatibility_color = "orange"
-                        compatibility_details.append(compat.get("reason", ""))
-                        compatibility_details.append(compat.get("recommendation", ""))
-                        compatibility_details.append(
-                            f"Fallback: {compat.get('fallback', 'SimConnect')}"
-                        )
-                    else:
-                        compatibility_status = "Full Compatibility"
-                        compatibility_color = "green"
-                        if compat.get("full_functionality"):
-                            compatibility_details.append("✓ WASM support available")
-                            compatibility_details.append("✓ Custom autopilot commands")
-                        if compat.get("autothrottle"):
-                            compatibility_details.append("✓ Autothrottle supported")
-                else:
-                    compatibility_status = "Not Compatible"
-                    compatibility_color = "red"
-                    compatibility_details.append(compat.get("reason", "Unknown reason"))
+            # Подготовка данных
+            aircraft_data = {
+                'title': title,
+                'type': aircraft_type,
+                'manufacturer': manufacturer,
+                'version': version_info,
+                'autopilot_type': autopilot_type
+            }
 
-                # Попытка получить версию из конфигурационных файлов
-                if adapter.config_reader:
-                    try:
-                        details = adapter.config_reader.get_aircraft_details(title)
-                        if details.get("found"):
-                            manifest = details.get("manifest")
-                            if manifest:
-                                version_info = manifest.get("package_version", "N/A")
-                                if version_info == "N/A":
-                                    version_info = manifest.get("version", "N/A")
-                    except Exception as e:
-                        logging.debug(f"Could not get version info: {e}")
+            profile_data = {
+                'name': profile_name,
+                'manufacturer': profile_manufacturer
+            }
 
-            # Формирование отчёта
-            report_lines = [
-                "=" * 60,
-                "AIRCRAFT DETECTION REPORT",
-                "=" * 60,
-                "",
-                f"Aircraft Title: {title}",
-                f"Type: {aircraft_type}",
-                f"Manufacturer: {manufacturer}",
-                f"Version: {version_info}",
-                "",
-                "--- Autopilot Profile ---",
-                f"Profile: {profile_name}",
-                f"Developer: {profile_manufacturer}",
-                f"SimConnect Type: {autopilot_type}",
-                "",
-                "--- Compatibility Status ---",
-                f"Status: {compatibility_status}",
-            ]
+            compat_data = {
+                'status': compatibility_status,
+                'color': compatibility_color,
+                'details': compatibility_details
+            }
 
-            if compatibility_details:
-                report_lines.append("")
-                for detail in compatibility_details:
-                    if detail:
-                        report_lines.append(f"  {detail}")
-
-            # Добавить информацию о возможностях автопилота
             ap_caps = self.system.telemetry.get_autopilot_capabilities()
-            if ap_caps:
-                report_lines.append("")
-                report_lines.append("--- Autopilot Capabilities ---")
-                if ap_caps.get("available"):
-                    report_lines.append("✓ Autopilot Available")
 
-                    # Проверка текущего состояния для определения доступных режимов
-                    ap_state = self.system.telemetry.get_autopilot_state()
-                    available_modes = []
+            # Формирование и вывод отчёта
+            report_lines = self._build_report_lines(aircraft_data, profile_data, compat_data, ap_caps)
+            logging.info("\n".join(report_lines))
 
-                    # Все стандартные самолёты MSFS имеют базовые режимы
-                    available_modes.append("Master (AP)")
-                    available_modes.append("Heading Hold (HDG)")
-                    available_modes.append("Altitude Hold (ALT)")
-
-                    # Проверяем наличие дополнительных режимов
-                    if ap_state is not None:
-                        available_modes.append("Navigation (NAV)")
-                        available_modes.append("Approach (APP)")
-
-                    # Проверяем наличие autothrottle
-                    if ap_caps.get("has_autothrottle"):
-                        available_modes.append("Autothrottle (AT)")
-
-                    max_bank = ap_caps.get("max_bank")
-                    if max_bank:
-                        report_lines.append(f"  Max Bank Angle: {max_bank:.1f}°")
-
-                    report_lines.append("  Available Modes:")
-                    for mode in available_modes:
-                        report_lines.append(f"    • {mode}")
-                else:
-                    report_lines.append("✗ No Autopilot Available")
-
-            report_lines.extend(["", "=" * 60, ""])
-
-            # Вывод в лог
-            report_text = "\n".join(report_lines)
-            logging.info(report_text)
-
-            # Обновление GUI панели Aircraft & Autopilot
-            self.aircraft_name_var.set(title[:40] + "..." if len(title) > 40 else title)
-            self.ap_profile_var.set(profile_name)
-            self.compat_status_var.set(compatibility_status)
-            self.compat_status_label.config(foreground=compatibility_color)
-
-            # Обновление доступных режимов автопилота в GUI
-            if ap_caps and ap_caps.get("available"):
-                ap_state = self.system.telemetry.get_autopilot_state()
-                available_modes_short = ["AP", "HDG", "ALT"]
-                if ap_state is not None:
-                    available_modes_short.extend(["NAV", "APP"])
-                if ap_caps.get("has_autothrottle"):
-                    available_modes_short.append("AT")
-                self.ap_available_modes_var.set(" | ".join(available_modes_short))
-            else:
-                self.ap_available_modes_var.set("No autopilot")
+            # Обновление GUI
+            self._update_gui_panels(aircraft_data, profile_data, compat_data, ap_caps)
 
             # Обновление текстового поля во вкладке Aircraft Info
             if hasattr(self, "compat_details_text"):
-                self.compat_details_text.configure(state="normal")
-                self.compat_details_text.delete("1.0", tk.END)
+                self._update_details_text(aircraft_data, profile_data, compat_data)
 
-                detailed_report = f"""
+        except Exception as e:
+            logging.error("Error displaying aircraft report: %s", e)
+
+    def _update_details_text(self, aircraft_data, profile_data, compat_data):
+        """Обновить детальный текст в GUI"""
+        self.compat_details_text.configure(state="normal")
+        self.compat_details_text.delete("1.0", tk.END)
+
+        detailed_report = f"""
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 AIRCRAFT DETECTION REPORT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Aircraft Title:
-  {title}
+  {aircraft_data['title']}
 
-Type: {aircraft_type}
-Manufacturer: {manufacturer}
-Version: {version_info}
+Type: {aircraft_data['type']}
+Manufacturer: {aircraft_data['manufacturer']}
+Version: {aircraft_data['version']}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 AUTOPILOT PROFILE
 
-Profile: {profile_name}
-Developer: {profile_manufacturer}
-SimConnect Type: {autopilot_type}
+Profile: {profile_data['name']}
+Developer: {profile_data['manufacturer']}
+SimConnect Type: {aircraft_data['autopilot_type']}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 COMPATIBILITY STATUS
 
-Status: {compatibility_status}
+Status: {compat_data['status']}
 """
 
-                if compatibility_details:
-                    detailed_report += "\nDetails:\n"
-                    for detail in compatibility_details:
-                        if detail:
-                            detailed_report += f"  • {detail}\n"
+        if compat_data['details']:
+            detailed_report += "\nDetails:\n"
+            for detail in compat_data['details']:
+                if detail:
+                    detailed_report += f"  • {detail}\n"
 
-                detailed_report += "\n" + "━" * 60 + "\n"
-                detailed_report += "\nDetection Methods Used:\n"
-                detailed_report += "  1. SimConnect autopilot_type\n"
-                detailed_report += "  2. TITLE pattern matching\n"
-                detailed_report += (
-                    "  3. Configuration files (manifest.json, aircraft.cfg)\n"
-                )
+        detailed_report += "\n" + "━" * 60 + "\n"
+        detailed_report += "\nDetection Methods Used:\n"
+        detailed_report += "  1. SimConnect autopilot_type\n"
+        detailed_report += "  2. TITLE pattern matching\n"
+        detailed_report += "  3. Configuration files (manifest.json, aircraft.cfg)\n"
 
-                self.compat_details_text.insert("1.0", detailed_report)
-                self.compat_details_text.configure(state="disabled")
-
-            # Показать диалоговое окно с отчётом (опционально)
-            # self.show_aircraft_report_dialog(...)
-
-        except Exception as e:
-            logging.error(f"Error displaying aircraft report: {e}")
+        self.compat_details_text.insert("1.0", detailed_report)
+        self.compat_details_text.configure(state="disabled")
 
     def show_aircraft_report_dialog(
         self,
@@ -2138,7 +2175,7 @@ Status: {compat_status}
                 self.monitor_history_text.configure(state="disabled")
 
         except Exception as e:
-            logging.error(f"Connection monitor panel update error: {e}")
+            logging.error("Connection monitor panel update error: %s", e)
 
     def export_monitor_json(self):
         """Экспорт метрик мониторинга в JSON"""
@@ -2248,7 +2285,7 @@ Status: {compat_status}
                     self._draw_axis_bar(canvas, value)
 
         except Exception as e:
-            logging.error(f"vJoy monitor panel update error: {e}")
+            logging.error("vJoy monitor panel update error: %s", e)
 
     def _draw_axis_bar(self, canvas, value):
         """
@@ -2296,7 +2333,7 @@ Status: {compat_status}
             )
 
         except Exception as e:
-            logging.error(f"Error drawing axis bar: {e}")
+            logging.error("Error drawing axis bar: %s", e)
 
     def vjoy_center_axes(self):
         """Центрировать все оси vJoy"""
@@ -2399,6 +2436,33 @@ Status: {compat_status}
 
         except Exception as e:
             messagebox.showerror("Error", f"Failed to test rudder:\n{e}")
+
+    def open_settings(self):
+        """Открыть диалог настроек"""
+        try:
+            from modules.settings_dialog import SettingsDialog
+            SettingsDialog(self.root)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open settings:\n{e}")
+
+    def show_about(self):
+        """Показать информацию о программе"""
+        about_text = (
+            "MSFS AutoLand System\n\n"
+            "Version: 1.1.0\n"
+            "Date: 2026-04-21\n\n"
+            "Automatic landing system for Microsoft Flight Simulator\n"
+            "with ILS, VOR, NDB, and GPS approach support.\n\n"
+            "Features:\n"
+            "• Navigraph integration for runway data\n"
+            "• MobiFlight WASM support for custom aircraft\n"
+            "• Audio alerts for wind shear\n"
+            "• Turbulence detection\n"
+            "• VAPP/VREF calculation\n\n"
+            "Developed by: Claude (Sonnet 4)\n"
+            "Project: msfs_autoland"
+        )
+        messagebox.showinfo("About", about_text)
 
 
 def main():

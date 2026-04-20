@@ -1,0 +1,310 @@
+@startuml MSFS_AutoLand_Class_Diagram
+
+title MSFS AutoLand System - Диаграмма классов (основные компоненты)
+
+' Стили
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #333333
+    ArrowColor #666666
+}
+
+' Главный класс
+class AutoLandSystem {
+    - telemetry: MSFSTelemetry
+    - control: MSFSControl
+    - navigation: Navigation
+    - aircraft_adapter: AircraftCommandAdapter
+    - ils_navigation: ILSNavigation
+    - autothrottle: AutothrottleController
+    - flare_controller: FlareController
+    - stabilized_monitor: StabilizedApproachMonitor
+    - phase: ApproachPhase
+    - running: bool
+    - use_vjoy: bool
+    - use_ils: bool
+    - use_custom_autopilot: bool
+    --
+    + connect(): bool
+    + disconnect(): void
+    + configure_approach(config): void
+    + start_approach(): void
+    + stop_approach(): void
+    + execute_approach(): void
+    + execute_go_around(): void
+    + get_aircraft_info(): dict
+}
+
+enum ApproachPhase {
+    IDLE
+    INITIAL
+    INTERMEDIATE
+    FINAL
+    LANDING
+    COMPLETED
+}
+
+' Телеметрия
+class MSFSTelemetry {
+    - sm: SimConnect
+    - aq: AircraftRequests
+    - ae: AircraftEvents
+    - connected: bool
+    --
+    + connect(): bool
+    + disconnect(): void
+    + get_all_data(): dict
+    + get_aircraft_info(): dict
+}
+
+' Адаптер самолётов
+class AircraftCommandAdapter {
+    - control: MSFSControl
+    - telemetry: MSFSTelemetry
+    - wasm: MobiFlightWASM
+    - current_profile: dict
+    - aircraft_info: dict
+    --
+    + detect_and_configure(): bool
+    + set_heading(heading): bool
+    + set_altitude(altitude): bool
+    + set_vertical_speed(vs): bool
+    + set_speed(speed): bool
+    + engage_autopilot(): bool
+    + disengage_autopilot(): bool
+    + engage_autothrottle(): bool
+    + engage_approach_mode(): bool
+    + engage_nav_mode(): bool
+    + get_autopilot_status(): dict
+    + get_profile_info(): dict
+    + check_compatibility(): dict
+}
+
+' WASM интерфейс
+class MobiFlightWASM {
+    - sm: SimConnect
+    - connected: bool
+    - lvars_cache: dict
+    --
+    + connect(): bool
+    + disconnect(): void
+    + read_lvar(name): float
+    + write_lvar(name, value): bool
+    + trigger_event(event, param): bool
+    + get_available_lvars(): list
+}
+
+' Навигация
+class Navigation {
+    --
+    + calculate_vor_approach(position, nav, config): dict
+    + calculate_distance_to_station(lat, lon, station): float
+    + calculate_bearing_to_station(lat, lon, station): float
+    + calculate_cross_track_error(position, config): float
+    + calculate_required_altitude(distance, config): float
+    + calculate_distance_to_threshold(lat, lon, config): float
+}
+
+class ILSNavigation {
+    - config: ILSConfig
+    --
+    + configure(config): void
+    + calculate_ils_approach(telemetry, ils_data): dict
+    + get_localizer_deviation(cdi): dict
+    + get_glideslope_deviation(gsi): dict
+}
+
+class DMENavigation {
+    - dme_fixes: list
+    --
+    + add_dme_fix(fix): void
+    + check_altitude_at_fix(distance, altitude): dict
+    + check_dme_accuracy(dme, calculated): dict
+}
+
+class WindCorrection {
+    --
+    + apply_wind_corrections(telemetry, approach, config): dict
+    + calculate_drift_angle(wind_speed, wind_dir, heading, tas): float
+    + calculate_crab_angle(wind_speed, wind_dir, course, tas): float
+    + calculate_headwind_component(wind_speed, wind_dir, heading): float
+    + calculate_crosswind_component(wind_speed, wind_dir, heading): float
+}
+
+' Управление
+class MSFSControl {
+    - ae: AircraftEvents
+    --
+    + set_autopilot_master(state): void
+    + set_heading_hold(heading): void
+    + set_altitude_hold(altitude): void
+    + set_vertical_speed(vs): void
+    + set_airspeed_hold(speed): void
+    + set_approach_hold(state): void
+    + set_nav_hold(state): void
+    + set_nav_frequency(nav_id, freq): void
+    + set_obs(nav_id, course): void
+    + set_throttle(value): void
+    + set_flaps(position): void
+}
+
+class AutothrottleController {
+    - config: AutothrottleConfig
+    - pid_controller: PIDController
+    - active: bool
+    --
+    + activate(initial_throttle): void
+    + deactivate(): void
+    + update(telemetry, target_speed): float
+}
+
+class FlareController {
+    - config: FlareConfig
+    - active: bool
+    - initial_height: float
+    --
+    + activate(radio_height): void
+    + deactivate(): void
+    + update(telemetry): dict
+    + calculate_target_pitch(height_ratio): float
+    + calculate_target_vs(height_ratio): float
+}
+
+class VirtualJoystick {
+    - j: vJoy
+    - connected: bool
+    --
+    + connect(): bool
+    + disconnect(): void
+    + set_axis(axis, value): void
+    + set_aileron(value): void
+    + set_elevator(value): void
+    + set_rudder(value): void
+    + center_all_axes(): void
+}
+
+' Мониторинг
+class StabilizedApproachMonitor {
+    - criteria: StabilizedCriteria
+    - violations: list
+    - stabilized: bool
+    --
+    + check_stabilization(telemetry, approach): dict
+    + reset(): void
+}
+
+class StabilizedCriteria {
+    + speed_target: int
+    + speed_tolerance: int
+    + max_vertical_speed: int
+    + max_bank_angle: float
+    + max_localizer_deviation: float
+    + max_glideslope_deviation: float
+    + stabilization_height: int
+}
+
+' База данных
+class AirportsDatabase {
+    - airports: dict
+    --
+    + get_airport(icao): AirportInfo
+    + get_approach_config(icao, runway, type): ApproachConfig
+    + get_ils_config(icao, runway): ILSConfig
+    + search_airports(query): list
+}
+
+class MSFSAirportReader {
+    - telemetry: MSFSTelemetry
+    --
+    + get_nearest_airport(): str
+    + get_destination_airport(): str
+    + get_active_runway_info(): dict
+    + get_ils_frequency_from_nav(): tuple
+    + get_glideslope_info(): dict
+    + get_magnetic_variation(): float
+    + auto_configure_approach(): dict
+}
+
+class FMSReader {
+    - telemetry: MSFSTelemetry
+    --
+    + get_fms_status(): dict
+    + get_current_waypoint(): Waypoint
+    + get_next_waypoint(): Waypoint
+    + get_all_waypoints(): list
+    + get_star_waypoints(): list
+}
+
+' GUI
+class AutoLandGUI {
+    - root: Tk
+    - system: AutoLandSystem
+    - running: bool
+    --
+    + create_widgets(): void
+    + connect_msfs(): void
+    + start_approach(): void
+    + stop_approach(): void
+    + go_around(): void
+    + update_gui(): void
+}
+
+class ApproachConfigDialog {
+    - parent: Tk
+    - telemetry: MSFSTelemetry
+    --
+    + show(): tuple
+}
+
+' Связи
+AutoLandSystem *-- ApproachPhase
+AutoLandSystem *-- MSFSTelemetry
+AutoLandSystem *-- MSFSControl
+AutoLandSystem *-- Navigation
+AutoLandSystem *-- ILSNavigation
+AutoLandSystem *-- DMENavigation
+AutoLandSystem *-- WindCorrection
+AutoLandSystem *-- AircraftCommandAdapter
+AutoLandSystem *-- AutothrottleController
+AutoLandSystem *-- FlareController
+AutoLandSystem *-- StabilizedApproachMonitor
+AutoLandSystem *-- FMSReader
+
+AircraftCommandAdapter *-- MobiFlightWASM
+AircraftCommandAdapter --> MSFSControl : "fallback"
+AircraftCommandAdapter --> MSFSTelemetry : "reads"
+
+MSFSControl --> MSFSTelemetry : "uses"
+AutothrottleController --> VirtualJoystick : "uses"
+FlareController --> VirtualJoystick : "uses"
+
+StabilizedApproachMonitor *-- StabilizedCriteria
+
+AutoLandGUI *-- AutoLandSystem
+AutoLandGUI --> ApproachConfigDialog : "creates"
+ApproachConfigDialog --> AirportsDatabase : "uses"
+ApproachConfigDialog --> MSFSAirportReader : "uses"
+
+MSFSAirportReader --> MSFSTelemetry : "uses"
+FMSReader --> MSFSTelemetry : "uses"
+
+note top of AutoLandSystem
+  Главный класс системы.
+  Координирует все модули
+  и управляет фазами захода.
+end note
+
+note top of AircraftCommandAdapter
+  Адаптер для кастомных самолётов.
+  Использует L:Vars через WASM
+  или fallback на SimConnect.
+end note
+
+note top of MobiFlightWASM
+  Интерфейс для работы с
+  локальными переменными (L:Vars)
+  через MobiFlight WASM модуль.
+end note
+
+@enduml

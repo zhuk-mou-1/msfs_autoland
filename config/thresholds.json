@@ -1,0 +1,136 @@
+{
+    "_comment": "Centralized thresholds configuration for MSFS AutoLand System",
+    "_description": "All hardcoded limits, thresholds, and constants extracted from code",
+    "_version": "1.0.0",
+    "_date": "2026-04-20",
+
+    "stabilized_approach": {
+        "_comment": "Criteria for stabilized approach monitoring",
+        "speed_tolerance_high": 10.0,
+        "speed_tolerance_low": 5.0,
+        "max_vertical_speed": 1000,
+        "max_glideslope_deviation": 1.0,
+        "max_localizer_deviation": 1.0,
+        "max_bank_angle": 7.0,
+        "min_throttle_percent": 30.0
+    },
+
+    "wind_shear": {
+        "_comment": "Wind shear detection thresholds",
+        "headwind_loss_threshold": 10.0,
+        "crosswind_change_threshold": 15.0,
+        "vertical_speed_change_threshold": 500.0,
+        "airspeed_loss_threshold": 10.0,
+        "monitoring_window_seconds": 5.0
+    },
+
+    "turbulence": {
+        "_comment": "Turbulence severity thresholds (G-force std)",
+        "light_threshold": 0.05,
+        "moderate_threshold": 0.15,
+        "severe_threshold": 0.30,
+        "wind_variance_calm": 2.0
+    },
+
+    "flare": {
+        "_comment": "Flare controller parameters",
+        "start_height": 30.0,
+        "end_height": 5.0,
+        "initial_pitch": 2.5,
+        "target_pitch": 6.0,
+        "max_pitch_rate": 2.0,
+        "throttle_reduction_start": 30.0,
+        "height_adjustment_headwind": 5.0,
+        "height_adjustment_tailwind": -3.0
+    },
+
+    "autopilot_takeover": {
+        "_comment": "Autopilot takeover conditions",
+        "distance_nm": 10.0,
+        "altitude_min_agl": 1500.0,
+        "altitude_max_agl": 4000.0,
+        "ils_cat1_dh": 200.0,
+        "ils_cat2_dh": 100.0,
+        "initialization_timeout": 30.0,
+        "stabilization_timeout": 10.0,
+        "speed_tolerance": 10.0,
+        "altitude_tolerance": 200.0,
+        "default_distance_nm": 10.0,
+        "default_altitude_agl": 3000.0,
+        "cat1_default_altitude": 250.0,
+        "vor_distance_nm": 9.0,
+        "vor_altitude_agl": 3000.0
+    },
+
+    "autothrottle": {
+        "_comment": "Autothrottle PID and limits",
+        "pid": {
+            "kp": 0.05,
+            "ki": 0.01,
+            "kd": 0.02
+        },
+        "throttle": {
+            "max": 1.0,
+            "min": 0.0,
+            "max_rate": 0.1,
+            "initial": 0.5,
+            "base": 0.5
+        },
+        "speed_tolerance": 5.0,
+        "drag_factors": {
+            "flaps": 0.15,
+            "gear": 0.10
+        },
+        "weight": {
+            "reference": 5000.0,
+            "factor": 0.00002
+        }
+    },
+
+    "approach_phases": {
+        "_comment": "Phase transition thresholds",
+        "ils_intercept_distance_nm": 10.0,
+        "cat2_decision_height": 100.0,
+        "final_approach_pitch": 2.5,
+        "flare_throttle_factor": 0.3,
+        "flare_height_reference": 50.0
+    },
+
+    "navigation": {
+        "_comment": "Navigation tolerances and limits",
+        "course_tolerance": 5.0,
+        "altitude_tolerance": 100.0,
+        "distance_tolerance_nm": 0.5
+    },
+
+    "timeouts": {
+        "_comment": "System timeouts in seconds",
+        "initialization": 30.0,
+        "stabilization": 10.0,
+        "connection_retry": 5.0,
+        "telemetry_update": 0.1
+    },
+
+    "safety_limits": {
+        "_comment": "Hard safety limits - DO NOT EXCEED",
+        "max_bank_angle": 30.0,
+        "max_pitch_up": 15.0,
+        "max_pitch_down": -10.0,
+        "min_decision_height": 50.0,
+        "max_crosswind_landing": 35.0,
+        "max_tailwind_landing": 10.0,
+        "min_runway_length_m": 1000
+    },
+
+    "validation": {
+        "_comment": "Config validation rules",
+        "speed_min": 0,
+        "speed_max": 500,
+        "altitude_min": 0,
+        "altitude_max": 50000,
+        "distance_min": 0,
+        "distance_max": 100,
+        "throttle_min": 0.0,
+        "throttle_max": 1.0
+    }
+}

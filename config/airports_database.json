@@ -1,0 +1,353 @@
+{
+  "airports": {
+    "UUEE": {
+      "name": "Sheremetyevo International Airport",
+      "city": "Moscow",
+      "country": "Russia",
+      "elevation": 622,
+      "runways": {
+        "07C": {
+          "heading": 70,
+          "length": 12139,
+          "width": 197,
+          "threshold_lat": 55.9728,
+          "threshold_lon": 37.4106,
+          "approaches": {
+            "ILS": {
+              "type": "ILS",
+              "frequency": 110300000,
+              "course": 70,
+              "glideslope": 3.0,
+              "decision_height": 200,
+              "approach_speed": 140
+            },
+            "VOR": {
+              "type": "VOR",
+              "station_name": "SVO VOR",
+              "frequency": 11450000,
+              "station_lat": 55.9650,
+              "station_lon": 37.4150,
+              "course": 70,
+              "glideslope": 3.0,
+              "decision_height": 400,
+              "approach_speed": 140
+            }
+          }
+        },
+        "25C": {
+          "heading": 250,
+          "length": 12139,
+          "width": 197,
+          "threshold_lat": 55.9850,
+          "threshold_lon": 37.4450,
+          "approaches": {
+            "ILS": {
+              "type": "ILS",
+              "frequency": 109500000,
+              "course": 250,
+              "glideslope": 3.0,
+              "decision_height": 200,
+              "approach_speed": 140
+            }
+          }
+        }
+      }
+    },
+    "KJFK": {
+      "name": "John F. Kennedy International Airport",
+      "city": "New York",
+      "country": "USA",
+      "elevation": 13,
+      "runways": {
+        "04L": {
+          "heading": 40,
+          "length": 11351,
+          "width": 200,
+          "threshold_lat": 40.6398,
+          "threshold_lon": -73.7789,
+          "approaches": {
+            "ILS": {
+              "type": "ILS",
+              "frequency": 109500000,
+              "course": 40,
+              "glideslope": 3.0,
+              "decision_height": 200,
+              "approach_speed": 140
+            }
+          }
+        },
+        "13L": {
+          "heading": 130,
+          "length": 10000,
+          "width": 150,
+          "threshold_lat": 40.6513,
+          "threshold_lon": -73.7762,
+          "approaches": {
+            "ILS": {
+              "type": "ILS",
+              "frequency": 111500000,
+              "course": 130,
+              "glideslope": 3.0,
+              "decision_height": 200,
+              "approach_speed": 140
+            }
+          }
+        }
+      }
+    },
+    "EGLL": {
+      "name": "London Heathrow Airport",
+      "city": "London",
+      "country": "UK",
+      "elevation": 83,
+      "runways": {
+        "09L": {
+          "heading": 90,
+          "length": 12802,
+          "width": 164,
+          "threshold_lat": 51.4700,
+          "threshold_lon": -0.4887,
+          "approaches": {
+            "ILS": {
+              "type": "ILS",
+              "frequency": 110100000,
+              "course": 90,
+              "glideslope": 3.0,
+              "decision_height": 200,
+              "approach_speed": 140
+            }
+          }
+        },
+        "27R": {
+          "heading": 270,
+          "length": 12802,
+          "width": 164,
+          "threshold_lat": 51.4775,
+          "threshold_lon": -0.4344,
+          "approaches": {
+            "ILS": {
+              "type": "ILS",
+              "frequency": 109500000,
+              "course": 270,
+              "glideslope": 3.0,
+              "decision_height": 200,
+              "approach_speed": 140
+            }
+          }
+        }
+      }
+    },
+    "EGLC": {
+      "name": "London City Airport",
+      "city": "London",
+      "country": "UK",
+      "elevation": 19,
+      "runways": {
+        "09": {
+          "heading": 92,
+          "length": 4948,
+          "width": 98,
+          "threshold_lat": 51.5053,
+          "threshold_lon": 0.0553,
+          "approaches": {
+            "ILS": {
+              "type": "ILS",
+              "frequency": 109900000,
+              "course": 92,
+              "glideslope": 5.5,
+              "decision_height": 250,
+              "approach_speed": 130,
+              "notes": "Steep approach - 5.5 degrees"
+            }
+          }
+        },
+        "27": {
+          "heading": 272,
+          "length": 4948,
+          "width": 98,
+          "threshold_lat": 51.5031,
+          "threshold_lon": 0.0775,
+          "approaches": {
+            "ILS": {
+              "type": "ILS",
+              "frequency": 110700000,
+              "course": 272,
+              "glideslope": 5.5,
+              "decision_height": 250,
+              "approach_speed": 130,
+              "notes": "Steep approach - 5.5 degrees"
+            }
+          }
+        }
+      }
+    },
+    "LFPG": {
+      "name": "Paris Charles de Gaulle Airport",
+      "city": "Paris",
+      "country": "France",
+      "elevation": 392,
+      "runways": {
+        "08L": {
+          "heading": 83,
+          "length": 13829,
+          "width": 197,
+          "threshold_lat": 49.0097,
+          "threshold_lon": 2.5478,
+          "approaches": {
+            "ILS": {
+              "type": "ILS",
+              "frequency": 110300000,
+              "course": 83,
+              "glideslope": 3.0,
+              "decision_height": 200,
+              "approach_speed": 140
+            }
+          }
+        },
+        "26R": {
+          "heading": 263,
+          "length": 13829,
+          "width": 197,
+          "threshold_lat": 49.0242,
+          "threshold_lon": 2.5950,
+          "approaches": {
+            "ILS": {
+              "type": "ILS",
+              "frequency": 109100000,
+              "course": 263,
+              "glideslope": 3.0,
+              "decision_height": 200,
+              "approach_speed": 140
+            }
+          }
+        }
+      }
+    },
+    "EDDF": {
+      "name": "Frankfurt Airport",
+      "city": "Frankfurt",
+      "country": "Germany",
+      "elevation": 364,
+      "runways": {
+        "07C": {
+          "heading": 70,
+          "length": 13123,
+          "width": 197,
+          "threshold_lat": 50.0333,
+          "threshold_lon": 8.5706,
+          "approaches": {
+            "ILS": {
+              "type": "ILS",
+              "frequency": 110100000,
+              "course": 70,
+              "glideslope": 3.0,
+              "decision_height": 200,
+              "approach_speed": 140
+            }
+          }
+        },
+        "25C": {
+          "heading": 250,
+          "length": 13123,
+          "width": 197,
+          "threshold_lat": 50.0464,
+          "threshold_lon": 8.6097,
+          "approaches": {
+            "ILS": {
+              "type": "ILS",
+              "frequency": 109900000,
+              "course": 250,
+              "glideslope": 3.0,
+              "decision_height": 200,
+              "approach_speed": 140
+            }
+          }
+        }
+      }
+    },
+    "RJTT": {
+      "name": "Tokyo Haneda Airport",
+      "city": "Tokyo",
+      "country": "Japan",
+      "elevation": 35,
+      "runways": {
+        "16R": {
+          "heading": 160,
+          "length": 9843,
+          "width": 197,
+          "threshold_lat": 35.5522,
+          "threshold_lon": 139.7797,
+          "approaches": {
+            "ILS": {
+              "type": "ILS",
+              "frequency": 110300000,
+              "course": 160,
+              "glideslope": 3.0,
+              "decision_height": 200,
+              "approach_speed": 140
+            }
+          }
+        },
+        "34L": {
+          "heading": 340,
+          "length": 9843,
+          "width": 197,
+          "threshold_lat": 35.5647,
+          "threshold_lon": 139.7689,
+          "approaches": {
+            "ILS": {
+              "type": "ILS",
+              "frequency": 109100000,
+              "course": 340,
+              "glideslope": 3.0,
+              "decision_height": 200,
+              "approach_speed": 140
+            }
+          }
+        }
+      }
+    },
+    "KLAX": {
+      "name": "Los Angeles International Airport",
+      "city": "Los Angeles",
+      "country": "USA",
+      "elevation": 125,
+      "runways": {
+        "06L": {
+          "heading": 69,
+          "length": 8926,
+          "width": 150,
+          "threshold_lat": 33.9425,
+          "threshold_lon": -118.4081,
+          "approaches": {
+            "ILS": {
+              "type": "ILS",
+              "frequency": 110900000,
+              "course": 69,
+              "glideslope": 3.0,
+              "decision_height": 200,
+              "approach_speed": 140
+            }
+          }
+        },
+        "24R": {
+          "heading": 249,
+          "length": 8926,
+          "width": 150,
+          "threshold_lat": 33.9456,
+          "threshold_lon": -118.3856,
+          "approaches": {
+            "ILS": {
+              "type": "ILS",
+              "frequency": 109300000,
+              "course": 249,
+              "glideslope": 3.0,
+              "decision_height": 200,
+              "approach_speed": 140
+            }
+          }
+        }
+      }
+    }
+  }
+}

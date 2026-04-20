@@ -1,0 +1,83 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Claude Code local settings
+.claude/
+
+# Claude Code - Transcripts and Local Docs
+logs/*.jsonl
+*.jsonl
+SUMMARY_*.md
+CHANGELOG_*.md
+BUGFIX_*.md
+TODO_*.md
+NOTES_*.md
+SESSION_*.md
+
+# Temporary files
+%TEMP_FILE%
+*.tmp
+*.temp
+*.bak
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Executables (should not be in repo)
+*.exe
+*.dll
+*.bat
+
+# MSFS specific
+*.pln
+*.flt
+
+# Logs
+*.log
+logs/*.log
+
+# Keep these files (documentation)
+!CLAUDE.md
+!ARCHITECTURE.md
+!DATABASE_GUIDE.md
+!APPROACH_SPEED_CALCULATOR.md
+!AUDIO_SETUP.md
+!CLAUDE_LOGS_GUIDE.md
+!CLIENT_DATA_IMPLEMENTATION.md
+!CONNECTION_MONITOR.md
+!CONNECTION_OPTIMIZER.md
+!CURRENT_STATE.md
+!CHANGELOG.md

@@ -1,0 +1,176 @@
+@startuml MSFS_AutoLand_Architecture
+
+!define RECTANGLE class
+
+title MSFS AutoLand System - Архитектура компонентов
+
+' Стили
+skinparam componentStyle rectangle
+skinparam backgroundColor #FFFFFF
+skinparam component {
+    BackgroundColor<<msfs>> #E1F5FF
+    BorderColor<<msfs>> #01579B
+    BackgroundColor<<input>> #FFF3E0
+    BorderColor<<input>> #E65100
+    BackgroundColor<<navigation>> #F3E5F5
+    BorderColor<<navigation>> #4A148C
+    BackgroundColor<<control>> #E8F5E9
+    BorderColor<<control>> #1B5E20
+    BackgroundColor<<main>> #FFEBEE
+    BorderColor<<main>> #B71C1C
+    BackgroundColor<<adapter>> #FFF9C4
+    BorderColor<<adapter>> #F57F17
+    BackgroundColor<<database>> #E0F2F1
+    BorderColor<<database>> #004D40
+}
+
+package "Microsoft Flight Simulator" <<msfs>> {
+    component [MSFS 2020/2024] as MSFS
+    component [SimConnect API] as SimConnect
+    component [MobiFlight WASM] as WASM
+}
+
+package "MSFS AutoLand System" {
+
+    package "Главное приложение" <<main>> {
+        component [main.py\nAutoLandSystem] as Main
+        component [gui.py\nAutoLandGUI] as GUI
+    }
+
+    package "Ввод данных" <<input>> {
+        component [telemetry.py\nMSFSTelemetry] as Telemetry
+        component [msfs_airport_reader.py\nMSFSAirportReader] as AirportReader
+        component [fms_reader.py\nFMSReader] as FMSReader
+    }
+
+    package "Адаптеры самолётов" <<adapter>> {
+        component [aircraft_adapter.py\nAircraftCommandAdapter] as AircraftAdapter
+        component [wasm_interface.py\nMobiFlightWASM] as WASMInterface
+        database [aircraft_profiles.json\nПрофили самолётов] as Profiles
+    }
+
+    package "Навигация" <<navigation>> {
+        component [navigation.py\nNavigation] as Navigation
+        component [ils_navigation.py\nILSNavigation] as ILSNav
+        component [dme_navigation.py\nDMENavigation] as DMENav
+        component [wind_correction.py\nWindCorrection] as WindCorr
+    }
+
+    package "Управление" <<control>> {
+        component [control.py\nMSFSControl] as Control
+        component [autothrottle.py\nAutothrottleController] as Autothrottle
+        component [flare_controller.py\nFlareController] as FlareCtrl
+        component [virtual_joystick.py\nVirtualJoystick] as VJoy
+    }
+
+    package "Мониторинг" <<navigation>> {
+        component [stabilized_approach.py\nStabilizedApproachMonitor] as StabMonitor
+    }
+
+    package "База данных" <<database>> {
+        component [airports_database.py\nAirportsDatabase] as AirportsDB
+        database [airports_database.json\n8 аэропортов] as AirportsJSON
+        component [approach_dialog.py\nApproachConfigDialog] as ApproachDialog
+    }
+}
+
+package "Внешние устройства" <<control>> {
+    component [vJoy Driver] as vJoyDriver
+}
+
+' Связи MSFS -> Ввод данных
+MSFS --> SimConnect : "Состояние\nсамолёта"
+MSFS --> WASM : "L:Vars"
+SimConnect --> Telemetry : "Телеметрия"
+SimConnect --> AirportReader : "Данные\nаэропортов"
+SimConnect --> FMSReader : "FMS/GPS\nданные"
+WASM --> WASMInterface : "L:Vars\nчтение/запись"
+
+' Связи Ввод данных -> Главное приложение
+Telemetry --> Main : "Позиция, скорость,\nориентация, погода"
+AirportReader --> Main : "ILS частота,\nGPS назначение"
+FMSReader --> Main : "Маршрутные\nточки, STAR"
+
+' Связи Адаптеры
+Telemetry --> AircraftAdapter : "Тип самолёта"
+WASMInterface --> AircraftAdapter : "L:Vars доступ"
+Profiles --> AircraftAdapter : "Профили\nавтопилотов"
+AircraftAdapter --> Main : "Команды\nавтопилота"
+
+' Связи Навигация
+Telemetry --> Navigation : "Телеметрия"
+Telemetry --> ILSNav : "ILS данные"
+Telemetry --> DMENav : "DME данные"
+Telemetry --> WindCorr : "Ветер"
+Navigation --> Main : "VOR/NDB\nпараметры"
+ILSNav --> Main : "ILS\nпараметры"
+DMENav --> Main : "DME\nпараметры"
+WindCorr --> Main : "Коррекции\nветра"
+
+' Связи Управление
+Main --> Control : "Команды\nавтопилота"
+Main --> Autothrottle : "Целевая\nскорость"
+Main --> FlareCtrl : "Активация\nвыравнивания"
+Control --> SimConnect : "События\nSimConnect"
+Autothrottle --> VJoy : "Управление\nтягой"
+FlareCtrl --> VJoy : "Управление\nрулями"
+VJoy --> vJoyDriver : "Прямое\nуправление"
+vJoyDriver --> MSFS : "Ввод\nуправления"
+
+' Связи Мониторинг
+Telemetry --> StabMonitor : "Параметры\nполёта"
+StabMonitor --> Main : "Статус\nстабилизации"
+
+' Связи База данных
+AirportsJSON --> AirportsDB : "Данные\nаэропортов"
+AirportsDB --> ApproachDialog : "Список\nаэропортов"
+AirportReader --> ApproachDialog : "Auto-detect\nиз MSFS"
+ApproachDialog --> GUI : "Конфигурация\nзахода"
+
+' Связи GUI
+Main --> GUI : "Телеметрия,\nстатус"
+GUI --> Main : "Команды\nпользователя"
+
+' Связи Adapter -> Control (fallback)
+AircraftAdapter ..> Control : "Fallback\nSimConnect"
+
+note right of Main
+  **Центральная система**
+
+  Координирует все модули
+  Управляет фазами захода:
+  • IDLE
+  • INITIAL
+  • INTERMEDIATE
+  • FINAL
+  • LANDING
+  • COMPLETED
+end note
+
+note right of AircraftAdapter
+  **Поддержка кастомных самолётов**
+
+  • PMDG 737/777
+  • Fenix A320
+  • FlyByWire A32NX
+  • FSLabs A32X
+  • iniBuilds A300/A310
+
+  Fallback на SimConnect
+  если WASM недоступен
+end note
+
+note bottom of Telemetry
+  **Единственный источник данных**
+
+  Все модули читают через Telemetry
+end note
+
+note bottom of Control
+  **Единственная точка вывода**
+
+  Все команды через Control
+  (или через AircraftAdapter)
+end note
+
+@enduml
