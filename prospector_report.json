@@ -1,0 +1,3892 @@
+{
+  "summary": {
+    "started": "2026-04-21 02:19:39.250110",
+    "libraries": [],
+    "strictness": "medium",
+    "profiles": "default, strictness_medium, strictness_high, strictness_veryhigh, no_doc_warnings, no_test_warnings, no_member_warnings",
+    "tools": [
+      "dodgy",
+      "mccabe",
+      "profile-validator",
+      "pycodestyle",
+      "pyflakes",
+      "pylint"
+    ],
+    "message_count": 245,
+    "completed": "2026-04-21 02:19:50.913323",
+    "time_taken": "11.66",
+    "formatter": "json"
+  },
+  "messages": [
+    {
+      "source": "pylint",
+      "code": "too-many-branches",
+      "location": {
+        "path": "modules\\msfs_airport_reader.py",
+        "module": "modules.msfs_airport_reader",
+        "function": "MSFSAirportReader.auto_configure_approach",
+        "line": 255,
+        "character": 4,
+        "lineEnd": 255,
+        "characterEnd": 31
+      },
+      "message": "Too many branches (20/15)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-branches.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-statements",
+      "location": {
+        "path": "modules\\msfs_airport_reader.py",
+        "module": "modules.msfs_airport_reader",
+        "function": "MSFSAirportReader.auto_configure_approach",
+        "line": 255,
+        "character": 4,
+        "lineEnd": 255,
+        "characterEnd": 31
+      },
+      "message": "Too many statements (72/60)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-statements.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-locals",
+      "location": {
+        "path": "modules\\msfs_airport_reader.py",
+        "module": "modules.msfs_airport_reader",
+        "function": "MSFSAirportReader.auto_configure_approach",
+        "line": 255,
+        "character": 4,
+        "lineEnd": 255,
+        "characterEnd": 31
+      },
+      "message": "Too many local variables (18/15)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-locals.html"
+    },
+    {
+      "source": "pylint",
+      "code": "line-too-long",
+      "location": {
+        "path": "modules\\msfs_airport_reader.py",
+        "module": "modules.msfs_airport_reader",
+        "function": null,
+        "line": 357,
+        "character": 0
+      },
+      "message": "Line too long (137/120)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/line-too-long.html"
+    },
+    {
+      "source": "pylint",
+      "code": "line-too-long",
+      "location": {
+        "path": "modules\\msfs_airport_reader.py",
+        "module": "modules.msfs_airport_reader",
+        "function": null,
+        "line": 412,
+        "character": 0
+      },
+      "message": "Line too long (137/120)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/line-too-long.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\msfs_airport_reader.py",
+        "module": "modules.msfs_airport_reader",
+        "function": "MSFSAirportReader.auto_configure_approach",
+        "line": 299,
+        "character": 20,
+        "lineEnd": 299,
+        "characterEnd": 94
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\msfs_airport_reader.py",
+        "module": "modules.msfs_airport_reader",
+        "function": "MSFSAirportReader.auto_configure_approach",
+        "line": 354,
+        "character": 12,
+        "lineEnd": 355,
+        "characterEnd": 115
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\msfs_airport_reader.py",
+        "module": "modules.msfs_airport_reader",
+        "function": "MSFSAirportReader.auto_configure_approach",
+        "line": 372,
+        "character": 20,
+        "lineEnd": 372,
+        "characterEnd": 94
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-branches",
+      "location": {
+        "path": "modules\\telemetry.py",
+        "module": "modules.telemetry",
+        "function": "MSFSTelemetry.get_aircraft_info",
+        "line": 229,
+        "character": 4,
+        "lineEnd": 229,
+        "characterEnd": 25
+      },
+      "message": "Too many branches (21/15)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-branches.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-statements",
+      "location": {
+        "path": "modules\\telemetry.py",
+        "module": "modules.telemetry",
+        "function": "MSFSTelemetry.get_aircraft_info",
+        "line": 229,
+        "character": 4,
+        "lineEnd": 229,
+        "characterEnd": 25
+      },
+      "message": "Too many statements (63/60)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-statements.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-locals",
+      "location": {
+        "path": "modules\\telemetry.py",
+        "module": "modules.telemetry",
+        "function": "MSFSTelemetry.get_aircraft_info",
+        "line": 229,
+        "character": 4,
+        "lineEnd": 229,
+        "characterEnd": 25
+      },
+      "message": "Too many local variables (22/15)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-locals.html"
+    },
+    {
+      "source": "pylint",
+      "code": "line-too-long",
+      "location": {
+        "path": "modules\\telemetry.py",
+        "module": "modules.telemetry",
+        "function": null,
+        "line": 204,
+        "character": 0
+      },
+      "message": "Line too long (145/120)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/line-too-long.html"
+    },
+    {
+      "source": "pylint",
+      "code": "line-too-long",
+      "location": {
+        "path": "modules\\telemetry.py",
+        "module": "modules.telemetry",
+        "function": null,
+        "line": 242,
+        "character": 0
+      },
+      "message": "Line too long (133/120)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/line-too-long.html"
+    },
+    {
+      "source": "pylint",
+      "code": "line-too-long",
+      "location": {
+        "path": "modules\\telemetry.py",
+        "module": "modules.telemetry",
+        "function": null,
+        "line": 243,
+        "character": 0
+      },
+      "message": "Line too long (138/120)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/line-too-long.html"
+    },
+    {
+      "source": "pylint",
+      "code": "line-too-long",
+      "location": {
+        "path": "modules\\telemetry.py",
+        "module": "modules.telemetry",
+        "function": null,
+        "line": 247,
+        "character": 0
+      },
+      "message": "Line too long (145/120)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/line-too-long.html"
+    },
+    {
+      "source": "pylint",
+      "code": "line-too-long",
+      "location": {
+        "path": "modules\\telemetry.py",
+        "module": "modules.telemetry",
+        "function": null,
+        "line": 515,
+        "character": 0
+      },
+      "message": "Line too long (121/120)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/line-too-long.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\telemetry.py",
+        "module": "modules.telemetry",
+        "function": "MSFSTelemetry.get_gps_destination",
+        "line": 437,
+        "character": 16,
+        "lineEnd": 438,
+        "characterEnd": 60
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-branches",
+      "location": {
+        "path": "gui.py",
+        "module": "gui",
+        "function": "AutoLandGUI._update_autopilot_modes_panel",
+        "line": 1954,
+        "character": 4,
+        "lineEnd": 1954,
+        "characterEnd": 37
+      },
+      "message": "Too many branches (16/15)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-branches.html"
+    },
+    {
+      "source": "pylint",
+      "code": "line-too-long",
+      "location": {
+        "path": "gui.py",
+        "module": "gui",
+        "function": null,
+        "line": 1325,
+        "character": 0
+      },
+      "message": "Line too long (122/120)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/line-too-long.html"
+    },
+    {
+      "source": "pylint",
+      "code": "line-too-long",
+      "location": {
+        "path": "gui.py",
+        "module": "gui",
+        "function": null,
+        "line": 2023,
+        "character": 0
+      },
+      "message": "Line too long (123/120)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/line-too-long.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-statements",
+      "location": {
+        "path": "gui.py",
+        "module": "gui",
+        "function": "AutoLandGUI.create_telemetry_panel",
+        "line": 165,
+        "character": 4,
+        "lineEnd": 165,
+        "characterEnd": 30
+      },
+      "message": "Too many statements (74/60)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-statements.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "gui.py",
+        "module": "gui",
+        "function": "AutoLandGUI.create_aircraft_tab.update_scrollregion",
+        "line": 344,
+        "character": 32,
+        "lineEnd": 344,
+        "characterEnd": 37
+      },
+      "message": "Unused argument 'event'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-locals",
+      "location": {
+        "path": "gui.py",
+        "module": "gui",
+        "function": "AutoLandGUI.create_connection_monitor_tab",
+        "line": 480,
+        "character": 4,
+        "lineEnd": 480,
+        "characterEnd": 37
+      },
+      "message": "Too many local variables (16/15)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-locals.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "gui.py",
+        "module": "gui",
+        "function": "AutoLandGUI.create_connection_monitor_tab.update_scrollregion",
+        "line": 490,
+        "character": 32,
+        "lineEnd": 490,
+        "characterEnd": 37
+      },
+      "message": "Unused argument 'event'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-locals",
+      "location": {
+        "path": "gui.py",
+        "module": "gui",
+        "function": "AutoLandGUI.create_vjoy_monitor_tab",
+        "line": 662,
+        "character": 4,
+        "lineEnd": 662,
+        "characterEnd": 31
+      },
+      "message": "Too many local variables (16/15)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-locals.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-variable",
+      "location": {
+        "path": "gui.py",
+        "module": "gui",
+        "function": "AutoLandGUI.create_vjoy_monitor_tab",
+        "line": 724,
+        "character": 12,
+        "lineEnd": 724,
+        "characterEnd": 15
+      },
+      "message": "Unused variable 'idx'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-variable.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-statements",
+      "location": {
+        "path": "gui.py",
+        "module": "gui",
+        "function": "AutoLandGUI.create_navigation_panel",
+        "line": 978,
+        "character": 4,
+        "lineEnd": 978,
+        "characterEnd": 31
+      },
+      "message": "Too many statements (76/60)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-statements.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-locals",
+      "location": {
+        "path": "gui.py",
+        "module": "gui",
+        "function": "AutoLandGUI.display_aircraft_report",
+        "line": 1614,
+        "character": 4,
+        "lineEnd": 1614,
+        "characterEnd": 31
+      },
+      "message": "Too many local variables (21/15)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-locals.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-arguments",
+      "location": {
+        "path": "gui.py",
+        "module": "gui",
+        "function": "AutoLandGUI.show_aircraft_report_dialog",
+        "line": 1734,
+        "character": 4,
+        "lineEnd": 1734,
+        "characterEnd": 35
+      },
+      "message": "Too many arguments (11/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-locals",
+      "location": {
+        "path": "gui.py",
+        "module": "gui",
+        "function": "AutoLandGUI.show_aircraft_report_dialog",
+        "line": 1734,
+        "character": 4,
+        "lineEnd": 1734,
+        "characterEnd": 35
+      },
+      "message": "Too many local variables (22/15)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-locals.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-positional-arguments",
+      "location": {
+        "path": "gui.py",
+        "module": "gui",
+        "function": "AutoLandGUI.show_aircraft_report_dialog",
+        "line": 1734,
+        "character": 4,
+        "lineEnd": 1734,
+        "characterEnd": 35
+      },
+      "message": "Too many positional arguments (11/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-positional-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "gui.py",
+        "module": "gui",
+        "function": "AutoLandGUI._update_aircraft_panel",
+        "line": 1923,
+        "character": 37,
+        "lineEnd": 1923,
+        "characterEnd": 41
+      },
+      "message": "Unused argument 'data'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "import-outside-toplevel",
+      "location": {
+        "path": "gui.py",
+        "module": "gui",
+        "function": "AutoLandGUI.export_monitor_json",
+        "line": 2187,
+        "character": 12,
+        "lineEnd": 2187,
+        "characterEnd": 42
+      },
+      "message": "Import outside toplevel (tkinter.filedialog)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/import-outside-toplevel.html"
+    },
+    {
+      "source": "pylint",
+      "code": "import-outside-toplevel",
+      "location": {
+        "path": "gui.py",
+        "module": "gui",
+        "function": "AutoLandGUI.export_monitor_csv",
+        "line": 2208,
+        "character": 12,
+        "lineEnd": 2208,
+        "characterEnd": 42
+      },
+      "message": "Import outside toplevel (tkinter.filedialog)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/import-outside-toplevel.html"
+    },
+    {
+      "source": "pylint",
+      "code": "import-outside-toplevel",
+      "location": {
+        "path": "gui.py",
+        "module": "gui",
+        "function": "AutoLandGUI.open_settings",
+        "line": 2443,
+        "character": 12,
+        "lineEnd": 2443,
+        "characterEnd": 62
+      },
+      "message": "Import outside toplevel (modules.settings_dialog.SettingsDialog)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/import-outside-toplevel.html"
+    },
+    {
+      "source": "pycodestyle",
+      "code": "E306",
+      "location": {
+        "path": "main.py",
+        "module": null,
+        "function": null,
+        "line": 131,
+        "character": 17
+      },
+      "message": "expected 1 blank line before a nested definition, found 0",
+      "isFixable": false
+    },
+    {
+      "source": "pylint",
+      "code": "line-too-long",
+      "location": {
+        "path": "main.py",
+        "module": "main",
+        "function": null,
+        "line": 250,
+        "character": 0
+      },
+      "message": "Line too long (126/120)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/line-too-long.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-statements",
+      "location": {
+        "path": "main.py",
+        "module": "main",
+        "function": "AutoLandSystem.connect",
+        "line": 99,
+        "character": 4,
+        "lineEnd": 99,
+        "characterEnd": 15
+      },
+      "message": "Too many statements (61/60)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-statements.html"
+    },
+    {
+      "source": "pylint",
+      "code": "import-outside-toplevel",
+      "location": {
+        "path": "main.py",
+        "module": "main",
+        "function": "AutoLandSystem.connect",
+        "line": 138,
+        "character": 16,
+        "lineEnd": 138,
+        "characterEnd": 32
+      },
+      "message": "Import outside toplevel (threading)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/import-outside-toplevel.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "main.py",
+        "module": "main",
+        "function": "AutoLandSystem.configure_approach",
+        "line": 260,
+        "character": 12,
+        "lineEnd": 261,
+        "characterEnd": 59
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "main.py",
+        "module": "main",
+        "function": "AutoLandSystem.start_approach",
+        "line": 286,
+        "character": 8,
+        "lineEnd": 287,
+        "characterEnd": 55
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "main.py",
+        "module": "main",
+        "function": "AutoLandSystem._calculate_approach_speeds",
+        "line": 433,
+        "character": 12,
+        "lineEnd": 436,
+        "characterEnd": 84
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "main.py",
+        "module": "main",
+        "function": "AutoLandSystem._calculate_approach_speeds",
+        "line": 440,
+        "character": 16,
+        "lineEnd": 441,
+        "characterEnd": 116
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "import-outside-toplevel",
+      "location": {
+        "path": "main.py",
+        "module": "main",
+        "function": "AutoLandSystem._calculate_headwind",
+        "line": 463,
+        "character": 8,
+        "lineEnd": 463,
+        "characterEnd": 19
+      },
+      "message": "Import outside toplevel (math)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/import-outside-toplevel.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "main.py",
+        "module": "main",
+        "function": "AutoLandSystem._check_connection_optimization",
+        "line": 521,
+        "character": 12,
+        "lineEnd": 524,
+        "characterEnd": 13
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "main.py",
+        "module": "main",
+        "function": "AutoLandSystem._calculate_approach_data",
+        "line": 544,
+        "character": 8,
+        "lineEnd": 551,
+        "characterEnd": 13
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "access-member-before-definition",
+      "location": {
+        "path": "main.py",
+        "module": "main",
+        "function": "AutoLandSystem._log_fms_data",
+        "line": 591,
+        "character": 30,
+        "lineEnd": 591,
+        "characterEnd": 53
+      },
+      "message": "Access to member '_last_fms_log_time' before its definition line 597",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/error/access-member-before-definition.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "main.py",
+        "module": "main",
+        "function": "AutoLandSystem._log_fms_data",
+        "line": 594,
+        "character": 20,
+        "lineEnd": 596,
+        "characterEnd": 66
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "line-too-long",
+      "location": {
+        "path": "modules\\turbulence_detector.py",
+        "module": "modules.turbulence_detector",
+        "function": null,
+        "line": 311,
+        "character": 0
+      },
+      "message": "Line too long (135/120)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/line-too-long.html"
+    },
+    {
+      "source": "pylint",
+      "code": "consider-using-max-builtin",
+      "location": {
+        "path": "modules\\turbulence_detector.py",
+        "module": "modules.turbulence_detector",
+        "function": "TurbulenceDetector.update",
+        "line": 131,
+        "character": 16,
+        "lineEnd": 132,
+        "characterEnd": 60
+      },
+      "message": "Consider using 'self.max_g_force_std = max(self.max_g_force_std, alert.g_force_std)' instead of unnecessary if block",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/consider-using-max-builtin.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\turbulence_detector.py",
+        "module": "modules.turbulence_detector",
+        "function": "TurbulenceDetector.update",
+        "line": 134,
+        "character": 16,
+        "lineEnd": 137,
+        "characterEnd": 17
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "consider-using-min-builtin",
+      "location": {
+        "path": "modules\\turbulence_detector.py",
+        "module": "modules.turbulence_detector",
+        "function": "TurbulenceDetector._calculate_std",
+        "line": 191,
+        "character": 8,
+        "lineEnd": 192,
+        "characterEnd": 30
+      },
+      "message": "Consider using 'window = min(window, len(data))' instead of unnecessary if block",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/consider-using-min-builtin.html"
+    },
+    {
+      "source": "pylint",
+      "code": "consider-using-min-builtin",
+      "location": {
+        "path": "modules\\turbulence_detector.py",
+        "module": "modules.turbulence_detector",
+        "function": "TurbulenceDetector._calculate_oscillation",
+        "line": 205,
+        "character": 8,
+        "lineEnd": 206,
+        "characterEnd": 30
+      },
+      "message": "Consider using 'window = min(window, len(data))' instead of unnecessary if block",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/consider-using-min-builtin.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\turbulence_detector.py",
+        "module": "modules.turbulence_detector",
+        "function": "TurbulenceDetector._determine_intensity",
+        "line": 242,
+        "character": 8,
+        "lineEnd": 249,
+        "characterEnd": 27
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\turbulence_detector.py",
+        "module": "modules.turbulence_detector",
+        "function": "TurbulenceDetector._get_recommendation",
+        "line": 273,
+        "character": 8,
+        "lineEnd": 283,
+        "characterEnd": 38
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\turbulence_detector.py",
+        "module": "modules.turbulence_detector",
+        "function": "TurbulenceDetector._get_recommendation",
+        "line": 276,
+        "character": 12,
+        "lineEnd": 279,
+        "characterEnd": 56
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pycodestyle",
+      "code": "E129",
+      "location": {
+        "path": "modules\\airports_database.py",
+        "module": null,
+        "function": null,
+        "line": 251,
+        "character": 5
+      },
+      "message": "visually indented line with same indent as next logical line",
+      "isFixable": false
+    },
+    {
+      "source": "pylint",
+      "code": "line-too-long",
+      "location": {
+        "path": "modules\\simconnect_client_data.py",
+        "module": "modules.simconnect_client_data",
+        "function": null,
+        "line": 192,
+        "character": 0
+      },
+      "message": "Line too long (124/120)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/line-too-long.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\simconnect_client_data.py",
+        "module": "modules.simconnect_client_data",
+        "function": "SimConnectClientDataAPI.map_client_data_name_to_id",
+        "line": 101,
+        "character": 12,
+        "lineEnd": 106,
+        "characterEnd": 28
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\simconnect_client_data.py",
+        "module": "modules.simconnect_client_data",
+        "function": "SimConnectClientDataAPI.create_client_data",
+        "line": 145,
+        "character": 12,
+        "lineEnd": 150,
+        "characterEnd": 28
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-arguments",
+      "location": {
+        "path": "modules\\simconnect_client_data.py",
+        "module": "modules.simconnect_client_data",
+        "function": "SimConnectClientDataAPI.add_to_client_data_definition",
+        "line": 156,
+        "character": 4,
+        "lineEnd": 156,
+        "characterEnd": 37
+      },
+      "message": "Too many arguments (6/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-positional-arguments",
+      "location": {
+        "path": "modules\\simconnect_client_data.py",
+        "module": "modules.simconnect_client_data",
+        "function": "SimConnectClientDataAPI.add_to_client_data_definition",
+        "line": 156,
+        "character": 4,
+        "lineEnd": 156,
+        "characterEnd": 37
+      },
+      "message": "Too many positional arguments (6/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-positional-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\simconnect_client_data.py",
+        "module": "modules.simconnect_client_data",
+        "function": "SimConnectClientDataAPI.add_to_client_data_definition",
+        "line": 191,
+        "character": 12,
+        "lineEnd": 196,
+        "characterEnd": 28
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-arguments",
+      "location": {
+        "path": "modules\\simconnect_client_data.py",
+        "module": "modules.simconnect_client_data",
+        "function": "SimConnectClientDataAPI.request_client_data",
+        "line": 202,
+        "character": 4,
+        "lineEnd": 202,
+        "characterEnd": 27
+      },
+      "message": "Too many arguments (9/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-positional-arguments",
+      "location": {
+        "path": "modules\\simconnect_client_data.py",
+        "module": "modules.simconnect_client_data",
+        "function": "SimConnectClientDataAPI.request_client_data",
+        "line": 202,
+        "character": 4,
+        "lineEnd": 202,
+        "characterEnd": 27
+      },
+      "message": "Too many positional arguments (9/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-positional-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\simconnect_client_data.py",
+        "module": "modules.simconnect_client_data",
+        "function": "SimConnectClientDataAPI.request_client_data",
+        "line": 247,
+        "character": 12,
+        "lineEnd": 252,
+        "characterEnd": 28
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-arguments",
+      "location": {
+        "path": "modules\\simconnect_client_data.py",
+        "module": "modules.simconnect_client_data",
+        "function": "SimConnectClientDataAPI.set_client_data",
+        "line": 258,
+        "character": 4,
+        "lineEnd": 258,
+        "characterEnd": 23
+      },
+      "message": "Too many arguments (7/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-positional-arguments",
+      "location": {
+        "path": "modules\\simconnect_client_data.py",
+        "module": "modules.simconnect_client_data",
+        "function": "SimConnectClientDataAPI.set_client_data",
+        "line": 258,
+        "character": 4,
+        "lineEnd": 258,
+        "characterEnd": 23
+      },
+      "message": "Too many positional arguments (7/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-positional-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\simconnect_client_data.py",
+        "module": "modules.simconnect_client_data",
+        "function": "SimConnectClientDataAPI.set_client_data",
+        "line": 299,
+        "character": 12,
+        "lineEnd": 304,
+        "characterEnd": 28
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\simconnect_client_data.py",
+        "module": "modules.simconnect_client_data",
+        "function": "SimConnectClientDataAPI.clear_client_data_definition",
+        "line": 331,
+        "character": 12,
+        "lineEnd": 336,
+        "characterEnd": 28
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "line-too-long",
+      "location": {
+        "path": "modules\\log_analyzer.py",
+        "module": "modules.log_analyzer",
+        "function": null,
+        "line": 256,
+        "character": 0
+      },
+      "message": "Line too long (129/120)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/line-too-long.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-variable",
+      "location": {
+        "path": "modules\\log_analyzer.py",
+        "module": "modules.log_analyzer",
+        "function": "LogAnalyzer._determine_severity",
+        "line": 189,
+        "character": 12,
+        "lineEnd": 189,
+        "characterEnd": 24
+      },
+      "message": "Unused variable 'pattern_name'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-variable.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\log_analyzer.py",
+        "module": "modules.log_analyzer",
+        "function": "LogAnalyzer._determine_severity",
+        "line": 199,
+        "character": 8,
+        "lineEnd": 204,
+        "characterEnd": 24
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-variable",
+      "location": {
+        "path": "modules\\log_analyzer.py",
+        "module": "modules.log_analyzer",
+        "function": "LogAnalyzer._generate_recommendations",
+        "line": 248,
+        "character": 16,
+        "lineEnd": 248,
+        "characterEnd": 28
+      },
+      "message": "Unused variable 'pattern_name'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-variable.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-variable",
+      "location": {
+        "path": "modules\\log_analyzer.py",
+        "module": "modules.log_analyzer",
+        "function": "LogAnalyzer._suggest_fix",
+        "line": 289,
+        "character": 12,
+        "lineEnd": 289,
+        "characterEnd": 24
+      },
+      "message": "Unused variable 'pattern_name'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-variable.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\log_analyzer.py",
+        "module": "modules.log_analyzer",
+        "function": "LogAnalyzer._suggest_fix",
+        "line": 294,
+        "character": 8,
+        "lineEnd": 305,
+        "characterEnd": 96
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pycodestyle",
+      "code": "E129",
+      "location": {
+        "path": "modules\\autopilot_takeover.py",
+        "module": null,
+        "function": null,
+        "line": 199,
+        "character": 13
+      },
+      "message": "visually indented line with same indent as next logical line",
+      "isFixable": false
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-arguments",
+      "location": {
+        "path": "modules\\autopilot_takeover.py",
+        "module": "modules.autopilot_takeover",
+        "function": "AutopilotTakeover.should_initiate_takeover",
+        "line": 70,
+        "character": 4,
+        "lineEnd": 70,
+        "characterEnd": 32
+      },
+      "message": "Too many arguments (7/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-positional-arguments",
+      "location": {
+        "path": "modules\\autopilot_takeover.py",
+        "module": "modules.autopilot_takeover",
+        "function": "AutopilotTakeover.should_initiate_takeover",
+        "line": 70,
+        "character": 4,
+        "lineEnd": 70,
+        "characterEnd": 32
+      },
+      "message": "Too many positional arguments (7/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-positional-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "chained-comparison",
+      "location": {
+        "path": "modules\\autopilot_takeover.py",
+        "module": "modules.autopilot_takeover",
+        "function": "AutopilotTakeover.should_initiate_takeover",
+        "line": 113,
+        "character": 15,
+        "lineEnd": 113,
+        "characterEnd": 81
+      },
+      "message": "Simplify chained comparison between the operands",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/chained-comparison.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\autopilot_takeover.py",
+        "module": "modules.autopilot_takeover",
+        "function": "AutopilotTakeover.should_initiate_takeover",
+        "line": 116,
+        "character": 20,
+        "lineEnd": 118,
+        "characterEnd": 69
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\autopilot_takeover.py",
+        "module": "modules.autopilot_takeover",
+        "function": "AutopilotTakeover.should_initiate_takeover",
+        "line": 124,
+        "character": 12,
+        "lineEnd": 125,
+        "characterEnd": 63
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\autopilot_takeover.py",
+        "module": "modules.autopilot_takeover",
+        "function": "AutopilotTakeover.should_initiate_takeover",
+        "line": 139,
+        "character": 12,
+        "lineEnd": 141,
+        "characterEnd": 80
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\autopilot_takeover.py",
+        "module": "modules.autopilot_takeover",
+        "function": "AutopilotTakeover._save_initial_parameters",
+        "line": 224,
+        "character": 8,
+        "lineEnd": 226,
+        "characterEnd": 69
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "modules\\autopilot_takeover.py",
+        "module": "modules.autopilot_takeover",
+        "function": "AutopilotTakeover._disengage_autothrottle",
+        "line": 299,
+        "character": 56,
+        "lineEnd": 299,
+        "characterEnd": 63
+      },
+      "message": "Unused argument 'control'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "modules\\autopilot_takeover.py",
+        "module": "modules.autopilot_takeover",
+        "function": "AutopilotTakeover._acquire_controls",
+        "line": 322,
+        "character": 32,
+        "lineEnd": 322,
+        "characterEnd": 39
+      },
+      "message": "Unused argument 'control'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\autopilot_takeover.py",
+        "module": "modules.autopilot_takeover",
+        "function": "AutopilotTakeover.get_status_summary",
+        "line": 354,
+        "character": 8,
+        "lineEnd": 377,
+        "characterEnd": 26
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\autopilot_takeover.py",
+        "module": "modules.autopilot_takeover",
+        "function": "AutopilotTakeover.get_recommended_takeover_point",
+        "line": 450,
+        "character": 8,
+        "lineEnd": 451,
+        "characterEnd": 76
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "line-too-long",
+      "location": {
+        "path": "modules\\approach_dialog.py",
+        "module": "modules.approach_dialog",
+        "function": null,
+        "line": 143,
+        "character": 0
+      },
+      "message": "Line too long (121/120)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/line-too-long.html"
+    },
+    {
+      "source": "pylint",
+      "code": "line-too-long",
+      "location": {
+        "path": "modules\\approach_dialog.py",
+        "module": "modules.approach_dialog",
+        "function": null,
+        "line": 148,
+        "character": 0
+      },
+      "message": "Line too long (122/120)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/line-too-long.html"
+    },
+    {
+      "source": "pylint",
+      "code": "line-too-long",
+      "location": {
+        "path": "modules\\approach_dialog.py",
+        "module": "modules.approach_dialog",
+        "function": null,
+        "line": 201,
+        "character": 0
+      },
+      "message": "Line too long (121/120)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/line-too-long.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\approach_dialog.py",
+        "module": "modules.approach_dialog",
+        "function": "ApproachConfigDialog.detect_approach",
+        "line": 201,
+        "character": 16,
+        "lineEnd": 201,
+        "characterEnd": 121
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "line-too-long",
+      "location": {
+        "path": "modules\\approach_dialog.py",
+        "module": "modules.approach_dialog",
+        "function": null,
+        "line": 475,
+        "character": 0
+      },
+      "message": "Line too long (122/120)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/line-too-long.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\approach_dialog.py",
+        "module": "modules.approach_dialog",
+        "function": "ApproachConfigDialog.on_ok",
+        "line": 475,
+        "character": 24,
+        "lineEnd": 475,
+        "characterEnd": 123
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "import-outside-toplevel",
+      "location": {
+        "path": "modules\\approach_dialog.py",
+        "module": "modules.approach_dialog",
+        "function": "ApproachConfigDialog.refresh_navigraph",
+        "line": 259,
+        "character": 12,
+        "lineEnd": 259,
+        "characterEnd": 72
+      },
+      "message": "Import outside toplevel (modules.navigraph_parser.create_navigraph_parser)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/import-outside-toplevel.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\approach_dialog.py",
+        "module": "modules.approach_dialog",
+        "function": "ApproachConfigDialog.refresh_navigraph",
+        "line": 287,
+        "character": 12,
+        "lineEnd": 287,
+        "characterEnd": 69
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "modules\\approach_dialog.py",
+        "module": "modules.approach_dialog",
+        "function": "ApproachConfigDialog.on_airport_select",
+        "line": 395,
+        "character": 32,
+        "lineEnd": 395,
+        "characterEnd": 37
+      },
+      "message": "Unused argument 'event'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "modules\\approach_dialog.py",
+        "module": "modules.approach_dialog",
+        "function": "ApproachConfigDialog.on_runway_select",
+        "line": 411,
+        "character": 31,
+        "lineEnd": 411,
+        "characterEnd": 36
+      },
+      "message": "Unused argument 'event'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "modules\\approach_dialog.py",
+        "module": "modules.approach_dialog",
+        "function": "ApproachConfigDialog.on_approach_select",
+        "line": 431,
+        "character": 33,
+        "lineEnd": 431,
+        "characterEnd": 38
+      },
+      "message": "Unused argument 'event'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "line-too-long",
+      "location": {
+        "path": "modules\\navigraph_parser.py",
+        "module": "modules.navigraph_parser",
+        "function": null,
+        "line": 362,
+        "character": 0
+      },
+      "message": "Line too long (135/120)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/line-too-long.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\navigraph_parser.py",
+        "module": "modules.navigraph_parser",
+        "function": "NavigraphParser.connect",
+        "line": 90,
+        "character": 16,
+        "lineEnd": 90,
+        "characterEnd": 77
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\navigraph_parser.py",
+        "module": "modules.navigraph_parser",
+        "function": "NavigraphParser.connect",
+        "line": 95,
+        "character": 12,
+        "lineEnd": 95,
+        "characterEnd": 75
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\navigraph_parser.py",
+        "module": "modules.navigraph_parser",
+        "function": "NavigraphParser.connect",
+        "line": 99,
+        "character": 12,
+        "lineEnd": 99,
+        "characterEnd": 73
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\navigraph_parser.py",
+        "module": "modules.navigraph_parser",
+        "function": "NavigraphParser.get_runway_data",
+        "line": 150,
+        "character": 12,
+        "lineEnd": 150,
+        "characterEnd": 54
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\navigraph_parser.py",
+        "module": "modules.navigraph_parser",
+        "function": "NavigraphParser.get_runway_data",
+        "line": 192,
+        "character": 12,
+        "lineEnd": 219,
+        "characterEnd": 27
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\navigraph_parser.py",
+        "module": "modules.navigraph_parser",
+        "function": "NavigraphParser.get_runway_data",
+        "line": 197,
+        "character": 20,
+        "lineEnd": 197,
+        "characterEnd": 83
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\navigraph_parser.py",
+        "module": "modules.navigraph_parser",
+        "function": "NavigraphParser.get_runway_data",
+        "line": 218,
+        "character": 16,
+        "lineEnd": 218,
+        "characterEnd": 90
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\navigraph_parser.py",
+        "module": "modules.navigraph_parser",
+        "function": "NavigraphParser.get_runway_data",
+        "line": 222,
+        "character": 12,
+        "lineEnd": 222,
+        "characterEnd": 67
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\navigraph_parser.py",
+        "module": "modules.navigraph_parser",
+        "function": "NavigraphParser.get_glideslope_angle",
+        "line": 249,
+        "character": 12,
+        "lineEnd": 250,
+        "characterEnd": 71
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\navigraph_parser.py",
+        "module": "modules.navigraph_parser",
+        "function": "NavigraphParser.get_glideslope_angle",
+        "line": 257,
+        "character": 16,
+        "lineEnd": 258,
+        "characterEnd": 59
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\navigraph_parser.py",
+        "module": "modules.navigraph_parser",
+        "function": "NavigraphParser.get_glideslope_angle",
+        "line": 262,
+        "character": 8,
+        "lineEnd": 263,
+        "characterEnd": 76
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "import-outside-toplevel",
+      "location": {
+        "path": "modules\\navigraph_parser.py",
+        "module": "modules.navigraph_parser",
+        "function": "create_navigraph_parser",
+        "line": 316,
+        "character": 12,
+        "lineEnd": 316,
+        "characterEnd": 53
+      },
+      "message": "Import outside toplevel (modules.settings.get_settings)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/import-outside-toplevel.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\navigraph_parser.py",
+        "module": "modules.navigraph_parser",
+        "function": "create_navigraph_parser",
+        "line": 321,
+        "character": 16,
+        "lineEnd": 321,
+        "characterEnd": 86
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\navigraph_parser.py",
+        "module": "modules.navigraph_parser",
+        "function": "create_navigraph_parser",
+        "line": 323,
+        "character": 12,
+        "lineEnd": 323,
+        "characterEnd": 94
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\navigraph_parser.py",
+        "module": "modules.navigraph_parser",
+        "function": "create_navigraph_parser",
+        "line": 327,
+        "character": 4,
+        "lineEnd": 331,
+        "characterEnd": 19
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pyflakes",
+      "code": "F999",
+      "location": {
+        "path": "modules\\thresholds_config.py",
+        "module": null,
+        "function": null,
+        "line": 277,
+        "character": 5
+      },
+      "message": "`global _thresholds_config` is unused: name is never assigned in scope",
+      "isFixable": false
+    },
+    {
+      "source": "pylint",
+      "code": "global-variable-not-assigned",
+      "location": {
+        "path": "modules\\thresholds_config.py",
+        "module": "modules.thresholds_config",
+        "function": "reload_thresholds",
+        "line": 277,
+        "character": 4,
+        "lineEnd": 277,
+        "characterEnd": 29
+      },
+      "message": "Using global for '_thresholds_config' but no assignment is done",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/global-variable-not-assigned.html"
+    },
+    {
+      "source": "pylint",
+      "code": "import-error",
+      "location": {
+        "path": "analyze_logs.py",
+        "module": "analyze_logs",
+        "function": null,
+        "line": 13,
+        "character": 0,
+        "lineEnd": 13,
+        "characterEnd": 40
+      },
+      "message": "Unable to import 'modules.auto_fixer'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/error/import-error.html"
+    },
+    {
+      "source": "pylint",
+      "code": "wrong-import-position",
+      "location": {
+        "path": "analyze_logs.py",
+        "module": "analyze_logs",
+        "function": null,
+        "line": 13,
+        "character": 0,
+        "lineEnd": 13,
+        "characterEnd": 40
+      },
+      "message": "Import \"from modules.auto_fixer import AutoFixer\" should be placed at the top of the module",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/wrong-import-position.html"
+    },
+    {
+      "source": "pylint",
+      "code": "wrong-import-position",
+      "location": {
+        "path": "analyze_logs.py",
+        "module": "analyze_logs",
+        "function": null,
+        "line": 14,
+        "character": 0,
+        "lineEnd": 14,
+        "characterEnd": 44
+      },
+      "message": "Import \"from modules.log_analyzer import LogAnalyzer\" should be placed at the top of the module",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/wrong-import-position.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-statements",
+      "location": {
+        "path": "analyze_logs.py",
+        "module": "analyze_logs",
+        "function": "main",
+        "line": 17,
+        "character": 0,
+        "lineEnd": 17,
+        "characterEnd": 8
+      },
+      "message": "Too many statements (66/60)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-statements.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-locals",
+      "location": {
+        "path": "analyze_logs.py",
+        "module": "analyze_logs",
+        "function": "main",
+        "line": 17,
+        "character": 0,
+        "lineEnd": 17,
+        "characterEnd": 8
+      },
+      "message": "Too many local variables (19/15)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-locals.html"
+    },
+    {
+      "source": "pylint",
+      "code": "wrong-import-position",
+      "location": {
+        "path": "claude_db.py",
+        "module": "claude_db",
+        "function": null,
+        "line": 13,
+        "character": 0,
+        "lineEnd": 13,
+        "characterEnd": 44
+      },
+      "message": "Import \"from modules.log_database import LogDatabase\" should be placed at the top of the module",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/wrong-import-position.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-statements",
+      "location": {
+        "path": "claude_db.py",
+        "module": "claude_db",
+        "function": "claude_read_database",
+        "line": 21,
+        "character": 0,
+        "lineEnd": 21,
+        "characterEnd": 24
+      },
+      "message": "Too many statements (68/60)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-statements.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-locals",
+      "location": {
+        "path": "claude_db.py",
+        "module": "claude_db",
+        "function": "claude_read_database",
+        "line": 21,
+        "character": 0,
+        "lineEnd": 21,
+        "characterEnd": 24
+      },
+      "message": "Too many local variables (16/15)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-locals.html"
+    },
+    {
+      "source": "pylint",
+      "code": "wrong-import-position",
+      "location": {
+        "path": "claude_read_logs.py",
+        "module": "claude_read_logs",
+        "function": null,
+        "line": 13,
+        "character": 0,
+        "lineEnd": 13,
+        "characterEnd": 44
+      },
+      "message": "Import \"from modules.log_analyzer import LogAnalyzer\" should be placed at the top of the module",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/wrong-import-position.html"
+    },
+    {
+      "source": "pylint",
+      "code": "import-outside-toplevel",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.__init__",
+        "line": 33,
+        "character": 12,
+        "lineEnd": 33,
+        "characterEnd": 75
+      },
+      "message": "Import outside toplevel (modules.aircraft_config_reader.AircraftConfigReader)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/import-outside-toplevel.html"
+    },
+    {
+      "source": "pylint",
+      "code": "import-outside-toplevel",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.__init__",
+        "line": 42,
+        "character": 12,
+        "lineEnd": 42,
+        "characterEnd": 61
+      },
+      "message": "Import outside toplevel (modules.wasm_interface.MobiFlightWASM)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/import-outside-toplevel.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.detect_and_configure",
+        "line": 151,
+        "character": 8,
+        "lineEnd": 158,
+        "characterEnd": 23
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.set_heading",
+        "line": 178,
+        "character": 12,
+        "lineEnd": 208,
+        "characterEnd": 28
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.set_heading",
+        "line": 189,
+        "character": 16,
+        "lineEnd": 198,
+        "characterEnd": 31
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.set_altitude",
+        "line": 232,
+        "character": 12,
+        "lineEnd": 259,
+        "characterEnd": 28
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.set_altitude",
+        "line": 242,
+        "character": 16,
+        "lineEnd": 250,
+        "characterEnd": 31
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.set_vertical_speed",
+        "line": 289,
+        "character": 12,
+        "lineEnd": 315,
+        "characterEnd": 28
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.set_vertical_speed",
+        "line": 298,
+        "character": 16,
+        "lineEnd": 306,
+        "characterEnd": 31
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.engage_approach_mode",
+        "line": 341,
+        "character": 12,
+        "lineEnd": 363,
+        "characterEnd": 28
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.engage_approach_mode",
+        "line": 348,
+        "character": 16,
+        "lineEnd": 354,
+        "characterEnd": 31
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.engage_nav_mode",
+        "line": 389,
+        "character": 12,
+        "lineEnd": 411,
+        "characterEnd": 28
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.engage_nav_mode",
+        "line": 396,
+        "character": 16,
+        "lineEnd": 402,
+        "characterEnd": 31
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.engage_autopilot",
+        "line": 439,
+        "character": 12,
+        "lineEnd": 464,
+        "characterEnd": 27
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.engage_autopilot",
+        "line": 446,
+        "character": 16,
+        "lineEnd": 451,
+        "characterEnd": 31
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.engage_autopilot",
+        "line": 455,
+        "character": 16,
+        "lineEnd": 460,
+        "characterEnd": 31
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.disengage_autopilot",
+        "line": 491,
+        "character": 12,
+        "lineEnd": 516,
+        "characterEnd": 27
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.disengage_autopilot",
+        "line": 498,
+        "character": 16,
+        "lineEnd": 503,
+        "characterEnd": 31
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.disengage_autopilot",
+        "line": 507,
+        "character": 16,
+        "lineEnd": 512,
+        "characterEnd": 31
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.set_speed",
+        "line": 551,
+        "character": 12,
+        "lineEnd": 571,
+        "characterEnd": 27
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.set_speed",
+        "line": 560,
+        "character": 16,
+        "lineEnd": 567,
+        "characterEnd": 31
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.engage_autothrottle",
+        "line": 603,
+        "character": 12,
+        "lineEnd": 628,
+        "characterEnd": 27
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.engage_autothrottle",
+        "line": 610,
+        "character": 16,
+        "lineEnd": 615,
+        "characterEnd": 31
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.engage_autothrottle",
+        "line": 619,
+        "character": 16,
+        "lineEnd": 624,
+        "characterEnd": 31
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_adapter.py",
+        "module": "modules.aircraft_adapter",
+        "function": "AircraftCommandAdapter.check_compatibility",
+        "line": 693,
+        "character": 12,
+        "lineEnd": 711,
+        "characterEnd": 17
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_config_reader.py",
+        "module": "modules.aircraft_config_reader",
+        "function": "AircraftConfigReader._detect_from_manifest",
+        "line": 227,
+        "character": 12,
+        "lineEnd": 232,
+        "characterEnd": 33
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_config_reader.py",
+        "module": "modules.aircraft_config_reader",
+        "function": "AircraftConfigReader._detect_from_manifest",
+        "line": 254,
+        "character": 12,
+        "lineEnd": 259,
+        "characterEnd": 39
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_config_reader.py",
+        "module": "modules.aircraft_config_reader",
+        "function": "AircraftConfigReader._detect_from_aircraft_cfg",
+        "line": 289,
+        "character": 12,
+        "lineEnd": 294,
+        "characterEnd": 33
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\aircraft_config_reader.py",
+        "module": "modules.aircraft_config_reader",
+        "function": "AircraftConfigReader._detect_from_aircraft_cfg",
+        "line": 314,
+        "character": 12,
+        "lineEnd": 319,
+        "characterEnd": 39
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unnecessary-pass",
+      "location": {
+        "path": "modules\\approach_phases.py",
+        "module": "modules.approach_phases",
+        "function": "ApproachPhaseState.handle",
+        "line": 35,
+        "character": 8,
+        "lineEnd": 35,
+        "characterEnd": 12
+      },
+      "message": "Unnecessary pass statement",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unnecessary-pass.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unnecessary-pass",
+      "location": {
+        "path": "modules\\approach_phases.py",
+        "module": "modules.approach_phases",
+        "function": "ApproachPhaseState.get_phase_name",
+        "line": 40,
+        "character": 8,
+        "lineEnd": 40,
+        "characterEnd": 12
+      },
+      "message": "Unnecessary pass statement",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unnecessary-pass.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "modules\\approach_phases.py",
+        "module": "modules.approach_phases",
+        "function": "IntermediatePhaseState._check_autopilot_takeover",
+        "line": 144,
+        "character": 77,
+        "lineEnd": 144,
+        "characterEnd": 92
+      },
+      "message": "Unused argument 'telemetry'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "protected-access",
+      "location": {
+        "path": "modules\\approach_phases.py",
+        "module": "modules.approach_phases",
+        "function": "IntermediatePhaseState._check_autopilot_takeover",
+        "line": 170,
+        "character": 16,
+        "lineEnd": 170,
+        "characterEnd": 44
+      },
+      "message": "Access to a protected member _ils_info_logged of a client class",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/protected-access.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "modules\\approach_phases.py",
+        "module": "modules.approach_phases",
+        "function": "FinalPhaseState._check_ils_takeover",
+        "line": 283,
+        "character": 92,
+        "lineEnd": 283,
+        "characterEnd": 107
+      },
+      "message": "Unused argument 'telemetry'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\approach_phases.py",
+        "module": "modules.approach_phases",
+        "function": "FinalPhaseState._check_weather_conditions",
+        "line": 341,
+        "character": 16,
+        "lineEnd": 343,
+        "characterEnd": 67
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "import-outside-toplevel",
+      "location": {
+        "path": "modules\\approach_phases.py",
+        "module": "modules.approach_phases",
+        "function": "FinalPhaseState._check_weather_conditions",
+        "line": 346,
+        "character": 20,
+        "lineEnd": 346,
+        "characterEnd": 73
+      },
+      "message": "Import outside toplevel (modules.audio_alerts.play_windshear_alert)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/import-outside-toplevel.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "modules\\approach_phases.py",
+        "module": "modules.approach_phases",
+        "function": "FinalPhaseState._log_approach_parameters",
+        "line": 365,
+        "character": 56,
+        "lineEnd": 365,
+        "characterEnd": 75
+      },
+      "message": "Unused argument 'approach_data'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-unsupported-format",
+      "location": {
+        "path": "modules\\approach_phases.py",
+        "module": "modules.approach_phases",
+        "function": "FinalPhaseState._control_throttle",
+        "line": 462,
+        "character": 16,
+        "lineEnd": 462,
+        "characterEnd": 89
+      },
+      "message": "Unsupported logging format character '(' (0x28) at index 18",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/error/logging-unsupported-format.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\approach_phases.py",
+        "module": "modules.approach_phases",
+        "function": "FinalPhaseState._get_aircraft_weight",
+        "line": 469,
+        "character": 8,
+        "lineEnd": 480,
+        "characterEnd": 38
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\approach_phases.py",
+        "module": "modules.approach_phases",
+        "function": "LandingPhaseState._get_target_speed",
+        "line": 584,
+        "character": 8,
+        "lineEnd": 589,
+        "characterEnd": 65
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\approach_speed_calculator.py",
+        "module": "modules.approach_speed_calculator",
+        "function": "ApproachSpeedCalculator.identify_aircraft",
+        "line": 65,
+        "character": 8,
+        "lineEnd": 73,
+        "characterEnd": 32
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\approach_speed_calculator.py",
+        "module": "modules.approach_speed_calculator",
+        "function": "ApproachSpeedCalculator.calculate_temperature_correction",
+        "line": 191,
+        "character": 8,
+        "lineEnd": 194,
+        "characterEnd": 20
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-arguments",
+      "location": {
+        "path": "modules\\approach_speed_calculator.py",
+        "module": "modules.approach_speed_calculator",
+        "function": "ApproachSpeedCalculator.calculate_approach_parameters",
+        "line": 196,
+        "character": 4,
+        "lineEnd": 196,
+        "characterEnd": 37
+      },
+      "message": "Too many arguments (8/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-locals",
+      "location": {
+        "path": "modules\\approach_speed_calculator.py",
+        "module": "modules.approach_speed_calculator",
+        "function": "ApproachSpeedCalculator.calculate_approach_parameters",
+        "line": 196,
+        "character": 4,
+        "lineEnd": 196,
+        "characterEnd": 37
+      },
+      "message": "Too many local variables (20/15)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-locals.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-positional-arguments",
+      "location": {
+        "path": "modules\\approach_speed_calculator.py",
+        "module": "modules.approach_speed_calculator",
+        "function": "ApproachSpeedCalculator.calculate_approach_parameters",
+        "line": 196,
+        "character": 4,
+        "lineEnd": 196,
+        "characterEnd": 37
+      },
+      "message": "Too many positional arguments (8/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-positional-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-format-truncated",
+      "location": {
+        "path": "modules\\autothrottle.py",
+        "module": "modules.autothrottle",
+        "function": "AutothrottleController.activate",
+        "line": 68,
+        "character": 8,
+        "lineEnd": 68,
+        "characterEnd": 74
+      },
+      "message": "Logging format string ends in middle of conversion specifier",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/error/logging-format-truncated.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\autothrottle.py",
+        "module": "modules.autothrottle",
+        "function": "AutothrottleController.calculate_base_throttle",
+        "line": 108,
+        "character": 8,
+        "lineEnd": 109,
+        "characterEnd": 102
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\autothrottle.py",
+        "module": "modules.autothrottle",
+        "function": "AutothrottleController.calculate_pid_correction",
+        "line": 214,
+        "character": 8,
+        "lineEnd": 215,
+        "characterEnd": 50
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-locals",
+      "location": {
+        "path": "modules\\autothrottle.py",
+        "module": "modules.autothrottle",
+        "function": "AutothrottleController.calculate_throttle",
+        "line": 219,
+        "character": 4,
+        "lineEnd": 219,
+        "characterEnd": 26
+      },
+      "message": "Too many local variables (21/15)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-locals.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\autothrottle.py",
+        "module": "modules.autothrottle",
+        "function": "AutothrottleController.calculate_throttle",
+        "line": 293,
+        "character": 8,
+        "lineEnd": 297,
+        "characterEnd": 51
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\autothrottle.py",
+        "module": "modules.autothrottle",
+        "function": "VJoyThrottleIntegration.enable",
+        "line": 338,
+        "character": 8,
+        "lineEnd": 344,
+        "characterEnd": 24
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "modules\\connection_monitor.py",
+        "module": "modules.connection_monitor",
+        "function": "ConnectionMonitor.update_flight_phase",
+        "line": 315,
+        "character": 55,
+        "lineEnd": 315,
+        "characterEnd": 74
+      },
+      "message": "Unused argument 'ground_speed'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "import-outside-toplevel",
+      "location": {
+        "path": "modules\\connection_monitor.py",
+        "module": "modules.connection_monitor",
+        "function": "ConnectionMonitor.export_metrics_csv",
+        "line": 601,
+        "character": 8,
+        "lineEnd": 601,
+        "characterEnd": 18
+      },
+      "message": "Import outside toplevel (csv)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/import-outside-toplevel.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-format-truncated",
+      "location": {
+        "path": "modules\\connection_optimizer.py",
+        "module": "modules.connection_optimizer",
+        "function": "ConnectionOptimizer._log_results",
+        "line": 341,
+        "character": 12,
+        "lineEnd": 341,
+        "characterEnd": 67
+      },
+      "message": "Logging format string ends in middle of conversion specifier",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/error/logging-format-truncated.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-format-truncated",
+      "location": {
+        "path": "modules\\control.py",
+        "module": "modules.control",
+        "function": "MSFSControl.set_throttle",
+        "line": 145,
+        "character": 12,
+        "lineEnd": 145,
+        "characterEnd": 57
+      },
+      "message": "Logging format string ends in middle of conversion specifier",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/error/logging-format-truncated.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\dme_navigation.py",
+        "module": "modules.dme_navigation",
+        "function": "DMENavigation.check_altitude_at_fix",
+        "line": 79,
+        "character": 8,
+        "lineEnd": 80,
+        "characterEnd": 90
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\dme_navigation.py",
+        "module": "modules.dme_navigation",
+        "function": "DMENavigation.calculate_required_vs_for_dme",
+        "line": 153,
+        "character": 8,
+        "lineEnd": 155,
+        "characterEnd": 58
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\dme_navigation.py",
+        "module": "modules.dme_navigation",
+        "function": "DMENavigation.check_dme_accuracy",
+        "line": 250,
+        "character": 12,
+        "lineEnd": 252,
+        "characterEnd": 69
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "modules\\dme_navigation.py",
+        "module": "modules.dme_navigation",
+        "function": "DMENavigation.calculate_dme_hold",
+        "line": 263,
+        "character": 26,
+        "lineEnd": 263,
+        "characterEnd": 48
+      },
+      "message": "Unused argument 'current_heading'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\dme_navigation.py",
+        "module": "modules.dme_navigation",
+        "function": "DMENavigation._is_radial_on_arc",
+        "line": 300,
+        "character": 8,
+        "lineEnd": 303,
+        "characterEnd": 81
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-arguments",
+      "location": {
+        "path": "modules\\flare_controller.py",
+        "module": "modules.flare_controller",
+        "function": "FlareController.calculate_flare_parameters",
+        "line": 76,
+        "character": 4,
+        "lineEnd": 76,
+        "characterEnd": 34
+      },
+      "message": "Too many arguments (6/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-locals",
+      "location": {
+        "path": "modules\\flare_controller.py",
+        "module": "modules.flare_controller",
+        "function": "FlareController.calculate_flare_parameters",
+        "line": 76,
+        "character": 4,
+        "lineEnd": 76,
+        "characterEnd": 34
+      },
+      "message": "Too many local variables (16/15)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-locals.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-positional-arguments",
+      "location": {
+        "path": "modules\\flare_controller.py",
+        "module": "modules.flare_controller",
+        "function": "FlareController.calculate_flare_parameters",
+        "line": 76,
+        "character": 4,
+        "lineEnd": 76,
+        "characterEnd": 34
+      },
+      "message": "Too many positional arguments (6/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-positional-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "modules\\flare_controller.py",
+        "module": "modules.flare_controller",
+        "function": "FlareController.calculate_flare_parameters",
+        "line": 79,
+        "character": 35,
+        "lineEnd": 79,
+        "characterEnd": 54
+      },
+      "message": "Unused argument 'ground_speed'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\flare_controller.py",
+        "module": "modules.flare_controller",
+        "function": "FlareController.calculate_flare_parameters",
+        "line": 137,
+        "character": 8,
+        "lineEnd": 139,
+        "characterEnd": 89
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\flare_controller.py",
+        "module": "modules.flare_controller",
+        "function": "FlareController.get_flare_status",
+        "line": 217,
+        "character": 12,
+        "lineEnd": 220,
+        "characterEnd": 40
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\flare_controller.py",
+        "module": "modules.flare_controller",
+        "function": "FlareController.get_flare_status",
+        "line": 222,
+        "character": 12,
+        "lineEnd": 225,
+        "characterEnd": 51
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\fms_reader.py",
+        "module": "modules.fms_reader",
+        "function": "FMSReader.get_star_waypoints",
+        "line": 224,
+        "character": 16,
+        "lineEnd": 225,
+        "characterEnd": 101
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\ils_navigation.py",
+        "module": "modules.ils_navigation",
+        "function": "ILSNavigation.configure",
+        "line": 46,
+        "character": 8,
+        "lineEnd": 48,
+        "characterEnd": 62
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "modules\\navigation.py",
+        "module": "modules.navigation",
+        "function": "Navigation.calculate_intercept_heading",
+        "line": 123,
+        "character": 42,
+        "lineEnd": 123,
+        "characterEnd": 64
+      },
+      "message": "Unused argument 'current_heading'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\navigation.py",
+        "module": "modules.navigation",
+        "function": "Navigation.calculate_intercept_heading",
+        "line": 139,
+        "character": 8,
+        "lineEnd": 144,
+        "characterEnd": 72
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "modules\\navigation.py",
+        "module": "modules.navigation",
+        "function": "Navigation.calculate_vor_approach",
+        "line": 186,
+        "character": 57,
+        "lineEnd": 186,
+        "characterEnd": 71
+      },
+      "message": "Unused argument 'nav_data'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\navigation.py",
+        "module": "modules.navigation",
+        "function": "Navigation.calculate_landing_distance",
+        "line": 283,
+        "character": 8,
+        "lineEnd": 285,
+        "characterEnd": 54
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-arguments",
+      "location": {
+        "path": "modules\\navigation.py",
+        "module": "modules.navigation",
+        "function": "Navigation.calculate_glideslope_intercept_point",
+        "line": 372,
+        "character": 4,
+        "lineEnd": 372,
+        "characterEnd": 44
+      },
+      "message": "Too many arguments (7/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-positional-arguments",
+      "location": {
+        "path": "modules\\navigation.py",
+        "module": "modules.navigation",
+        "function": "Navigation.calculate_glideslope_intercept_point",
+        "line": 372,
+        "character": 4,
+        "lineEnd": 372,
+        "characterEnd": 44
+      },
+      "message": "Too many positional arguments (7/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-positional-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-arguments",
+      "location": {
+        "path": "modules\\navigation.py",
+        "module": "modules.navigation",
+        "function": "Navigation.should_start_descent",
+        "line": 433,
+        "character": 4,
+        "lineEnd": 433,
+        "characterEnd": 28
+      },
+      "message": "Too many arguments (6/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-locals",
+      "location": {
+        "path": "modules\\navigation.py",
+        "module": "modules.navigation",
+        "function": "Navigation.should_start_descent",
+        "line": 433,
+        "character": 4,
+        "lineEnd": 433,
+        "characterEnd": 28
+      },
+      "message": "Too many local variables (16/15)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-locals.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-positional-arguments",
+      "location": {
+        "path": "modules\\navigation.py",
+        "module": "modules.navigation",
+        "function": "Navigation.should_start_descent",
+        "line": 433,
+        "character": 4,
+        "lineEnd": 433,
+        "characterEnd": 28
+      },
+      "message": "Too many positional arguments (6/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-positional-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-arguments",
+      "location": {
+        "path": "modules\\navigation.py",
+        "module": "modules.navigation",
+        "function": "Navigation.calculate_runway_beacons",
+        "line": 576,
+        "character": 4,
+        "lineEnd": 576,
+        "characterEnd": 32
+      },
+      "message": "Too many arguments (8/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-locals",
+      "location": {
+        "path": "modules\\navigation.py",
+        "module": "modules.navigation",
+        "function": "Navigation.calculate_runway_beacons",
+        "line": 576,
+        "character": 4,
+        "lineEnd": 576,
+        "characterEnd": 32
+      },
+      "message": "Too many local variables (21/15)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-locals.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-positional-arguments",
+      "location": {
+        "path": "modules\\navigation.py",
+        "module": "modules.navigation",
+        "function": "Navigation.calculate_runway_beacons",
+        "line": 576,
+        "character": 4,
+        "lineEnd": 576,
+        "characterEnd": 32
+      },
+      "message": "Too many positional arguments (8/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-positional-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "modules\\navigation.py",
+        "module": "modules.navigation",
+        "function": "Navigation.calculate_runway_beacons",
+        "line": 580,
+        "character": 32,
+        "lineEnd": 580,
+        "characterEnd": 55
+      },
+      "message": "Unused argument 'runway_elevation'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-arguments",
+      "location": {
+        "path": "modules\\navigation.py",
+        "module": "modules.navigation",
+        "function": "Navigation.check_beacon_passage",
+        "line": 658,
+        "character": 4,
+        "lineEnd": 658,
+        "characterEnd": 28
+      },
+      "message": "Too many arguments (10/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-locals",
+      "location": {
+        "path": "modules\\navigation.py",
+        "module": "modules.navigation",
+        "function": "Navigation.check_beacon_passage",
+        "line": 658,
+        "character": 4,
+        "lineEnd": 658,
+        "characterEnd": 28
+      },
+      "message": "Too many local variables (21/15)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-locals.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-positional-arguments",
+      "location": {
+        "path": "modules\\navigation.py",
+        "module": "modules.navigation",
+        "function": "Navigation.check_beacon_passage",
+        "line": 658,
+        "character": 4,
+        "lineEnd": 658,
+        "characterEnd": 28
+      },
+      "message": "Too many positional arguments (10/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-positional-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "import-outside-toplevel",
+      "location": {
+        "path": "modules\\navigation.py",
+        "module": "modules.navigation",
+        "function": "Navigation.check_beacon_passage",
+        "line": 685,
+        "character": 8,
+        "lineEnd": 685,
+        "characterEnd": 19
+      },
+      "message": "Import outside toplevel (time)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/import-outside-toplevel.html"
+    },
+    {
+      "source": "pylint",
+      "code": "trailing-newlines",
+      "location": {
+        "path": "modules\\navigation.py",
+        "module": "modules.navigation",
+        "function": null,
+        "line": 773,
+        "character": 0
+      },
+      "message": "Trailing newlines",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/trailing-newlines.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\settings.py",
+        "module": "modules.settings",
+        "function": "Settings._load_settings",
+        "line": 35,
+        "character": 16,
+        "lineEnd": 35,
+        "characterEnd": 96
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\settings.py",
+        "module": "modules.settings",
+        "function": "Settings._load_settings",
+        "line": 40,
+        "character": 16,
+        "lineEnd": 40,
+        "characterEnd": 73
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\settings.py",
+        "module": "modules.settings",
+        "function": "Settings._load_settings",
+        "line": 44,
+        "character": 12,
+        "lineEnd": 44,
+        "characterEnd": 73
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\settings.py",
+        "module": "modules.settings",
+        "function": "Settings.save",
+        "line": 121,
+        "character": 12,
+        "lineEnd": 121,
+        "characterEnd": 66
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\settings.py",
+        "module": "modules.settings",
+        "function": "Settings.save",
+        "line": 124,
+        "character": 12,
+        "lineEnd": 124,
+        "characterEnd": 57
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "import-outside-toplevel",
+      "location": {
+        "path": "modules\\settings_dialog.py",
+        "module": "modules.settings_dialog",
+        "function": "SettingsDialog.create_navigraph_tab",
+        "line": 73,
+        "character": 12,
+        "lineEnd": 73,
+        "characterEnd": 64
+      },
+      "message": "Import outside toplevel (modules.navigraph_parser.NavigraphParser)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/import-outside-toplevel.html"
+    },
+    {
+      "source": "pylint",
+      "code": "import-outside-toplevel",
+      "location": {
+        "path": "modules\\settings_dialog.py",
+        "module": "modules.settings_dialog",
+        "function": "SettingsDialog.test_connection",
+        "line": 152,
+        "character": 12,
+        "lineEnd": 152,
+        "characterEnd": 64
+      },
+      "message": "Import outside toplevel (modules.navigraph_parser.NavigraphParser)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/import-outside-toplevel.html"
+    },
+    {
+      "source": "pylint",
+      "code": "import-outside-toplevel",
+      "location": {
+        "path": "modules\\settings_dialog.py",
+        "module": "modules.settings_dialog",
+        "function": "SettingsDialog.on_save",
+        "line": 174,
+        "character": 12,
+        "lineEnd": 174,
+        "characterEnd": 64
+      },
+      "message": "Import outside toplevel (modules.navigraph_parser.NavigraphParser)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/convention/import-outside-toplevel.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\settings_dialog.py",
+        "module": "modules.settings_dialog",
+        "function": "SettingsDialog.on_save",
+        "line": 206,
+        "character": 12,
+        "lineEnd": 206,
+        "characterEnd": 55
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-locals",
+      "location": {
+        "path": "modules\\stabilized_approach.py",
+        "module": "modules.stabilized_approach",
+        "function": "StabilizedApproachMonitor.check_stabilization",
+        "line": 77,
+        "character": 4,
+        "lineEnd": 77,
+        "characterEnd": 27
+      },
+      "message": "Too many local variables (16/15)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-locals.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "modules\\stabilized_approach.py",
+        "module": "modules.stabilized_approach",
+        "function": "StabilizedApproachMonitor.check_stabilization",
+        "line": 78,
+        "character": 27,
+        "lineEnd": 78,
+        "characterEnd": 42
+      },
+      "message": "Unused argument 'wind_data'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "modules\\stabilized_approach.py",
+        "module": "modules.stabilized_approach",
+        "function": "StabilizedApproachMonitor.check_continuous_monitoring",
+        "line": 187,
+        "character": 59,
+        "lineEnd": 187,
+        "characterEnd": 78
+      },
+      "message": "Unused argument 'approach_data'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\stabilized_approach.py",
+        "module": "modules.stabilized_approach",
+        "function": "StabilizedApproachMonitor.get_status_summary",
+        "line": 272,
+        "character": 8,
+        "lineEnd": 279,
+        "characterEnd": 76
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-variable",
+      "location": {
+        "path": "modules\\structured_logger.py",
+        "module": "modules.structured_logger",
+        "function": "StructuredLoggerBridge.emit",
+        "line": 104,
+        "character": 37,
+        "lineEnd": 104,
+        "characterEnd": 43
+      },
+      "message": "Unused variable 'exc_tb'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-variable.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\structured_logger.py",
+        "module": "modules.structured_logger",
+        "function": "StructuredLoggerBridge._get_category_from_module",
+        "line": 140,
+        "character": 8,
+        "lineEnd": 155,
+        "characterEnd": 37
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-arguments",
+      "location": {
+        "path": "modules\\structured_logger.py",
+        "module": "modules.structured_logger",
+        "function": "StructuredLogger.log",
+        "line": 215,
+        "character": 4,
+        "lineEnd": 215,
+        "characterEnd": 11
+      },
+      "message": "Too many arguments (6/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-positional-arguments",
+      "location": {
+        "path": "modules\\structured_logger.py",
+        "module": "modules.structured_logger",
+        "function": "StructuredLogger.log",
+        "line": 215,
+        "character": 4,
+        "lineEnd": 215,
+        "characterEnd": 11
+      },
+      "message": "Too many positional arguments (6/5)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-positional-arguments.html"
+    },
+    {
+      "source": "pylint",
+      "code": "protected-access",
+      "location": {
+        "path": "modules\\structured_logger.py",
+        "module": "modules.structured_logger",
+        "function": "StructuredLogger.log",
+        "line": 228,
+        "character": 16,
+        "lineEnd": 228,
+        "characterEnd": 29
+      },
+      "message": "Access to a protected member _getframe of a client class",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/protected-access.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\structured_logger.py",
+        "module": "modules.structured_logger",
+        "function": "StructuredLogger.log",
+        "line": 280,
+        "character": 8,
+        "lineEnd": 280,
+        "characterEnd": 67
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "modules\\virtual_joystick.py",
+        "module": "modules.virtual_joystick",
+        "function": "VirtualJoystick.calculate_heading_correction",
+        "line": 265,
+        "character": 36,
+        "lineEnd": 265,
+        "characterEnd": 55
+      },
+      "message": "Unused argument 'current_bank'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\wasm_interface.py",
+        "module": "modules.wasm_interface",
+        "function": "MobiFlightWASM.connect",
+        "line": 77,
+        "character": 12,
+        "lineEnd": 83,
+        "characterEnd": 28
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\wasm_interface.py",
+        "module": "modules.wasm_interface",
+        "function": "MobiFlightWASM.read_lvar",
+        "line": 173,
+        "character": 12,
+        "lineEnd": 184,
+        "characterEnd": 27
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\wasm_version_checker.py",
+        "module": "modules.wasm_version_checker",
+        "function": "MobiFlightVersionChecker.get_installed_version",
+        "line": 56,
+        "character": 12,
+        "lineEnd": 62,
+        "characterEnd": 27
+      },
+      "message": "Unnecessary \"else\" after \"return\", remove the \"else\" and de-indent the code inside it",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\wasm_version_checker.py",
+        "module": "modules.wasm_version_checker",
+        "function": "MobiFlightVersionChecker.compare_versions",
+        "line": 158,
+        "character": 12,
+        "lineEnd": 161,
+        "characterEnd": 24
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-variable",
+      "location": {
+        "path": "modules\\wind_correction.py",
+        "module": "modules.wind_correction",
+        "function": "WindCorrection.calculate_corrected_heading",
+        "line": 98,
+        "character": 8,
+        "lineEnd": 98,
+        "characterEnd": 16
+      },
+      "message": "Unused variable 'headwind'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-variable.html"
+    },
+    {
+      "source": "pylint",
+      "code": "logging-fstring-interpolation",
+      "location": {
+        "path": "modules\\wind_correction.py",
+        "module": "modules.wind_correction",
+        "function": "WindCorrection.calculate_corrected_heading",
+        "line": 112,
+        "character": 8,
+        "lineEnd": 114,
+        "characterEnd": 68
+      },
+      "message": "Use lazy % formatting in logging functions",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/logging-fstring-interpolation.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "modules\\wind_correction.py",
+        "module": "modules.wind_correction",
+        "function": "WindCorrection.calculate_pitch_correction",
+        "line": 144,
+        "character": 58,
+        "lineEnd": 144,
+        "characterEnd": 74
+      },
+      "message": "Unused argument 'target_vs'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "modules\\wind_correction.py",
+        "module": "modules.wind_correction",
+        "function": "WindCorrection.calculate_pitch_correction",
+        "line": 145,
+        "character": 34,
+        "lineEnd": 145,
+        "characterEnd": 49
+      },
+      "message": "Unused argument 'airspeed'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "unused-argument",
+      "location": {
+        "path": "modules\\wind_correction.py",
+        "module": "modules.wind_correction",
+        "function": "WindCorrection.apply_wind_corrections",
+        "line": 166,
+        "character": 54,
+        "lineEnd": 166,
+        "characterEnd": 73
+      },
+      "message": "Unused argument 'approach_data'",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/warning/unused-argument.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-locals",
+      "location": {
+        "path": "modules\\wind_correction.py",
+        "module": "modules.wind_correction",
+        "function": "WindCorrection.apply_wind_corrections",
+        "line": 166,
+        "character": 4,
+        "lineEnd": 166,
+        "characterEnd": 30
+      },
+      "message": "Too many local variables (19/15)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-locals.html"
+    },
+    {
+      "source": "pylint",
+      "code": "too-many-locals",
+      "location": {
+        "path": "modules\\wind_shear_detector.py",
+        "module": "modules.wind_shear_detector",
+        "function": "WindShearDetector.update",
+        "line": 60,
+        "character": 4,
+        "lineEnd": 60,
+        "characterEnd": 14
+      },
+      "message": "Too many local variables (17/15)",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/too-many-locals.html"
+    },
+    {
+      "source": "pylint",
+      "code": "no-else-return",
+      "location": {
+        "path": "modules\\wind_shear_detector.py",
+        "module": "modules.wind_shear_detector",
+        "function": "WindShearDetector._calculate_trend",
+        "line": 331,
+        "character": 8,
+        "lineEnd": 336,
+        "characterEnd": 31
+      },
+      "message": "Unnecessary \"elif\" after \"return\", remove the leading \"el\" from \"elif\"",
+      "isFixable": false,
+      "docUrl": "https://pylint.readthedocs.io/en/latest/user_guide/messages/refactor/no-else-return.html"
+    }
+  ]
+}

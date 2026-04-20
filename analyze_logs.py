@@ -10,7 +10,7 @@ from pathlib import Path
 # Добавление корневой директории в путь
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-# from modules.auto_fixer import AutoFixer  # TODO: Модуль не реализован
+from modules.auto_fixer import AutoFixer
 from modules.log_analyzer import LogAnalyzer
 
 
@@ -93,15 +93,22 @@ def main():
         print("\n" + "="*80)
         print("ГЕНЕРАЦИЯ ИСПРАВЛЕНИЙ")
         print("="*80)
-        print("\n⚠️ AutoFixer не реализован. Функция недоступна.")
-        # TODO: Реализовать модуль modules/auto_fixer.py
-        # fixer = AutoFixer()
-        # fixes = fixer.generate_fixes(report)
-        # if fixes:
-        #     fix_report_file = log_dir / f"fixes_{session_id}.md"
-        #     fixer.generate_fix_report(fixes, fix_report_file)
-        #     print(f"\nСгенерировано исправлений: {len(fixes)}")
-        #     print(f"Отчёт с исправлениями: {fix_report_file}")
+
+        fixer = AutoFixer()
+        fixes = fixer.generate_fixes(report)
+
+        if fixes:
+            fix_report_file = log_dir / f"fixes_{session_id}.md"
+            fixer.generate_fix_report(fixes, fix_report_file)
+            print(f"\nСгенерировано исправлений: {len(fixes)}")
+            print(f"Отчёт с исправлениями: {fix_report_file}")
+
+            print("\nПредлагаемые исправления:")
+            for i, fix in enumerate(fixes[:5], 1):
+                print(f"  {i}. {fix.file_path}:{fix.line_number} -> {fix.function_name}")
+                print(f"     {fix.description}")
+        else:
+            print("\nИсправления не требуются")
 
     print("\n" + "="*80)
     return 0
