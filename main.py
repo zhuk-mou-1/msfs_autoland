@@ -93,6 +93,7 @@ class AutoLandSystem:
         self.use_autothrottle = True  # Флаг использования автоматической тяги
         self.use_custom_autopilot = False  # Флаг использования кастомного автопилота
         self.audio_alerts_enabled = True  # Флаг звуковых предупреждений
+        self._last_fms_log_time = 0.0  # Время последнего логирования FMS
 
         self.structured_logger.info(LogCategory.SYSTEM, "AutoLandSystem initialized")
 
@@ -586,7 +587,7 @@ class AutoLandSystem:
 
     def _log_fms_data(self):
         """Периодическое логирование FMS данных"""
-        if self.fms_reader and hasattr(self, '_last_fms_log_time'):
+        if self.fms_reader:
             current_time = time.time()
             if current_time - self._last_fms_log_time > 10:
                 current_wp = self.fms_reader.get_current_waypoint()
@@ -595,8 +596,6 @@ class AutoLandSystem:
                                f"Distance: {current_wp.distance:.1f}nm, "
                                f"ETE: {current_wp.ete/60:.1f}min")
                 self._last_fms_log_time = current_time
-        elif self.fms_reader and not hasattr(self, '_last_fms_log_time'):
-            self._last_fms_log_time = time.time()
 
     def _update_phase_enum(self, state: ApproachPhaseState):
         """Обновление enum фазы на основе состояния"""
