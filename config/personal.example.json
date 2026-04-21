@@ -1,0 +1,23 @@
+{
+  "user": {
+    "name": "Your Name",
+    "callsign": "YOUR_CALLSIGN",
+    "home_airport": "ICAO"
+  },
+  "preferences": {
+    "units": "metric",
+    "language": "en",
+    "sound_alerts": true,
+    "auto_connect": false
+  },
+  "paths": {
+    "msfs_community": "C:/Users/YourName/AppData/Local/Packages/Microsoft.FlightSimulator_8wekyb3d8bbwe/LocalCache/Packages/Community",
+    "little_navmap_db": "C:/Users/YourName/Documents/Little Navmap/little_navmap.sqlite"
+  },
+  "aircraft_overrides": {
+    "PMDG 737-800": {
+      "vapp_offset": 5,
+      "flare_height": 30
+    }
+  }
+}

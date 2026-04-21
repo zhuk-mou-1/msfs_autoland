@@ -25,6 +25,10 @@ venv/
 ENV/
 env/
 
+# Environment variables
+.env
+.env.local
+
 # IDE
 .vscode/
 .idea/
@@ -64,6 +68,19 @@ desktop.ini
 # MSFS specific
 *.pln
 *.flt
+
+# API Keys & Tokens
+config/api_keys.json
+config/navigraph_token.txt
+config/simbrief_*.json
+
+# Personal configs
+config/personal.json
+config/*.local.json
+
+# Crash dumps
+*.dmp
+crash_reports/
 
 # Logs
 *.log

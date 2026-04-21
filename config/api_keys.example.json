@@ -1,0 +1,19 @@
+{
+  "navigraph": {
+    "client_id": "YOUR_NAVIGRAPH_CLIENT_ID",
+    "client_secret": "YOUR_NAVIGRAPH_CLIENT_SECRET",
+    "token": "YOUR_NAVIGRAPH_TOKEN"
+  },
+  "simbrief": {
+    "username": "YOUR_SIMBRIEF_USERNAME",
+    "api_key": "YOUR_SIMBRIEF_API_KEY"
+  },
+  "little_navmap": {
+    "host": "localhost",
+    "port": 8965
+  },
+  "vatsim": {
+    "cid": "YOUR_VATSIM_CID",
+    "password": "YOUR_VATSIM_PASSWORD"
+  }
+}
