@@ -1,0 +1,322 @@
+diff --git a/main.py b/main.py
+index d9364da..a9c5427 100644
+--- a/main.py
++++ b/main.py
+@@ -475,17 +475,51 @@ class AutoLandSystem:
+         """Основной цикл выполнения захода"""
+         self._log_fms_data()
+ 
++        consecutive_errors = 0
++        max_consecutive_errors = 3
++
+         while self.running:
+             try:
+                 data = self._get_telemetry_with_monitoring()
+                 self._check_connection_optimization()
+                 approach_data = self._calculate_approach_data(data)
+                 self._handle_phase(data, approach_data)
++                consecutive_errors = 0
+                 time.sleep(0.5)
+ 
+-            except Exception as e:
+-                logger.error("Error in approach execution: %s", e)
++            except KeyboardInterrupt:
++                logger.warning("Approach interrupted by user")
+                 self.stop_approach()
++                break
++
++            except Exception as e:
++                consecutive_errors += 1
++                # Логируем с полным traceback - silent failure на финале опасен
++                logger.exception(
++                    "Error in approach execution (attempt %d/%d): %s",
++                    consecutive_errors, max_consecutive_errors, e
++                )
++
++                # Звуковой alert (если доступен) - пилот не услышит просто лог
++                if self.audio_alerts_enabled and self.audio_system and self.audio_system.is_available():
++                    try:
++                        # Используем существующий alert как proxy для критической ошибки
++                        self.audio_system.play_alert("SINK_RATE")
++                    except Exception:
++                        pass
++
++                # Останавливаем заход только после нескольких подряд ошибок,
++                # чтобы transient SimConnect glitch не обрывал автолендинг сразу
++                if consecutive_errors >= max_consecutive_errors:
++                    logger.critical(
++                        "Too many consecutive errors (%d) - stopping approach",
++                        consecutive_errors
++                    )
++                    self.stop_approach()
++                    break
++
++                # Пауза перед retry, чтобы дать SimConnect восстановиться
++                time.sleep(1.0)
+ 
+     def _get_telemetry_with_monitoring(self) -> dict:
+         """Получение телеметрии с мониторингом производительности"""
+diff --git a/modules/approach_phases.py b/modules/approach_phases.py
+index 0538f0b..39372ae 100644
+--- a/modules/approach_phases.py
++++ b/modules/approach_phases.py
+@@ -469,8 +469,8 @@ class FinalPhaseState(ApproachPhaseState):
+                 else:
+                     self.system.control.set_throttle(throttle_data['throttle'])
+ 
+-            if throttle_data['is_stable']:
+-                logger.debug("Autothrottle: %s% (stable)", throttle_data['throttle']*100)
++            if throttle_data.get('is_stable', False):
++                logger.debug("Autothrottle: %.1f%% (stable)", throttle_data['throttle']*100)
+         else:
+             self.system.control.set_throttle(0.5)
+ 
+@@ -522,13 +522,30 @@ class FinalPhaseState(ApproachPhaseState):
+         return True
+ 
+     def _deploy_flaps_and_gear(self, radio_height: float):
+-        """Выпуск закрылков и шасси"""
++        """Выпуск закрылков и шасси (идемпотентно, без спама SimConnect)"""
+ 
+-        if radio_height < 2000:
++        # Состояние храним на phase state — чтобы не дёргать SimConnect каждые 0.5s
++        if not hasattr(self, '_flaps_2_deployed'):
++            self._flaps_2_deployed = False
++        if not hasattr(self, '_flaps_3_deployed'):
++            self._flaps_3_deployed = False
++        if not hasattr(self, '_gear_deployed'):
++            self._gear_deployed = False
++
++        if radio_height < 2000 and not self._flaps_2_deployed:
+             self.system.control.set_flaps(2)
++            self._flaps_2_deployed = True
++            logger.info("Flaps 2 deployed at %.0fft AGL", radio_height)
++
+         if radio_height < 1500:
+-            self.system.control.set_gear(True)
+-            self.system.control.set_flaps(3)
++            if not self._gear_deployed:
++                self.system.control.set_gear(True)
++                self._gear_deployed = True
++                logger.info("Gear DOWN at %.0fft AGL", radio_height)
++            if not self._flaps_3_deployed:
++                self.system.control.set_flaps(3)
++                self._flaps_3_deployed = True
++                logger.info("Flaps 3 deployed at %.0fft AGL", radio_height)
+ 
+     def _check_final_stabilization(self, radio_height: float) -> bool:
+         """
+@@ -554,11 +571,22 @@ class LandingPhaseState(ApproachPhaseState):
+     def handle(self, telemetry: dict, approach_data: dict, wind_data: dict) -> Optional[ApproachPhaseState]:
+         """Обработка фазы посадки"""
+ 
+-        altitude_agl = telemetry['position']['altitude_agl']
+-        radio_height = telemetry['position'].get('radio_height', altitude_agl)
+-        current_pitch = telemetry['attitude']['pitch']
+-        current_vs = telemetry['speed']['vertical_speed']
+-        ground_speed = telemetry['speed']['ground_speed']
++        # Защищённое чтение ключевых параметров - flare математика безопасна только с валидными данными
++        position_data = telemetry.get('position', {})
++        attitude_data = telemetry.get('attitude', {})
++        speed_data = telemetry.get('speed', {})
++
++        altitude_agl = position_data.get('altitude_agl')
++        radio_height = position_data.get('radio_height', altitude_agl)
++        current_pitch = attitude_data.get('pitch')
++        current_vs = speed_data.get('vertical_speed')
++        ground_speed = speed_data.get('ground_speed', 0)
++
++        # Если ключевые параметры отсутствуют - не запускаем flare (опасно при ложных данных)
++        if altitude_agl is None or current_pitch is None or current_vs is None:
++            logger.error("LANDING phase: missing critical telemetry (alt_agl=%s, pitch=%s, vs=%s) - holding",
++                         altitude_agl, current_pitch, current_vs)
++            return None
+ 
+         # Проверка начала выравнивания
+         if self.system.flare_controller.should_start_flare(radio_height, current_vs):
+diff --git a/modules/autothrottle.py b/modules/autothrottle.py
+index f1cf966..0958714 100644
+--- a/modules/autothrottle.py
++++ b/modules/autothrottle.py
+@@ -72,7 +72,7 @@ class AutothrottleController:
+         self.active = True
+         self.current_throttle = initial_throttle
+         self.previous_time = time.time()
+-        logger.info("Autothrottle activated at %s%", initial_throttle*100)
++        logger.info("Autothrottle activated at %.1f%%", initial_throttle*100)
+ 
+     def deactivate(self):
+         """Деактивация контроллера"""
+@@ -247,13 +247,29 @@ class AutothrottleController:
+             }
+ 
+         # Текущие параметры
+-        current_speed = telemetry['speed'].get('airspeed_indicated', 0)
+-        current_bank = telemetry['attitude'].get('bank', 0)
++        speed_data = telemetry.get('speed', {})
++        attitude_data = telemetry.get('attitude', {})
++        current_speed = speed_data.get('airspeed_indicated')
++        current_bank = attitude_data.get('bank', 0)
++
++        # Защита: если airspeed отсутствует, удерживаем текущую тягу
++        # (не используем 0 как fallback - это вызвало бы max throttle через PID)
++        if current_speed is None or current_speed <= 0:
++            logger.warning("Autothrottle: missing/invalid airspeed - holding current throttle")
++            return {
++                'active': True,
++                'throttle': self.current_throttle,
++                'is_stable': False,
++                'reason': 'missing_airspeed'
++            }
+ 
+-        # Конфигурация самолёта (примерные значения, если нет точных данных)
+-        # TODO: Добавить чтение реальных значений из SimConnect
+-        flaps_position = 3  # Предполагаем посадочную конфигурацию
+-        gear_down = True
++        # Конфигурация самолёта - читаем из SimConnect
++        # FLAPS_HANDLE_PERCENT возвращает 0.0-1.0, конвертируем в позицию 0-4
++        # GEAR_POSITION возвращает 0.0-1.0 (1.0 = полностью выпущено)
++        config_data = telemetry.get('configuration', {})
++        flaps_handle_percent = config_data.get('flaps_position', 1.0)  # 0.0-1.0
++        flaps_position = int(round(flaps_handle_percent * 4))  # 0-4
++        gear_down = config_data.get('gear_position', 1.0) > 0.5
+ 
+         # Временной шаг
+         current_time = time.time()
+diff --git a/modules/connection_optimizer.py b/modules/connection_optimizer.py
+index 9942f01..f86b066 100644
+--- a/modules/connection_optimizer.py
++++ b/modules/connection_optimizer.py
+@@ -338,7 +338,7 @@ class ConnectionOptimizer:
+             logger.info("  Available: %s", perf.available)
+             logger.info("  Read Time: %sms", perf.read_time_ms)
+             logger.info("  Write Time: %sms", perf.write_time_ms)
+-            logger.info("  Reliability: %s%", perf.reliability*100)
++            logger.info("  Reliability: %.1f%%", perf.reliability*100)
+             logger.info("  Score: %s/100", perf.get_score())
+             logger.info("  Result: %s", perf.test_result)
+             if perf.error_message:
+diff --git a/modules/control.py b/modules/control.py
+index 16081fd..fd127f6 100644
+--- a/modules/control.py
++++ b/modules/control.py
+@@ -147,7 +147,7 @@ class MSFSControl:
+         try:
+             value = int(percent * 16384)
+             self.ae.event("THROTTLE_SET", value)
+-            logger.info("Throttle set: %s%", percent*100)
++            logger.info("Throttle set: %.1f%%", percent*100)
+         except Exception as e:
+             logger.error("Error setting throttle: %s", e)
+ 
+diff --git a/modules/flare_controller.py b/modules/flare_controller.py
+index 1c1feb1..8dd9743 100644
+--- a/modules/flare_controller.py
++++ b/modules/flare_controller.py
+@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
+ @dataclass
+ class FlareConfig:
+     """Конфигурация выравнивания"""
++    # --- Поля БЕЗ default (обязательные) ---
+     # Высоты
+     flare_start_height: float
+     flare_end_height: float
+@@ -24,12 +25,14 @@ class FlareConfig:
+     target_pitch: float
+     max_pitch_rate: float
+ 
++    # Газ
++    throttle_reduction_start: float
++
++    # --- Поля С default (опциональные) ---
+     # Вертикальная скорость
+     initial_vs: float = -600.0
+     target_vs: float = -100.0
+-
+-    # Газ
+-    throttle_reduction_start: float
++    min_throttle: float = 0.05        # минимальный газ (idle)
+ 
+     @classmethod
+     def from_thresholds(cls) -> 'FlareConfig':
+@@ -41,9 +44,8 @@ class FlareConfig:
+             initial_pitch=config.initial_pitch,
+             target_pitch=config.target_pitch,
+             max_pitch_rate=config.max_pitch_rate,
+-            throttle_reduction_start=config.throttle_reduction_start
++            throttle_reduction_start=config.throttle_reduction_start,
+         )
+-    min_throttle: float = 0.05        # минимальный газ (idle)
+ 
+ 
+ class FlareController:
+diff --git a/modules/stabilized_approach.py b/modules/stabilized_approach.py
+index 884d2d8..9887f9c 100644
+--- a/modules/stabilized_approach.py
++++ b/modules/stabilized_approach.py
+@@ -89,12 +89,26 @@ class StabilizedApproachMonitor:
+         """
+         self.violations = []
+ 
+-        # Получение данных
+-        radio_height = telemetry['position'].get('radio_height',
+-                                                 telemetry['position']['altitude_agl'])
+-        airspeed = telemetry['speed']['airspeed_indicated']
+-        vertical_speed = telemetry['speed']['vertical_speed']
+-        bank_angle = abs(telemetry['attitude']['bank'])
++        # Получение данных (защищённое от отсутствующих ключей)
++        position_data = telemetry.get('position', {})
++        speed_data = telemetry.get('speed', {})
++        attitude_data = telemetry.get('attitude', {})
++
++        radio_height = position_data.get('radio_height',
++                                         position_data.get('altitude_agl', 0))
++        airspeed = speed_data.get('airspeed_indicated')
++        vertical_speed = speed_data.get('vertical_speed', 0)
++        bank_angle = abs(attitude_data.get('bank', 0))
++
++        # Если airspeed отсутствует - не проверяем, чтобы не вызвать ложный go-around
++        if airspeed is None:
++            logger.warning("Stabilization check: missing airspeed data - skipping check")
++            return {
++                'is_stabilized': None,
++                'checked': False,
++                'violations': [],
++                'message': 'Missing airspeed data'
++            }
+ 
+         # Проверка высоты стабилизации
+         if radio_height > self.criteria.stabilization_height:
+@@ -198,16 +212,26 @@ class StabilizedApproachMonitor:
+         if not self.stabilization_checked:
+             return {'monitoring': False, 'go_around': False}
+ 
+-        radio_height = telemetry['position'].get('radio_height',
+-                                                 telemetry['position']['altitude_agl'])
++        # Защита от отсутствующих ключей (silent failures могут вызвать ложный go-around)
++        position_data = telemetry.get('position', {})
++        speed_data = telemetry.get('speed', {})
++        attitude_data = telemetry.get('attitude', {})
++
++        radio_height = position_data.get('radio_height',
++                                         position_data.get('altitude_agl', 0))
+ 
+         # Критические нарушения ниже высоты стабилизации
+         critical_violations = []
+ 
+-        # Проверка критических параметров
+-        airspeed = telemetry['speed']['airspeed_indicated']
+-        vertical_speed = telemetry['speed']['vertical_speed']
+-        bank_angle = abs(telemetry['attitude']['bank'])
++        # Проверка критических параметров (None если данные отсутствуют)
++        airspeed = speed_data.get('airspeed_indicated')
++        vertical_speed = speed_data.get('vertical_speed', 0)
++        bank_angle = abs(attitude_data.get('bank', 0))
++
++        # Если ключевые данные отсутствуют - не делаем ложный go-around
++        if airspeed is None:
++            logger.warning("Continuous monitoring: missing airspeed - skipping critical checks")
++            return {'monitoring': True, 'go_around': self.go_around_required, 'violations': []}
+ 
+         # Критические отклонения скорости (более строгие)
+         if airspeed > self.criteria.speed_target + 20:

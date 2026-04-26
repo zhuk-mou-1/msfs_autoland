@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from modules.ils_navigation import ILSConfig
-from modules.navigation import ApproachConfig, NavStation
+from modules.types import ApproachConfig, NavStation
 
 logger = logging.getLogger(__name__)
 

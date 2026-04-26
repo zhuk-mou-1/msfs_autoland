@@ -22,7 +22,8 @@ from modules.dme_navigation import DMENavigation
 from modules.flare_controller import FlareController
 from modules.fms_reader import FMSReader
 from modules.ils_navigation import ILSNavigation
-from modules.navigation import ApproachConfig, Navigation, NavStation
+from modules.navigation import Navigation
+from modules.types import ApproachConfig, NavStation
 from modules.stabilized_approach import (StabilizedApproachMonitor,
                                          StabilizedCriteria)
 from modules.structured_logger import LogCategory, init_logger
@@ -475,17 +476,51 @@ class AutoLandSystem:
         """Основной цикл выполнения захода"""
         self._log_fms_data()
 
+        consecutive_errors = 0
+        max_consecutive_errors = 3
+
         while self.running:
             try:
                 data = self._get_telemetry_with_monitoring()
                 self._check_connection_optimization()
                 approach_data = self._calculate_approach_data(data)
                 self._handle_phase(data, approach_data)
+                consecutive_errors = 0
                 time.sleep(0.5)
 
-            except Exception as e:
-                logger.error("Error in approach execution: %s", e)
+            except KeyboardInterrupt:
+                logger.warning("Approach interrupted by user")
                 self.stop_approach()
+                break
+
+            except Exception as e:
+                consecutive_errors += 1
+                # Логируем с полным traceback - silent failure на финале опасен
+                logger.exception(
+                    "Error in approach execution (attempt %d/%d): %s",
+                    consecutive_errors, max_consecutive_errors, e
+                )
+
+                # Звуковой alert (если доступен) - пилот не услышит просто лог
+                if self.audio_alerts_enabled and self.audio_system and self.audio_system.is_available():
+                    try:
+                        # Используем существующий alert как proxy для критической ошибки
+                        self.audio_system.play_alert("SINK_RATE")
+                    except Exception:
+                        pass
+
+                # Останавливаем заход только после нескольких подряд ошибок,
+                # чтобы transient SimConnect glitch не обрывал автолендинг сразу
+                if consecutive_errors >= max_consecutive_errors:
+                    logger.critical(
+                        "Too many consecutive errors (%d) - stopping approach",
+                        consecutive_errors
+                    )
+                    self.stop_approach()
+                    break
+
+                # Пауза перед retry, чтобы дать SimConnect восстановиться
+                time.sleep(1.0)
 
     def _get_telemetry_with_monitoring(self) -> dict:
         """Получение телеметрии с мониторингом производительности"""

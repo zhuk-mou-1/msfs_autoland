@@ -469,8 +469,8 @@ class FinalPhaseState(ApproachPhaseState):
                 else:
                     self.system.control.set_throttle(throttle_data['throttle'])
 
-            if throttle_data['is_stable']:
-                logger.debug("Autothrottle: %s% (stable)", throttle_data['throttle']*100)
+            if throttle_data.get('is_stable', False):
+                logger.debug("Autothrottle: %.1f%% (stable)", throttle_data['throttle']*100)
         else:
             self.system.control.set_throttle(0.5)
 
@@ -522,13 +522,30 @@ class FinalPhaseState(ApproachPhaseState):
         return True
 
     def _deploy_flaps_and_gear(self, radio_height: float):
-        """Выпуск закрылков и шасси"""
+        """Выпуск закрылков и шасси (идемпотентно, без спама SimConnect)"""
 
-        if radio_height < 2000:
+        # Состояние храним на phase state — чтобы не дёргать SimConnect каждые 0.5s
+        if not hasattr(self, '_flaps_2_deployed'):
+            self._flaps_2_deployed = False
+        if not hasattr(self, '_flaps_3_deployed'):
+            self._flaps_3_deployed = False
+        if not hasattr(self, '_gear_deployed'):
+            self._gear_deployed = False
+
+        if radio_height < 2000 and not self._flaps_2_deployed:
             self.system.control.set_flaps(2)
+            self._flaps_2_deployed = True
+            logger.info("Flaps 2 deployed at %.0fft AGL", radio_height)
+
         if radio_height < 1500:
-            self.system.control.set_gear(True)
-            self.system.control.set_flaps(3)
+            if not self._gear_deployed:
+                self.system.control.set_gear(True)
+                self._gear_deployed = True
+                logger.info("Gear DOWN at %.0fft AGL", radio_height)
+            if not self._flaps_3_deployed:
+                self.system.control.set_flaps(3)
+                self._flaps_3_deployed = True
+                logger.info("Flaps 3 deployed at %.0fft AGL", radio_height)
 
     def _check_final_stabilization(self, radio_height: float) -> bool:
         """
@@ -554,11 +571,22 @@ class LandingPhaseState(ApproachPhaseState):
     def handle(self, telemetry: dict, approach_data: dict, wind_data: dict) -> Optional[ApproachPhaseState]:
         """Обработка фазы посадки"""
 
-        altitude_agl = telemetry['position']['altitude_agl']
-        radio_height = telemetry['position'].get('radio_height', altitude_agl)
-        current_pitch = telemetry['attitude']['pitch']
-        current_vs = telemetry['speed']['vertical_speed']
-        ground_speed = telemetry['speed']['ground_speed']
+        # Защищённое чтение ключевых параметров - flare математика безопасна только с валидными данными
+        position_data = telemetry.get('position', {})
+        attitude_data = telemetry.get('attitude', {})
+        speed_data = telemetry.get('speed', {})
+
+        altitude_agl = position_data.get('altitude_agl')
+        radio_height = position_data.get('radio_height', altitude_agl)
+        current_pitch = attitude_data.get('pitch')
+        current_vs = speed_data.get('vertical_speed')
+        ground_speed = speed_data.get('ground_speed', 0)
+
+        # Если ключевые параметры отсутствуют - не запускаем flare (опасно при ложных данных)
+        if altitude_agl is None or current_pitch is None or current_vs is None:
+            logger.error("LANDING phase: missing critical telemetry (alt_agl=%s, pitch=%s, vs=%s) - holding",
+                         altitude_agl, current_pitch, current_vs)
+            return None
 
         # Проверка начала выравнивания
         if self.system.flare_controller.should_start_flare(radio_height, current_vs):

@@ -205,6 +205,62 @@ class AircraftConfigReader:
 
         return None
 
+    def _check_pmdg(self, creator: str, manufacturer: str, title: str, folder: str) -> Optional[str]:
+        """Проверка PMDG самолётов"""
+        if not any(keyword in text for text in [creator, manufacturer, folder] for keyword in ['pmdg']):
+            return None
+
+        if '737' in title or '737' in folder:
+            logger.info("Detected PMDG_737 from manifest")
+            return 'PMDG_737'
+        elif '777' in title or '777' in folder:
+            logger.info("Detected PMDG_777 from manifest")
+            return 'PMDG_777'
+        return None
+
+    def _check_fenix(self, creator: str, manufacturer: str, title: str, folder: str) -> Optional[str]:
+        """Проверка Fenix самолётов"""
+        if not any(keyword in text for text in [creator, manufacturer, folder] for keyword in ['fenix']):
+            return None
+
+        if 'a320' in title or 'a320' in folder:
+            logger.info("Detected FENIX_A320 from manifest")
+            return 'FENIX_A320'
+        return None
+
+    def _check_flybywire(self, creator: str, manufacturer: str, title: str, folder: str) -> Optional[str]:
+        """Проверка FlyByWire самолётов"""
+        if not any(keyword in text for text in [creator, manufacturer, folder] for keyword in ['flybywire', 'fbw']):
+            return None
+
+        if any(model in title or model in folder for model in ['a32nx', 'a320']):
+            logger.info("Detected FBW_A32NX from manifest")
+            return 'FBW_A32NX'
+        return None
+
+    def _check_fslabs(self, creator: str, manufacturer: str, folder: str, title: str) -> Optional[str]:
+        """Проверка FSLabs самолётов"""
+        if not any(keyword in text for text in [creator, folder] for keyword in ['fslabs', 'flight sim labs']):
+            return None
+
+        if any(model in title for model in ['a32', 'a320', 'a319', 'a321']):
+            logger.info("Detected FSLABS_A32X from manifest")
+            return 'FSLABS_A32X'
+        return None
+
+    def _check_inibuilds(self, creator: str, manufacturer: str, title: str, folder: str) -> Optional[str]:
+        """Проверка iniBuilds самолётов"""
+        if not any(keyword in text for text in [creator, folder] for keyword in ['inibuilds', 'ini builds']):
+            return None
+
+        if 'a300' in title or 'a300' in folder:
+            logger.info("Detected INIBUILDS_A300 from manifest")
+            return 'INIBUILDS_A300'
+        elif 'a310' in title or 'a310' in folder:
+            logger.info("Detected INIBUILDS_A310 from manifest")
+            return 'INIBUILDS_A310'
+        return None
+
     def _detect_from_manifest(self, manifest: Dict, folder_name: str) -> Optional[str]:
         """
         Определить профиль из manifest.json
@@ -216,47 +272,24 @@ class AircraftConfigReader:
         Returns:
             Ключ профиля или None
         """
-        # Проверяем поля manifest
         creator = manifest.get('creator', '').lower()
         manufacturer = manifest.get('manufacturer', '').lower()
         title = manifest.get('title', '').lower()
-        folder_lower = folder_name.lower()
+        folder = folder_name.lower()
 
-        # PMDG
-        if 'pmdg' in creator or 'pmdg' in manufacturer or 'pmdg' in folder_lower:
-            if '737' in title or '737' in folder_lower:
-                logger.info("Detected PMDG_737 from manifest")
-                return 'PMDG_737'
-            elif '777' in title or '777' in folder_lower:
-                logger.info("Detected PMDG_777 from manifest")
-                return 'PMDG_777'
+        # Проверяем каждого производителя
+        checkers = [
+            self._check_pmdg,
+            self._check_fenix,
+            self._check_flybywire,
+            self._check_fslabs,
+            self._check_inibuilds,
+        ]
 
-        # Fenix
-        if 'fenix' in creator or 'fenix' in manufacturer or 'fenix' in folder_lower:
-            if 'a320' in title or 'a320' in folder_lower:
-                logger.info("Detected FENIX_A320 from manifest")
-                return 'FENIX_A320'
-
-        # FlyByWire
-        if 'flybywire' in creator or 'flybywire' in manufacturer or 'fbw' in folder_lower:
-            if 'a32nx' in title or 'a32nx' in folder_lower or 'a320' in title:
-                logger.info("Detected FBW_A32NX from manifest")
-                return 'FBW_A32NX'
-
-        # FSLabs
-        if 'fslabs' in creator or 'flight sim labs' in creator or 'fslabs' in folder_lower:
-            if 'a32' in title or 'a320' in title or 'a319' in title or 'a321' in title:
-                logger.info("Detected FSLABS_A32X from manifest")
-                return 'FSLABS_A32X'
-
-        # iniBuilds
-        if 'inibuilds' in creator or 'ini builds' in creator or 'inibuilds' in folder_lower:
-            if 'a300' in title or 'a300' in folder_lower:
-                logger.info("Detected INIBUILDS_A300 from manifest")
-                return 'INIBUILDS_A300'
-            elif 'a310' in title or 'a310' in folder_lower:
-                logger.info("Detected INIBUILDS_A310 from manifest")
-                return 'INIBUILDS_A310'
+        for checker in checkers:
+            result = checker(creator, manufacturer, title, folder)
+            if result:
+                return result
 
         return None
 

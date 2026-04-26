@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class FlareConfig:
     """Конфигурация выравнивания"""
+    # --- Поля БЕЗ default (обязательные) ---
     # Высоты
     flare_start_height: float
     flare_end_height: float
@@ -24,12 +25,14 @@ class FlareConfig:
     target_pitch: float
     max_pitch_rate: float
 
+    # Газ
+    throttle_reduction_start: float
+
+    # --- Поля С default (опциональные) ---
     # Вертикальная скорость
     initial_vs: float = -600.0
     target_vs: float = -100.0
-
-    # Газ
-    throttle_reduction_start: float
+    min_throttle: float = 0.05        # минимальный газ (idle)
 
     @classmethod
     def from_thresholds(cls) -> 'FlareConfig':
@@ -41,9 +44,8 @@ class FlareConfig:
             initial_pitch=config.initial_pitch,
             target_pitch=config.target_pitch,
             max_pitch_rate=config.max_pitch_rate,
-            throttle_reduction_start=config.throttle_reduction_start
+            throttle_reduction_start=config.throttle_reduction_start,
         )
-    min_throttle: float = 0.05        # минимальный газ (idle)
 
 
 class FlareController:
@@ -227,6 +229,37 @@ class FlareController:
         self.flare_active = True
         self.initial_height = radio_height
         logger.info("FLARE STARTED at %sft", radio_height)
+
+    def update(self, aircraft_state: Dict, dt: float = 0.5) -> Dict[str, float]:
+        """
+        Обновление контроллера (единый интерфейс для всех контроллеров)
+
+        Args:
+            aircraft_state: Состояние самолёта (radio_height, pitch, vertical_speed, ground_speed)
+            dt: Временной шаг (секунды)
+
+        Returns:
+            Dict с командами управления
+        """
+        radio_height = aircraft_state.get('radio_height', 0)
+        current_pitch = aircraft_state.get('pitch', 0)
+        current_vs = aircraft_state.get('vertical_speed', 0)
+        ground_speed = aircraft_state.get('ground_speed', 0)
+        engine_failure_detector = aircraft_state.get('engine_failure_detector')
+
+        # Проверка начала выравнивания
+        if self.should_start_flare(radio_height, current_vs):
+            self.start_flare(radio_height)
+
+        # Расчёт параметров выравнивания
+        return self.calculate_flare_parameters(
+            radio_height=radio_height,
+            current_pitch=current_pitch,
+            current_vs=current_vs,
+            ground_speed=ground_speed,
+            dt=dt,
+            engine_failure_detector=engine_failure_detector
+        )
 
     def reset(self):
         """Сброс состояния контроллера"""

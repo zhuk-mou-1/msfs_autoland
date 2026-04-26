@@ -1,0 +1,516 @@
+modules\aileron_compensation.py
+    LOC: 192
+    LLOC: 109
+    SLOC: 107
+    Comments: 21
+    Single comments: 22
+    Multi: 21
+    Blank: 42
+    - Comment Stats
+        (C % L): 11%
+        (C % S): 20%
+        (C + M % L): 22%
+modules\aircraft_adapter.py
+    LOC: 719
+    LLOC: 463
+    SLOC: 477
+    Comments: 19
+    Single comments: 22
+    Multi: 84
+    Blank: 136
+    - Comment Stats
+        (C % L): 3%
+        (C % S): 4%
+        (C + M % L): 14%
+modules\aircraft_config_reader.py
+    LOC: 368
+    LLOC: 191
+    SLOC: 195
+    Comments: 31
+    Single comments: 32
+    Multi: 60
+    Blank: 81
+    - Comment Stats
+        (C % L): 8%
+        (C % S): 16%
+        (C + M % L): 25%
+modules\aircraft_geometry.py
+    LOC: 249
+    LLOC: 91
+    SLOC: 149
+    Comments: 25
+    Single comments: 12
+    Multi: 47
+    Blank: 41
+    - Comment Stats
+        (C % L): 10%
+        (C % S): 17%
+        (C + M % L): 29%
+modules\airports_database.py
+    LOC: 260
+    LLOC: 136
+    SLOC: 165
+    Comments: 4
+    Single comments: 10
+    Multi: 34
+    Blank: 51
+    - Comment Stats
+        (C % L): 2%
+        (C % S): 2%
+        (C + M % L): 15%
+modules\approach_dialog.py
+    LOC: 629
+    LLOC: 379
+    SLOC: 442
+    Comments: 62
+    Single comments: 73
+    Multi: 3
+    Blank: 111
+    - Comment Stats
+        (C % L): 10%
+        (C % S): 14%
+        (C + M % L): 10%
+modules\approach_phases.py
+    LOC: 679
+    LLOC: 369
+    SLOC: 436
+    Comments: 57
+    Single comments: 71
+    Multi: 33
+    Blank: 139
+    - Comment Stats
+        (C % L): 8%
+        (C % S): 13%
+        (C + M % L): 13%
+modules\approach_speed_calculator.py
+    LOC: 300
+    LLOC: 119
+    SLOC: 148
+    Comments: 22
+    Single comments: 23
+    Multi: 75
+    Blank: 54
+    - Comment Stats
+        (C % L): 7%
+        (C % S): 15%
+        (C + M % L): 32%
+modules\audio_alerts.py
+    LOC: 250
+    LLOC: 149
+    SLOC: 144
+    Comments: 14
+    Single comments: 19
+    Multi: 36
+    Blank: 51
+    - Comment Stats
+        (C % L): 6%
+        (C % S): 10%
+        (C + M % L): 20%
+modules\autopilot_takeover.py
+    LOC: 453
+    LLOC: 276
+    SLOC: 263
+    Comments: 70
+    Single comments: 64
+    Multi: 39
+    Blank: 87
+    - Comment Stats
+        (C % L): 15%
+        (C % S): 27%
+        (C + M % L): 24%
+modules\autothrottle.py
+    LOC: 470
+    LLOC: 213
+    SLOC: 229
+    Comments: 83
+    Single comments: 76
+    Multi: 69
+    Blank: 96
+    - Comment Stats
+        (C % L): 18%
+        (C % S): 36%
+        (C + M % L): 32%
+modules\auto_fixer.py
+    LOC: 237
+    LLOC: 119
+    SLOC: 127
+    Comments: 5
+    Single comments: 7
+    Multi: 58
+    Blank: 45
+    - Comment Stats
+        (C % L): 2%
+        (C % S): 4%
+        (C + M % L): 27%
+modules\base_controller.py
+    LOC: 55
+    LLOC: 13
+    SLOC: 9
+    Comments: 0
+    Single comments: 0
+    Multi: 33
+    Blank: 13
+    - Comment Stats
+        (C % L): 0%
+        (C % S): 0%
+        (C + M % L): 60%
+modules\connection_monitor.py
+    LOC: 713
+    LLOC: 423
+    SLOC: 413
+    Comments: 49
+    Single comments: 55
+    Multi: 101
+    Blank: 144
+    - Comment Stats
+        (C % L): 7%
+        (C % S): 12%
+        (C + M % L): 21%
+modules\connection_optimizer.py
+    LOC: 429
+    LLOC: 214
+    SLOC: 262
+    Comments: 25
+    Single comments: 26
+    Multi: 67
+    Blank: 74
+    - Comment Stats
+        (C % L): 6%
+        (C % S): 10%
+        (C + M % L): 21%
+modules\control.py
+    LOC: 236
+    LLOC: 166
+    SLOC: 148
+    Comments: 3
+    Single comments: 16
+    Multi: 36
+    Blank: 36
+    - Comment Stats
+        (C % L): 1%
+        (C % S): 2%
+        (C + M % L): 17%
+modules\dme_navigation.py
+    LOC: 311
+    LLOC: 141
+    SLOC: 165
+    Comments: 24
+    Single comments: 18
+    Multi: 69
+    Blank: 59
+    - Comment Stats
+        (C % L): 8%
+        (C % S): 15%
+        (C + M % L): 30%
+modules\engine_failure_detector.py
+    LOC: 307
+    LLOC: 169
+    SLOC: 156
+    Comments: 43
+    Single comments: 32
+    Multi: 57
+    Blank: 62
+    - Comment Stats
+        (C % L): 14%
+        (C % S): 28%
+        (C + M % L): 33%
+modules\flare_controller.py
+    LOC: 315
+    LLOC: 147
+    SLOC: 167
+    Comments: 29
+    Single comments: 33
+    Multi: 56
+    Blank: 59
+    - Comment Stats
+        (C % L): 9%
+        (C % S): 17%
+        (C + M % L): 27%
+modules\fms_reader.py
+    LOC: 278
+    LLOC: 152
+    SLOC: 180
+    Comments: 21
+    Single comments: 16
+    Multi: 32
+    Blank: 50
+    - Comment Stats
+        (C % L): 8%
+        (C % S): 12%
+        (C + M % L): 19%
+modules\ils_navigation.py
+    LOC: 240
+    LLOC: 126
+    SLOC: 123
+    Comments: 33
+    Single comments: 19
+    Multi: 47
+    Blank: 51
+    - Comment Stats
+        (C % L): 14%
+        (C % S): 27%
+        (C + M % L): 33%
+modules\log_analyzer.py
+    LOC: 427
+    LLOC: 268
+    SLOC: 294
+    Comments: 29
+    Single comments: 36
+    Multi: 28
+    Blank: 69
+    - Comment Stats
+        (C % L): 7%
+        (C % S): 10%
+        (C + M % L): 13%
+modules\log_database.py
+    LOC: 495
+    LLOC: 184
+    SLOC: 290
+    Comments: 16
+    Single comments: 21
+    Multi: 99
+    Blank: 85
+    - Comment Stats
+        (C % L): 3%
+        (C % S): 6%
+        (C + M % L): 23%
+modules\msfs_airport_reader.py
+    LOC: 430
+    LLOC: 227
+    SLOC: 262
+    Comments: 40
+    Single comments: 31
+    Multi: 59
+    Blank: 78
+    - Comment Stats
+        (C % L): 9%
+        (C % S): 15%
+        (C + M % L): 23%
+modules\navigation.py
+    LOC: 710
+    LLOC: 256
+    SLOC: 389
+    Comments: 66
+    Single comments: 68
+    Multi: 142
+    Blank: 111
+    - Comment Stats
+        (C % L): 9%
+        (C % S): 17%
+        (C + M % L): 29%
+modules\navigraph_parser.py
+    LOC: 379
+    LLOC: 208
+    SLOC: 217
+    Comments: 29
+    Single comments: 32
+    Multi: 58
+    Blank: 72
+    - Comment Stats
+        (C % L): 8%
+        (C % S): 13%
+        (C + M % L): 23%
+modules\rudder_compensation.py
+    LOC: 265
+    LLOC: 127
+    SLOC: 122
+    Comments: 35
+    Single comments: 29
+    Multi: 54
+    Blank: 60
+    - Comment Stats
+        (C % L): 13%
+        (C % S): 29%
+        (C + M % L): 34%
+modules\settings.py
+    LOC: 153
+    LLOC: 71
+    SLOC: 77
+    Comments: 1
+    Single comments: 3
+    Multi: 41
+    Blank: 32
+    - Comment Stats
+        (C % L): 1%
+        (C % S): 1%
+        (C + M % L): 27%
+modules\settings_dialog.py
+    LOC: 210
+    LLOC: 126
+    SLOC: 135
+    Comments: 18
+    Single comments: 26
+    Multi: 3
+    Blank: 46
+    - Comment Stats
+        (C % L): 9%
+        (C % S): 13%
+        (C + M % L): 10%
+modules\simconnect_client_data.py
+    LOC: 369
+    LLOC: 139
+    SLOC: 179
+    Comments: 56
+    Single comments: 50
+    Multi: 80
+    Blank: 60
+    - Comment Stats
+        (C % L): 15%
+        (C % S): 31%
+        (C + M % L): 37%
+modules\stabilized_approach.py
+    LOC: 293
+    LLOC: 165
+    SLOC: 169
+    Comments: 34
+    Single comments: 36
+    Multi: 33
+    Blank: 55
+    - Comment Stats
+        (C % L): 12%
+        (C % S): 20%
+        (C + M % L): 23%
+modules\structured_logger.py
+    LOC: 378
+    LLOC: 212
+    SLOC: 235
+    Comments: 32
+    Single comments: 47
+    Multi: 33
+    Blank: 63
+    - Comment Stats
+        (C % L): 8%
+        (C % S): 14%
+        (C + M % L): 17%
+modules\telemetry.py
+    LOC: 563
+    LLOC: 307
+    SLOC: 411
+    Comments: 95
+    Single comments: 48
+    Multi: 28
+    Blank: 76
+    - Comment Stats
+        (C % L): 17%
+        (C % S): 23%
+        (C + M % L): 22%
+modules\thresholds_config.py
+    LOC: 279
+    LLOC: 286
+    SLOC: 186
+    Comments: 3
+    Single comments: 32
+    Multi: 5
+    Blank: 56
+    - Comment Stats
+        (C % L): 1%
+        (C % S): 2%
+        (C + M % L): 3%
+modules\turbulence_detector.py
+    LOC: 332
+    LLOC: 201
+    SLOC: 204
+    Comments: 45
+    Single comments: 45
+    Multi: 15
+    Blank: 68
+    - Comment Stats
+        (C % L): 14%
+        (C % S): 22%
+        (C + M % L): 18%
+modules\types.py
+    LOC: 72
+    LLOC: 102
+    SLOC: 53
+    Comments: 20
+    Single comments: 4
+    Multi: 5
+    Blank: 10
+    - Comment Stats
+        (C % L): 28%
+        (C % S): 38%
+        (C + M % L): 35%
+modules\virtual_joystick.py
+    LOC: 292
+    LLOC: 145
+    SLOC: 146
+    Comments: 20
+    Single comments: 20
+    Multi: 70
+    Blank: 56
+    - Comment Stats
+        (C % L): 7%
+        (C % S): 14%
+        (C + M % L): 31%
+modules\wasm_interface.py
+    LOC: 386
+    LLOC: 168
+    SLOC: 204
+    Comments: 45
+    Single comments: 37
+    Multi: 67
+    Blank: 78
+    - Comment Stats
+        (C % L): 12%
+        (C % S): 22%
+        (C + M % L): 29%
+modules\wasm_version_checker.py
+    LOC: 291
+    LLOC: 156
+    SLOC: 165
+    Comments: 19
+    Single comments: 19
+    Multi: 48
+    Blank: 59
+    - Comment Stats
+        (C % L): 7%
+        (C % S): 12%
+        (C + M % L): 23%
+modules\wind_correction.py
+    LOC: 241
+    LLOC: 77
+    SLOC: 93
+    Comments: 22
+    Single comments: 21
+    Multi: 75
+    Blank: 52
+    - Comment Stats
+        (C % L): 9%
+        (C % S): 24%
+        (C + M % L): 40%
+modules\wind_shear_detector.py
+    LOC: 336
+    LLOC: 209
+    SLOC: 219
+    Comments: 28
+    Single comments: 34
+    Multi: 16
+    Blank: 67
+    - Comment Stats
+        (C % L): 8%
+        (C % S): 13%
+        (C + M % L): 13%
+modules\__init__.py
+    LOC: 1
+    LLOC: 0
+    SLOC: 0
+    Comments: 1
+    Single comments: 1
+    Multi: 0
+    Blank: 0
+    - Comment Stats
+        (C % L): 100%
+        (C % S): 100%
+        (C + M % L): 100%
+** Total **
+    LOC: 14592
+    LLOC: 7799
+    SLOC: 8555
+    Comments: 1294
+    Single comments: 1286
+    Multi: 2016
+    Blank: 2735
+    - Comment Stats
+        (C % L): 9%
+        (C % S): 15%
+        (C + M % L): 23%

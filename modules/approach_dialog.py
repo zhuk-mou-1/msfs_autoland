@@ -10,7 +10,7 @@ from typing import Optional
 from modules.airports_database import AirportsDatabase
 from modules.ils_navigation import ILSConfig
 from modules.msfs_airport_reader import MSFSAirportReader
-from modules.navigation import ApproachConfig, NavStation
+from modules.types import ApproachConfig, NavStation
 
 logger = logging.getLogger(__name__)
 

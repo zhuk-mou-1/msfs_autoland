@@ -147,7 +147,7 @@ class MSFSControl:
         try:
             value = int(percent * 16384)
             self.ae.event("THROTTLE_SET", value)
-            logger.info("Throttle set: %s%", percent*100)
+            logger.info("Throttle set: %.1f%%", percent*100)
         except Exception as e:
             logger.error("Error setting throttle: %s", e)
 

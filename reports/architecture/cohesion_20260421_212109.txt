@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\program files\python313\scripts\cohesion.exe\__main__.py", line 5, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "c:\program files\python313\Lib\site-packages\cohesion\__main__.py", line 163, in main
+    filename: module.Module.from_file(filename)
+              ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "c:\program files\python313\Lib\site-packages\cohesion\module.py", line 33, in from_file
+    file_contents = filesystem.get_file_contents(filename)
+  File "c:\program files\python313\Lib\site-packages\cohesion\filesystem.py", line 11, in get_file_contents
+    return fd.read()
+           ~~~~~~~^^
+  File "c:\program files\python313\Lib\encodings\cp1251.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x98 in position 567: character maps to <undefined>

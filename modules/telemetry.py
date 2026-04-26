@@ -226,6 +226,78 @@ class MSFSTelemetry:
                 'spoilers_position': 0.0
             }
 
+    def _decode_simconnect_string(self, raw_value) -> str:
+        """Декодировать строку из SimConnect"""
+        if isinstance(raw_value, bytes):
+            return raw_value.decode('utf-8')
+        return str(raw_value) if raw_value else ""
+
+    def _detect_custom_aircraft(self, title: str) -> tuple[str, str]:
+        """
+        Определить кастомный самолёт по названию
+
+        Returns:
+            (manufacturer, autopilot_type)
+        """
+        title_lower = title.lower() if title else ""
+
+        # PMDG
+        if "pmdg" in title_lower:
+            if "737" in title_lower:
+                return "PMDG", "PMDG_737"
+            elif "777" in title_lower:
+                return "PMDG", "PMDG_777"
+            elif "747" in title_lower:
+                return "PMDG", "PMDG_747"
+            else:
+                return "PMDG", "PMDG_CUSTOM"
+
+        # Fenix
+        if "fenix" in title_lower or ("a320" in title_lower and "fenix" in title_lower):
+            return "FENIX", "FENIX_A320"
+
+        # FSLabs
+        if "fslabs" in title_lower or "flight sim labs" in title_lower:
+            if any(model in title_lower for model in ["a320", "a319", "a321"]):
+                return "FSLABS", "FSLABS_A32X"
+            return "FSLABS", "FSLABS_CUSTOM"
+
+        # iniBuilds
+        if "inibuilds" in title_lower or "ini builds" in title_lower:
+            if "a300" in title_lower:
+                return "INIBUILDS", "INIBUILDS_A300"
+            elif "a310" in title_lower:
+                return "INIBUILDS", "INIBUILDS_A310"
+            else:
+                return "INIBUILDS", "INIBUILDS_CUSTOM"
+
+        # FlyByWire
+        if "flybywire" in title_lower or "fbw" in title_lower:
+            return "FLYBYWIRE", "FBW_A32NX"
+
+        return "UNKNOWN", "NONE"
+
+    def _detect_standard_autopilot(self, autopilot_max_bank: float) -> str:
+        """
+        Определить тип стандартного автопилота MSFS
+
+        Returns:
+            autopilot_type
+        """
+        has_approach = bool(self.aq.get("AUTOPILOT_APPROACH_HOLD"))
+        has_nav = bool(self.aq.get("AUTOPILOT_NAV1_LOCK"))
+        has_altitude = bool(self.aq.get("AUTOPILOT_ALTITUDE_LOCK"))
+        has_heading = bool(self.aq.get("AUTOPILOT_HEADING_LOCK"))
+
+        if has_approach and has_nav and has_altitude and has_heading:
+            if autopilot_max_bank and autopilot_max_bank > 25:
+                return "ADVANCED"
+            return "STANDARD"
+        elif has_heading and has_altitude:
+            return "BASIC"
+        else:
+            return "LIMITED"
+
     def get_aircraft_info(self) -> Dict[str, any]:
         """Получить информацию о самолёте и его системах"""
         if not self.connected:
@@ -233,83 +305,29 @@ class MSFSTelemetry:
 
         try:
             # Базовая информация о самолёте
-            title_raw = self.aq.get("TITLE")  # Название самолёта
-            atc_type_raw = self.aq.get("ATC_TYPE")  # Тип для ATC
-            atc_model_raw = self.aq.get("ATC_MODEL")  # Модель для ATC
-
-            # Декодирование строковых значений (SimConnect возвращает bytes)
-            title = title_raw.decode('utf-8') if isinstance(title_raw, bytes) else str(title_raw) if title_raw else ""
-            atc_type = atc_type_raw.decode('utf-8') if isinstance(atc_type_raw, bytes) else str(atc_type_raw) if atc_type_raw else ""
-            atc_model = atc_model_raw.decode('utf-8') if isinstance(atc_model_raw, bytes) else str(atc_model_raw) if atc_model_raw else ""
+            title = self._decode_simconnect_string(self.aq.get("TITLE"))
+            atc_type = self._decode_simconnect_string(self.aq.get("ATC_TYPE"))
+            atc_model = self._decode_simconnect_string(self.aq.get("ATC_MODEL"))
 
             # Информация о категории
-            category = self.aq.get("CATEGORY")  # Категория (Airplane, Helicopter, etc)
-            engine_type = self.aq.get("ENGINE_TYPE")  # Тип двигателя (0=Piston, 1=Jet, 2=None, 3=Helo(Bell) turbine, 4=Unsupported, 5=Turboprop)
-            number_of_engines = self.aq.get("NUMBER_OF_ENGINES")  # Количество двигателей
+            category = self.aq.get("CATEGORY")
+            engine_type = self.aq.get("ENGINE_TYPE")
+            number_of_engines = self.aq.get("NUMBER_OF_ENGINES")
 
             # Возможности автопилота
             autopilot_available = bool(self.aq.get("AUTOPILOT_AVAILABLE"))
-            autopilot_max_bank = self.aq.get("AUTOPILOT_MAX_BANK")  # Максимальный крен автопилота
+            autopilot_max_bank = self.aq.get("AUTOPILOT_MAX_BANK")
 
             # Дополнительные системы
             is_gear_retractable = bool(self.aq.get("IS_GEAR_RETRACTABLE"))
             is_tail_dragger = bool(self.aq.get("IS_TAIL_DRAGGER"))
 
-            # Определение типа автопилота (эвристика)
-            autopilot_type = "NONE"
-            aircraft_manufacturer = "UNKNOWN"
-
-            # Определение кастомных самолётов по названию
-            title_lower = title.lower() if title else ""
-
-            if "pmdg" in title_lower:
-                aircraft_manufacturer = "PMDG"
-                if "737" in title_lower:
-                    autopilot_type = "PMDG_737"
-                elif "777" in title_lower:
-                    autopilot_type = "PMDG_777"
-                elif "747" in title_lower:
-                    autopilot_type = "PMDG_747"
-                else:
-                    autopilot_type = "PMDG_CUSTOM"
-            elif "fenix" in title_lower or "a320" in title_lower and "fenix" in title_lower:
-                aircraft_manufacturer = "FENIX"
-                autopilot_type = "FENIX_A320"
-            elif "fslabs" in title_lower or "flight sim labs" in title_lower:
-                aircraft_manufacturer = "FSLABS"
-                if "a320" in title_lower or "a319" in title_lower or "a321" in title_lower:
-                    autopilot_type = "FSLABS_A32X"
-            elif "inibuilds" in title_lower or "ini builds" in title_lower:
-                aircraft_manufacturer = "INIBUILDS"
-                if "a300" in title_lower:
-                    autopilot_type = "INIBUILDS_A300"
-                elif "a310" in title_lower:
-                    autopilot_type = "INIBUILDS_A310"
-                else:
-                    autopilot_type = "INIBUILDS_CUSTOM"
-            elif "flybywire" in title_lower or "fbw" in title_lower:
-                aircraft_manufacturer = "FLYBYWIRE"
-                autopilot_type = "FBW_A32NX"
+            # Определение типа самолёта
+            aircraft_manufacturer, autopilot_type = self._detect_custom_aircraft(title)
 
             # Если не кастомный, определяем стандартный тип
             if aircraft_manufacturer == "UNKNOWN" and autopilot_available:
-                # Проверяем доступные режимы автопилота
-                has_approach = bool(self.aq.get("AUTOPILOT_APPROACH_HOLD"))
-                has_nav = bool(self.aq.get("AUTOPILOT_NAV1_LOCK"))
-                has_altitude = bool(self.aq.get("AUTOPILOT_ALTITUDE_LOCK"))
-                has_heading = bool(self.aq.get("AUTOPILOT_HEADING_LOCK"))
-
-                # Простая эвристика для определения типа
-                if has_approach and has_nav and has_altitude and has_heading:
-                    # Полнофункциональный автопилот
-                    if autopilot_max_bank and autopilot_max_bank > 25:
-                        autopilot_type = "ADVANCED"  # Продвинутый (возможно кастомный)
-                    else:
-                        autopilot_type = "STANDARD"  # Стандартный MSFS
-                elif has_heading and has_altitude:
-                    autopilot_type = "BASIC"  # Базовый
-                else:
-                    autopilot_type = "LIMITED"  # Ограниченный
+                autopilot_type = self._detect_standard_autopilot(autopilot_max_bank)
 
             return {
                 'title': title,

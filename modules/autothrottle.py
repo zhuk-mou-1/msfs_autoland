@@ -6,8 +6,9 @@
 import logging
 import time
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
+from modules.base_controller import Controller
 from modules.engine_failure_detector import EngineFailureDetector
 
 logger = logging.getLogger(__name__)
@@ -38,7 +39,7 @@ class AutothrottleConfig:
     weight_factor: float = 0.00002  # Коэффициент влияния веса
 
 
-class AutothrottleController:
+class AutothrottleController(Controller):
     """PID контроллер автоматической тяги с поддержкой отказов двигателей"""
 
     def __init__(self, config: Optional[AutothrottleConfig] = None,
@@ -72,7 +73,7 @@ class AutothrottleController:
         self.active = True
         self.current_throttle = initial_throttle
         self.previous_time = time.time()
-        logger.info("Autothrottle activated at %s%", initial_throttle*100)
+        logger.info("Autothrottle activated at %.1f%%", initial_throttle*100)
 
     def deactivate(self):
         """Деактивация контроллера"""
@@ -247,13 +248,29 @@ class AutothrottleController:
             }
 
         # Текущие параметры
-        current_speed = telemetry['speed'].get('airspeed_indicated', 0)
-        current_bank = telemetry['attitude'].get('bank', 0)
+        speed_data = telemetry.get('speed', {})
+        attitude_data = telemetry.get('attitude', {})
+        current_speed = speed_data.get('airspeed_indicated')
+        current_bank = attitude_data.get('bank', 0)
 
-        # Конфигурация самолёта (примерные значения, если нет точных данных)
-        # TODO: Добавить чтение реальных значений из SimConnect
-        flaps_position = 3  # Предполагаем посадочную конфигурацию
-        gear_down = True
+        # Защита: если airspeed отсутствует, удерживаем текущую тягу
+        # (не используем 0 как fallback - это вызвало бы max throttle через PID)
+        if current_speed is None or current_speed <= 0:
+            logger.warning("Autothrottle: missing/invalid airspeed - holding current throttle")
+            return {
+                'active': True,
+                'throttle': self.current_throttle,
+                'is_stable': False,
+                'reason': 'missing_airspeed'
+            }
+
+        # Конфигурация самолёта - читаем из SimConnect
+        # FLAPS_HANDLE_PERCENT возвращает 0.0-1.0, конвертируем в позицию 0-4
+        # GEAR_POSITION возвращает 0.0-1.0 (1.0 = полностью выпущено)
+        config_data = telemetry.get('configuration', {})
+        flaps_handle_percent = config_data.get('flaps_position', 1.0)  # 0.0-1.0
+        flaps_position = int(round(flaps_handle_percent * 4))  # 0-4
+        gear_down = config_data.get('gear_position', 1.0) > 0.5
 
         # Временной шаг
         current_time = time.time()
@@ -376,6 +393,36 @@ class AutothrottleController:
             'engine_throttles': engine_throttles,  # None если симметричный режим, dict если асимметричный
             'has_engine_failure': has_engine_failure
         }
+
+    def update(self, telemetry_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Реализация абстрактного метода Controller.update()
+
+        Обёртка над calculate_throttle() для соответствия интерфейсу Controller
+
+        Args:
+            telemetry_data: Словарь с телеметрией, должен содержать:
+                - 'telemetry': основная телеметрия
+                - 'target_speed': целевая скорость (узлы)
+                - 'wind_data': данные о ветре
+                - 'aircraft_weight': вес самолёта (опционально)
+
+        Returns:
+            Результат работы контроллера (см. calculate_throttle)
+        """
+        # Извлекаем параметры из telemetry_data
+        telemetry = telemetry_data.get('telemetry', telemetry_data)
+        target_speed = telemetry_data.get('target_speed', 140.0)
+        wind_data = telemetry_data.get('wind_data', {})
+        aircraft_weight = telemetry_data.get('aircraft_weight', 5000.0)
+
+        # Вызываем основной метод
+        return self.calculate_throttle(
+            telemetry=telemetry,
+            target_speed=target_speed,
+            wind_data=wind_data,
+            aircraft_weight=aircraft_weight
+        )
 
     def get_status(self) -> Dict[str, any]:
         """Получить статус контроллера"""

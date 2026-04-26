@@ -252,6 +252,143 @@ class MSFSAirportReader:
             logger.error("Error detecting approach: %s", e)
             return None
 
+    def _get_navigraph_data(self, dest_airport: str, dest_runway: str, approach_type: str):
+        """Получить данные из Navigraph"""
+        if not self.navigraph_parser or not dest_airport or not dest_runway:
+            return None
+
+        nav_data = self.navigraph_parser.get_runway_data(dest_airport, dest_runway, approach_type)
+        if nav_data:
+            logger.info(f"Navigraph data loaded for {dest_airport} RWY {dest_runway}")
+        return nav_data
+
+    def _determine_glideslope_angle(self, nav_data, glideslope_info) -> tuple[float, str]:
+        """
+        Определить угол глиссады с fallback логикой
+
+        Returns:
+            (angle, source)
+        """
+        if nav_data and nav_data.glideslope_angle:
+            return nav_data.glideslope_angle, "navigraph"
+        elif glideslope_info and glideslope_info.get('angle'):
+            return glideslope_info['angle'], "msfs"
+        else:
+            return 3.0, "standard"
+
+    def _determine_decision_height(self, approach_data: Dict) -> int:
+        """Определить Decision Height из MSFS или использовать значение по умолчанию"""
+        decision_height = approach_data.get('decision_height')
+
+        if decision_height and decision_height > 0:
+            logger.info("Decision Height from MSFS: %s ft", decision_height)
+            return int(decision_height)
+
+        # Определяем категорию по наличию glideslope
+        if approach_data.get('glideslope_valid'):
+            decision_height = 200  # CAT I по умолчанию
+        else:
+            decision_height = 250  # Localizer only
+
+        logger.info("Using default Decision Height: %s ft", decision_height)
+        return decision_height
+
+    def _determine_mda(self, approach_data: Dict) -> int:
+        """Определить Minimum Descent Altitude для GPS заходов"""
+        mda = approach_data.get('minimum_descent_altitude')
+
+        if mda and mda > 0:
+            logger.info("MDA from MSFS: %s ft", mda)
+            return int(mda)
+
+        logger.info("Using default MDA: 400 ft")
+        return 400
+
+    def _get_runway_elevation(self, dest: Dict, nav_data) -> float:
+        """Получить превышение ВПП"""
+        if nav_data and nav_data.airport_elevation:
+            return nav_data.airport_elevation
+        return dest.get('altitude', 0)
+
+    def _configure_ils_approach(self, approach_info: Dict, dest_airport: str, dest_runway: str,
+                                mag_var: float, glideslope_info: Dict, approach_data: Dict) -> Dict:
+        """Настроить ILS заход"""
+        ils = approach_info['ils']
+        dest = approach_info.get('destination', {})
+
+        # Получаем данные из Navigraph
+        nav_data = self._get_navigraph_data(dest_airport, dest_runway, 'ILS')
+        data_source = "navigraph" if nav_data else "msfs"
+
+        # Определяем параметры
+        glideslope_angle, glideslope_source = self._determine_glideslope_angle(nav_data, glideslope_info)
+        decision_height = self._determine_decision_height(approach_data)
+        runway_elevation = self._get_runway_elevation(dest, nav_data)
+
+        config = {
+            'type': 'ILS',
+            'frequency': ils['frequency'],
+            'course': ils['course'],
+            'glideslope': glideslope_angle,
+            'decision_height': decision_height,
+            'approach_speed': 140,
+            'runway_threshold_lat': dest.get('latitude', 0),
+            'runway_threshold_lon': dest.get('longitude', 0),
+            'runway_elevation': runway_elevation,
+            'airport_icao': dest_airport,
+            'runway_id': dest_runway,
+            'magnetic_variation': mag_var,
+            'runway_length': nav_data.length if nav_data else None,
+            'runway_width': nav_data.width if nav_data else None,
+            'data_source': data_source,
+            'glideslope_source': glideslope_source,
+        }
+
+        logger.info(f"Auto-configured ILS approach: {ils['frequency']/1000000:.2f} MHz, "
+                   f"Glideslope: {glideslope_angle}° (source: {glideslope_source}), DH: {decision_height} ft")
+        if dest_airport:
+            logger.info("Destination: %s RWY %s (data source: %s)",
+                       dest_airport, dest_runway if dest_runway else 'N/A', data_source)
+
+        return config
+
+    def _configure_gps_approach(self, approach_info: Dict, dest_airport: str, dest_runway: str,
+                               mag_var: float, approach_data: Dict) -> Dict:
+        """Настроить GPS заход"""
+        dest = approach_info['destination']
+
+        # Получаем данные из Navigraph
+        nav_data = self._get_navigraph_data(dest_airport, dest_runway, 'GPS')
+        data_source = "navigraph" if nav_data else "msfs"
+
+        # Определяем параметры
+        minimum_descent_altitude = self._determine_mda(approach_data)
+        runway_elevation = self._get_runway_elevation(dest, nav_data)
+
+        config = {
+            'type': 'GPS',
+            'glideslope': 3.0,
+            'decision_height': minimum_descent_altitude,
+            'approach_speed': 120,
+            'runway_threshold_lat': dest['latitude'],
+            'runway_threshold_lon': dest['longitude'],
+            'runway_elevation': runway_elevation,
+            'airport_icao': dest_airport,
+            'runway_id': dest_runway,
+            'magnetic_variation': mag_var,
+            'runway_length': nav_data.length if nav_data else None,
+            'runway_width': nav_data.width if nav_data else None,
+            'data_source': data_source,
+            'glideslope_source': "standard",
+        }
+
+        logger.info("Auto-configured GPS approach")
+        if dest_airport:
+            logger.info("Destination: %s RWY %s (data source: %s)",
+                       dest_airport, dest_runway if dest_runway else 'N/A', data_source)
+
+        return config
+
     def auto_configure_approach(self) -> Optional[Dict]:
         """
         Автоматически настроить заход на основе данных из MSFS
@@ -262,7 +399,6 @@ class MSFSAirportReader:
         logger.info("Auto-configuring approach from MSFS data...")
 
         approach_info = self.detect_approach_from_position()
-
         if not approach_info:
             logger.warning("Could not detect approach parameters from MSFS")
             return None
@@ -271,11 +407,7 @@ class MSFSAirportReader:
         mag_var = self.get_magnetic_variation()
         dest_airport = self.get_destination_airport()
         glideslope_info = self.get_glideslope_info()
-
-        # Получаем информацию о пункте назначения из GPS
         gps_dest = self.telemetry.get_gps_destination()
-
-        # Получаем информацию об активном заходе (DH, тип)
         approach_data = self.telemetry.get_approach_info()
 
         # Обновляем dest_airport и runway из GPS если доступно
@@ -285,132 +417,17 @@ class MSFSAirportReader:
 
         # Если есть ILS
         if approach_info.get('ils'):
-            ils = approach_info['ils']
-            dest = approach_info.get('destination', {})
-
-            # Получаем данные из Navigraph (длина/ширина ВПП, угол глиссады)
-            nav_data = None
-            data_source = "msfs"  # По умолчанию
-
-            if self.navigraph_parser and dest_airport and dest_runway:
-                nav_data = self.navigraph_parser.get_runway_data(dest_airport, dest_runway, 'ILS')
-                if nav_data:
-                    data_source = "navigraph"
-                    logger.info(f"Navigraph data loaded for {dest_airport} RWY {dest_runway}")
-
-            # Определяем угол глиссады с fallback логикой
-            glideslope_angle = 3.0  # По умолчанию
-            glideslope_source = "standard"
-
-            if nav_data and nav_data.glideslope_angle:
-                # Приоритет 1: Navigraph база данных
-                glideslope_angle = nav_data.glideslope_angle
-                glideslope_source = "navigraph"
-            elif glideslope_info and glideslope_info.get('angle'):
-                # Приоритет 2: MSFS (если есть)
-                glideslope_angle = glideslope_info['angle']
-                glideslope_source = "msfs"
-
-            # Читаем Decision Height из MSFS (если доступен)
-            decision_height = approach_data.get('decision_height')
-
-            # Если DH не получен из MSFS, используем значение по умолчанию
-            if not decision_height or decision_height <= 0:
-                # Определяем категорию по наличию glideslope
-                if approach_data.get('glideslope_valid'):
-                    decision_height = 200  # CAT I по умолчанию
-                else:
-                    decision_height = 250  # Localizer only
-                logger.info("Using default Decision Height: %s ft", decision_height)
-            else:
-                logger.info("Decision Height from MSFS: %s ft", decision_height)
-
-            # Получаем превышение аэропорта
-            runway_elevation = dest.get('altitude', 0)
-            if nav_data and nav_data.airport_elevation:
-                runway_elevation = nav_data.airport_elevation
-
-            config = {
-                'type': 'ILS',
-                'frequency': ils['frequency'],
-                'course': ils['course'],
-                'glideslope': glideslope_angle,
-                'decision_height': int(decision_height),
-                'approach_speed': 140,
-                'runway_threshold_lat': dest.get('latitude', 0),
-                'runway_threshold_lon': dest.get('longitude', 0),
-                'runway_elevation': runway_elevation,
-                'airport_icao': dest_airport,
-                'runway_id': dest_runway,
-                'magnetic_variation': mag_var,
-                # Добавляем данные из Navigraph
-                'runway_length': nav_data.length if nav_data else None,
-                'runway_width': nav_data.width if nav_data else None,
-                # Метаданные об источниках данных
-                'data_source': data_source,
-                'glideslope_source': glideslope_source,
-            }
-
-            logger.info(f"Auto-configured ILS approach: {ils['frequency']/1000000:.2f} MHz, "
-                       f"Glideslope: {glideslope_angle}° (source: {glideslope_source}), DH: {decision_height} ft")
-            if dest_airport:
-                logger.info("Destination: %s RWY %s (data source: %s)", dest_airport, dest_runway if dest_runway else 'N/A', data_source)
-            return config
+            return self._configure_ils_approach(
+                approach_info, dest_airport, dest_runway,
+                mag_var, glideslope_info, approach_data
+            )
 
         # Если только GPS пункт назначения
         if approach_info.get('destination'):
-            dest = approach_info['destination']
-
-            # Получаем данные из Navigraph (длина/ширина ВПП)
-            nav_data = None
-            data_source = "msfs"
-
-            if self.navigraph_parser and dest_airport and dest_runway:
-                nav_data = self.navigraph_parser.get_runway_data(dest_airport, dest_runway, 'GPS')
-                if nav_data:
-                    data_source = "navigraph"
-                    logger.info(f"Navigraph data loaded for {dest_airport} RWY {dest_runway}")
-
-            # Для GPS заходов используем MDA вместо DH
-            minimum_descent_altitude = approach_data.get('minimum_descent_altitude')
-            if not minimum_descent_altitude or minimum_descent_altitude <= 0:
-                minimum_descent_altitude = 400  # По умолчанию для GPS
-                logger.info("Using default MDA: %s ft", minimum_descent_altitude)
-            else:
-                logger.info("MDA from MSFS: %s ft", minimum_descent_altitude)
-
-            # Угол глиссады для GPS: стандарт 3.0°
-            glideslope_angle = 3.0
-            glideslope_source = "standard"
-
-            # Получаем превышение аэропорта
-            runway_elevation = dest['altitude']
-            if nav_data and nav_data.airport_elevation:
-                runway_elevation = nav_data.airport_elevation
-
-            config = {
-                'type': 'GPS',
-                'glideslope': glideslope_angle,
-                'decision_height': int(minimum_descent_altitude),  # Для совместимости используем DH
-                'approach_speed': 120,
-                'runway_threshold_lat': dest['latitude'],
-                'runway_threshold_lon': dest['longitude'],
-                'runway_elevation': runway_elevation,
-                'airport_icao': dest_airport,
-                'runway_id': dest_runway,
-                'magnetic_variation': mag_var,
-                # Добавляем данные из Navigraph
-                'runway_length': nav_data.length if nav_data else None,
-                'runway_width': nav_data.width if nav_data else None,
-                # Метаданные об источниках данных
-                'data_source': data_source,
-                'glideslope_source': glideslope_source,
-            }
-
-            logger.info("Auto-configured GPS approach")
-            if dest_airport:
-                logger.info("Destination: %s RWY %s (data source: %s)", dest_airport, dest_runway if dest_runway else 'N/A', data_source)
-            return config
+            return self._configure_gps_approach(
+                approach_info, dest_airport, dest_runway,
+                mag_var, approach_data
+            )
 
         logger.warning("No approach data available in MSFS")
         return None

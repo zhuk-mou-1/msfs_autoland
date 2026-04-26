@@ -89,12 +89,26 @@ class StabilizedApproachMonitor:
         """
         self.violations = []
 
-        # Получение данных
-        radio_height = telemetry['position'].get('radio_height',
-                                                 telemetry['position']['altitude_agl'])
-        airspeed = telemetry['speed']['airspeed_indicated']
-        vertical_speed = telemetry['speed']['vertical_speed']
-        bank_angle = abs(telemetry['attitude']['bank'])
+        # Получение данных (защищённое от отсутствующих ключей)
+        position_data = telemetry.get('position', {})
+        speed_data = telemetry.get('speed', {})
+        attitude_data = telemetry.get('attitude', {})
+
+        radio_height = position_data.get('radio_height',
+                                         position_data.get('altitude_agl', 0))
+        airspeed = speed_data.get('airspeed_indicated')
+        vertical_speed = speed_data.get('vertical_speed', 0)
+        bank_angle = abs(attitude_data.get('bank', 0))
+
+        # Если airspeed отсутствует - не проверяем, чтобы не вызвать ложный go-around
+        if airspeed is None:
+            logger.warning("Stabilization check: missing airspeed data - skipping check")
+            return {
+                'is_stabilized': None,
+                'checked': False,
+                'violations': [],
+                'message': 'Missing airspeed data'
+            }
 
         # Проверка высоты стабилизации
         if radio_height > self.criteria.stabilization_height:
@@ -198,16 +212,26 @@ class StabilizedApproachMonitor:
         if not self.stabilization_checked:
             return {'monitoring': False, 'go_around': False}
 
-        radio_height = telemetry['position'].get('radio_height',
-                                                 telemetry['position']['altitude_agl'])
+        # Защита от отсутствующих ключей (silent failures могут вызвать ложный go-around)
+        position_data = telemetry.get('position', {})
+        speed_data = telemetry.get('speed', {})
+        attitude_data = telemetry.get('attitude', {})
+
+        radio_height = position_data.get('radio_height',
+                                         position_data.get('altitude_agl', 0))
 
         # Критические нарушения ниже высоты стабилизации
         critical_violations = []
 
-        # Проверка критических параметров
-        airspeed = telemetry['speed']['airspeed_indicated']
-        vertical_speed = telemetry['speed']['vertical_speed']
-        bank_angle = abs(telemetry['attitude']['bank'])
+        # Проверка критических параметров (None если данные отсутствуют)
+        airspeed = speed_data.get('airspeed_indicated')
+        vertical_speed = speed_data.get('vertical_speed', 0)
+        bank_angle = abs(attitude_data.get('bank', 0))
+
+        # Если ключевые данные отсутствуют - не делаем ложный go-around
+        if airspeed is None:
+            logger.warning("Continuous monitoring: missing airspeed - skipping critical checks")
+            return {'monitoring': True, 'go_around': self.go_around_required, 'violations': []}
 
         # Критические отклонения скорости (более строгие)
         if airspeed > self.criteria.speed_target + 20:

@@ -338,7 +338,7 @@ class ConnectionOptimizer:
             logger.info("  Available: %s", perf.available)
             logger.info("  Read Time: %sms", perf.read_time_ms)
             logger.info("  Write Time: %sms", perf.write_time_ms)
-            logger.info("  Reliability: %s%", perf.reliability*100)
+            logger.info("  Reliability: %.1f%%", perf.reliability*100)
             logger.info("  Score: %s/100", perf.get_score())
             logger.info("  Result: %s", perf.test_result)
             if perf.error_message:
