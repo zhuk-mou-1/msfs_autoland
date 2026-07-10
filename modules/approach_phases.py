@@ -267,6 +267,15 @@ class FinalPhaseState(ApproachPhaseState):
 
         # Переход к посадке
         if radio_height < self.system.approach_config.decision_height:
+            # WP-4 DH guard: ниже DH без confirmed takeover → go-around
+            if (self.system.use_ils and
+                    not self.system.autopilot_takeover.status.completed):
+                logger.critical(
+                    "DH GUARD: Below DH (%.0fft) without confirmed takeover "
+                    "- GO AROUND", radio_height)
+                self.system.execute_go_around()
+                return None
+
             if not self._check_final_stabilization(radio_height):
                 return None  # Go around executed
 
