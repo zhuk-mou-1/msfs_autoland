@@ -50,36 +50,34 @@ class TestILSCrossingDetection:
         assert result is True, "Takeover should trigger at 244ft (crossing DH+50)"
 
     def test_large_step_across_entire_window_starts_or_aborts_safely(self):
-        """270 → 190: система не должна молча ничего не делать.
+        """FIX-7: 270 → 190: fail-closed с конкретным mechanism.
 
-        Допустимы:
-        1. Takeover инициирован (если crossing был detected)
-        2. Fail/go-around (ниже DH без confirmed takeover)
-
-        Недопустимо: Landing без completed takeover.
+        Below DH without completed takeover → altitude_safe fails
+        (190 < takeover_altitude_min=1500), not timeout.
         """
-        takeover = _make_takeover_for_ils()
+        clock = FakeClock(start=1000.0)
+        takeover = _make_takeover_for_ils(clock=clock)
 
-        # Step from 270 to 190 — crosses both DH+50 and DH
-        # At 190 (below DH), if takeover not completed → should fail
         assert 190 < DH, "190ft should be below DH"
 
-        # If we're below DH without completed takeover, must fail
-        # This is the "fail-closed" invariant
+        # Simulate: below DH, no completed takeover
         takeover.status.in_progress = True
-        takeover.takeover_start_time = 0.0
+        takeover.takeover_start_time = clock()
         takeover.initial_parameters = {"airspeed": 140, "altitude": 3000}
 
         ctrl = FakeControl()
         adapter = FakeAircraftAdapter()
 
-        # Below DH, unsafe — should fail hard
         telemetry = make_telemetry(altitude_agl=190, radio_height=190, bank=0)
         status = takeover.perform_takeover(telemetry, adapter, ctrl)
 
-        # Below DH, below min altitude → failed
-        assert status.failed is True, \
-            "Below DH without completed takeover must fail"
+        # Assert specific mechanism: hard_safety, NOT timeout
+        assert status.failed is True
+        assert status.failure_reason == "hard_safety"
+        assert "altitude" in status.error_message.lower() or \
+               "minimum" in status.error_message.lower()
+        assert not ctrl.has_call("set_autopilot_master"), \
+            "No AP commands should be sent on hard safety failure"
 
     def test_first_snapshot_below_dh_without_takeover_fails_closed(self):
         """Первый snapshot уже ниже DH → immediate fail-closed."""

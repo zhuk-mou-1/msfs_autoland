@@ -100,18 +100,16 @@ class AutopilotTakeover:
 
             takeover_height = decision_height + 50.0
 
-            # WP-4 / FIX-3: crossing detection
-            prev = self._prev_altitude_agl
+            # WP-4 / FIX-3: _prev_altitude_agl tracked for future crossing detection.
+            # FIX-8: crossed ⊆ in_window — when prev > takeover_height and current is in window,
+            # in_window is already True. DH guard in approach_phases.py handles the case
+            # where altitude jumps entirely below the window.
             self._prev_altitude_agl = altitude_agl
 
             in_window = (altitude_agl <= takeover_height
                          and altitude_agl > decision_height)
-            crossed = (prev is not None
-                       and prev > takeover_height
-                       and altitude_agl <= takeover_height
-                       and altitude_agl > decision_height)
 
-            if (in_window or crossed) and approach_phase in ['FINAL', 'LANDING']:
+            if in_window and approach_phase in ['FINAL', 'LANDING']:
                 logger.info("ILS takeover conditions met at DH: "
                             "altitude=%.0fft, DH=%.0fft, category=%s",
                             altitude_agl, decision_height,
@@ -155,6 +153,18 @@ class AutopilotTakeover:
         # ── Save initial params ───────────────────────────────────
         if not self.initial_parameters:
             self._save_initial_parameters(telemetry)
+
+        # ── Hard fail: below minimum altitude (not retryable) ─────
+        altitude_agl = telemetry['position']['altitude_agl']
+        if altitude_agl < self.config.takeover_altitude_min:
+            self.status.failed = True
+            self.status.failure_reason = "hard_safety"
+            self.status.error_message = (
+                f"Below minimum altitude: {altitude_agl:.0f}ft "
+                f"< {self.config.takeover_altitude_min:.0f}ft")
+            logger.error("Takeover ABORTED — below minimum altitude: %.0fft",
+                         altitude_agl)
+            return self.status
 
         # ── Safety checks ─────────────────────────────────────────
         checks = self._perform_safety_checks(telemetry)
