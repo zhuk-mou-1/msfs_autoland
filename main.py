@@ -238,9 +238,13 @@ class AutoLandSystem:
         telemetry = self.telemetry.get_all_data()
         weather = telemetry.get('weather', {})
 
+        # WP-6: ApproachConfig.runway_length is in FEET; convert to meters
+        runway_length_ft = config.runway_length if hasattr(config, 'runway_length') else 8000
+        runway_length_m = runway_length_ft / 3.28084  # feet → meters
+
         recommended_distance, recommended_altitude = self.autopilot_takeover.get_recommended_takeover_point(
             approach_type=config.station.type,
-            runway_length_m=config.runway_length if hasattr(config, 'runway_length') else 2500,
+            runway_length_m=int(runway_length_m),
             weather_conditions=weather,
             decision_height=config.decision_height if config.station.type == 'ILS' else None
         )
