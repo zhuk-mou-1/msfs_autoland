@@ -185,7 +185,10 @@ class WindCorrection:
         ground_speed = speed.get('ground_speed', 0)
 
         # Желаемый путевой угол (курс посадки)
-        desired_track = config.final_approach_course
+        # For LOC: use localizer-derived heading from approach_data
+        # if available; otherwise fall back to config.final_approach_course.
+        desired_track = approach_data.get('corrected_heading',
+                                          config.final_approach_course)
 
         # Компоненты ветра
         headwind, crosswind = self.calculate_wind_components(

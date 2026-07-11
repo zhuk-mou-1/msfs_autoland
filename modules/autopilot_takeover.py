@@ -120,7 +120,7 @@ class AutopilotTakeover:
                 return True
             return False
 
-        if approach_type and approach_type.upper() not in ['VOR', 'NDB']:
+        if approach_type and approach_type.upper() not in ['VOR', 'NDB', 'LOC']:
             return False
 
         distance_ok = distance_to_threshold <= self.config.takeover_distance_nm
@@ -398,18 +398,18 @@ class AutopilotTakeover:
             else:
                 altitude = 250.0
             distance = 0.0
-        elif approach_type in ['VOR', 'NDB']:
+        elif approach_type in ['VOR', 'NDB', 'LOC']:
             distance = 10.0
             altitude = 3500.0
         elif approach_type == 'GPS':
             distance = 9.0
             altitude = 3000.0
 
-        if approach_type in ['VOR', 'NDB'] and runway_length_m < 1500:
+        if approach_type in ['VOR', 'NDB', 'LOC'] and runway_length_m < 1500:
             distance += 2.0
             altitude += 500.0
 
-        if approach_type in ['VOR', 'NDB']:
+        if approach_type in ['VOR', 'NDB', 'LOC']:
             wind_speed = weather_conditions.get('wind_velocity', 0)
             visibility = weather_conditions.get('visibility', 10000)
             if wind_speed > 20:

@@ -62,6 +62,17 @@ class ILSNavigation:
 
         return has_loc and has_gs
 
+    def is_loc_available(self, ils_data: Dict) -> bool:
+        """Проверка доступности LOC (localizer only, без glideslope).
+
+        Args:
+            ils_data: Данные из телеметрии
+
+        Returns:
+            True если localizer доступен
+        """
+        return ils_data.get('nav1_has_localizer', False)
+
     def get_localizer_deviation(self, ils_data: Dict) -> Dict[str, float]:
         """
         Получить отклонение от курса localizer
@@ -174,6 +185,43 @@ class ILSNavigation:
             'on_localizer': loc_dev['on_course'],
             'on_glideslope': gs_dev['on_glideslope'],
             'stabilized': loc_dev['on_course'] and gs_dev['on_glideslope']
+        }
+
+    def calculate_loc_approach(self, telemetry: Dict, ils_data: Dict) -> Dict[str, any]:
+        """Расчёт параметров LOC захода (localizer only, без glideslope).
+
+        Lateral: реальный localizer signal (NAV1 CDI).
+        Vertical: synthetic glidepath (handled by SyntheticGlidepath module).
+        Stabilized = only on_localizer (no glideslope check).
+
+        Args:
+            telemetry: Телеметрия самолёта
+            ils_data: Данные из телеметрии (localizer signal)
+
+        Returns:
+            Dict с параметрами захода
+        """
+        if not self.config:
+            logger.error("LOC not configured (no ILSConfig)")
+            return {}
+
+        if not self.is_loc_available(ils_data):
+            return {
+                'loc_available': False,
+                'error': 'Localizer signal not available'
+            }
+
+        loc_dev = self.get_localizer_deviation(ils_data)
+
+        heading_correction = -loc_dev['degrees'] * 3
+        corrected_heading = (self.config.localizer_course + heading_correction) % 360
+
+        return {
+            'loc_available': True,
+            'localizer': loc_dev,
+            'corrected_heading': corrected_heading,
+            'on_localizer': loc_dev['on_course'],
+            'stabilized': loc_dev['on_course'],
         }
 
     def get_approach_guidance(self, approach_data: Dict) -> Dict[str, str]:

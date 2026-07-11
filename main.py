@@ -230,7 +230,7 @@ class AutoLandSystem:
             self.use_ils = True
             self.synthetic_glidepath = None
             logger.info("ILS approach configured: %s", config.station.name)
-        elif config.station.type in ('VOR', 'NDB'):
+        elif config.station.type in ('VOR', 'NDB', 'LOC'):
             self.use_ils = False
             self.synthetic_glidepath = SyntheticGlidepath(self.navigation, config)
             logger.info("Approach configured: %s - %s (synthetic glidepath active)",
@@ -327,6 +327,9 @@ class AutoLandSystem:
         if self.approach_config.station.type == 'ILS':
             self.control.set_nav_frequency(1, self.approach_config.station.frequency)
             logger.info("ILS frequency set: %s MHz", self.approach_config.station.frequency/1000000)
+        elif self.approach_config.station.type == 'LOC':
+            self.control.set_nav_frequency(1, self.approach_config.station.frequency)
+            logger.info("LOC frequency set: %s MHz", self.approach_config.station.frequency/1000000)
         elif self.approach_config.station.type == 'VOR':
             self.control.set_nav_frequency(1, self.approach_config.station.frequency)
             self.control.set_obs(1, self.approach_config.final_approach_course)
@@ -606,7 +609,7 @@ class AutoLandSystem:
             self.connection_monitor.perform_active_test()
 
     def _calculate_approach_data(self, data: dict) -> dict:
-        """Расчёт параметров захода (ILS или VOR/NDB)"""
+        """Расчёт параметров захода (ILS, LOC или VOR/NDB)"""
         position = data['position']
         attitude = data['attitude']
         nav = data['nav']
@@ -614,6 +617,16 @@ class AutoLandSystem:
 
         if self.use_ils and ils.get('nav1_has_localizer'):
             return self.ils_navigation.calculate_ils_approach(data, ils)
+        elif (self.approach_config is not None
+              and self.approach_config.station.type == 'LOC'):
+            # LOC: always route through calculate_loc_approach —
+            # it handles signal loss internally (loc_available=False).
+            loc_data = self.ils_navigation.calculate_loc_approach(data, ils)
+            if not loc_data.get('loc_available', False):
+                logger.warning("LOC signal lost — executing go-around")
+                self.execute_go_around()
+                return None
+            return loc_data
         else:
             return self.navigation.calculate_vor_approach(
                 {**position, **attitude},
@@ -627,6 +640,10 @@ class AutoLandSystem:
 
         Сложность снижена с CC=76 до CC=5
         """
+
+        # Fail-closed: signal loss returns None from _calculate_approach_data
+        if approach_data is None:
+            return
 
         # Расчёт поправок на ветер
         wind_data = self.wind_correction.apply_wind_corrections(

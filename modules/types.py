@@ -10,12 +10,12 @@ from dataclasses import dataclass
 
 @dataclass
 class NavStation:
-    """Навигационная станция (VOR или NDB)"""
+    """Навигационная станция (VOR, NDB, ILS или LOC)"""
     name: str
     frequency: int  # Hz
     latitude: float
     longitude: float
-    type: str  # 'VOR' или 'NDB'
+    type: str  # 'VOR', 'NDB', 'ILS', или 'LOC'
 
 
 @dataclass

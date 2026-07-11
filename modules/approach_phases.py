@@ -188,6 +188,13 @@ class IntermediatePhaseState(ApproachPhaseState):
                 logger.warning("Decision Height: %s ft", self.system.approach_config.decision_height)
                 logger.warning("Taking control for automatic flare and landing")
                 logger.warning("=" * 60)
+            elif approach_type == 'LOC':
+                logger.warning("=" * 60)
+                logger.warning("INITIATING AUTOPILOT TAKEOVER (LOC APPROACH)")
+                logger.warning("Distance to threshold: %s NM", distance_to_threshold)
+                logger.warning("Altitude AGL: %s ft", altitude_agl)
+                logger.warning("LOC: lateral via localizer, vertical via synthetic glidepath")
+                logger.warning("=" * 60)
             else:
                 logger.warning("=" * 60)
                 logger.warning("INITIATING AUTOPILOT TAKEOVER (%s APPROACH)", approach_type)
