@@ -648,10 +648,16 @@ class AutoLandSystem:
             # it handles signal loss internally (loc_available=False).
             loc_data = self.ils_navigation.calculate_loc_approach(data, ils)
             if not loc_data.get('loc_available', False):
-                logger.warning("LOC signal lost — returning None for _handle_phase")
-                # FIX-13: Don't call execute_go_around here.
-                # Return None and let _handle_phase handle the terminal frame
-                # and go-around AFTER actuator commands.
+                logger.warning("LOC signal lost — executing go-around")
+                # FIX-13: Set pending terminal frame, then execute_go_around.
+                # stop_approach → stop_recording flushes pending frame to disk.
+                self.telemetry_recorder.set_pending_frame(
+                    telemetry=data,
+                    phase=self.phase.value if self.phase else "UNKNOWN",
+                    guard_decision=None,
+                    guard_reason=None,
+                )
+                self.execute_go_around()
                 return None
             return loc_data
         else:
@@ -672,18 +678,11 @@ class AutoLandSystem:
         self._last_guard_decision = None
         self._last_guard_reason = None
 
-        # Fail-closed: signal loss returns None from _calculate_approach_data
+        # Fail-closed: signal loss returns None from _calculate_approach_data.
+        # For LOC loss, execute_go_around was already called in
+        # _calculate_approach_data, which flushes pending frame via stop_recording.
+        # _handle_phase(None) is a clean no-op — no duplicate go-around.
         if approach_data is None:
-            # FIX-13/FIX-14: LOC-loss terminal frame as pending,
-            # then go-around actuator commands, then flush pending to disk.
-            self.telemetry_recorder.set_pending_frame(
-                telemetry=telemetry,
-                phase=self.phase.value if self.phase else "UNKNOWN",
-                guard_decision=None,
-                guard_reason=None,
-            )
-            self.execute_go_around()
-            self.telemetry_recorder.flush_pending_frame()
             return
 
         # Расчёт поправок на ветер
@@ -709,8 +708,8 @@ class AutoLandSystem:
                 self._last_guard_reason = guard_result.reason
                 logger.critical("SAFETY GUARD: GO_AROUND — %s %s",
                                 guard_result.reason, guard_result.details)
-                # FIX-14: Set pending frame, execute actuator commands, then flush.
-                # Disk I/O must NOT delay GO_AROUND actuator commands.
+                # FIX-14: Set pending frame, execute actuator commands.
+                # stop_approach → stop_recording flushes pending to disk.
                 self.telemetry_recorder.set_pending_frame(
                     telemetry=telemetry,
                     phase=self.phase.value if self.phase else "UNKNOWN",
@@ -718,7 +717,6 @@ class AutoLandSystem:
                     guard_reason=guard_result.reason,
                 )
                 self.execute_go_around()
-                self.telemetry_recorder.flush_pending_frame()
                 return
 
             # Near-trigger logging: debounce counting but not yet at threshold
@@ -785,7 +783,7 @@ class AutoLandSystem:
                                                          telemetry['position']['altitude_agl'])
                 if radio_height < 3:
                     logger.info("TOUCHDOWN!")
-                    # FIX-14: Set pending frame, stop approach, flush pending.
+                    # Set pending frame, stop approach flushes pending to disk.
                     self.telemetry_recorder.set_pending_frame(
                         telemetry=telemetry,
                         phase="TOUCHDOWN",
@@ -794,7 +792,6 @@ class AutoLandSystem:
                     )
                     self.phase = ApproachPhase.COMPLETED
                     self.stop_approach()
-                    self.telemetry_recorder.flush_pending_frame()
                     logger.info("Landing completed!")
 
     def _log_fms_data(self):

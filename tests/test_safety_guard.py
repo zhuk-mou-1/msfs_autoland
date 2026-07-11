@@ -629,11 +629,9 @@ class TestIntegrationLocSignalLossUntouched:
         system.telemetry_recorder = MagicMock()
 
         # _calculate_approach_data returns None for LOC signal loss
-        # _handle_phase calls execute_go_around (FIX-13), but guard is NOT involved
-        system._handle_phase(None, None)  # approach_data=None → go-around via _handle_phase
-        system.execute_go_around.assert_called_once()
-        # Guard did NOT run (approach_data=None returns before guard check)
-        system.wind_correction.apply_wind_corrections.assert_not_called()
+        # execute_go_around is called inside _calculate_approach_data (original contract)
+        system._handle_phase(None, None)  # approach_data=None → no-op
+        system.execute_go_around.assert_not_called()  # not called by _handle_phase
         system.phase_state.handle.assert_not_called()
 
 

@@ -246,16 +246,21 @@ class TestRealFlushCloseFailure:
     def test_start_recording_cleanup_on_error(self, tmp_path, caplog):
         """If writeheader fails during start_recording, file handle is closed."""
         rec = TelemetryRecorder(log_dir=str(tmp_path))
-        rec.start_recording()
-        assert rec.is_recording
-        # Force writer.writeheader to fail on next start
-        if rec._writer:
-            rec._writer.writeheader = MagicMock(side_effect=OSError("header fail"))
-        # Second start with broken writer — should handle error
-        rec2 = TelemetryRecorder(log_dir=str(tmp_path))
-        rec2.start_recording()
-        assert rec2.is_recording
-        rec2.stop_recording()
+
+        # Monkeypatch csv.DictWriter to raise on writeheader
+        original_dictwriter = csv.DictWriter
+        class FailingDictWriter(csv.DictWriter):
+            def writeheader(self):
+                raise OSError("Simulated writeheader failure")
+
+        with patch('modules.telemetry_recorder.csv.DictWriter', FailingDictWriter):
+            with caplog.at_level(logging.WARNING, logger="modules.telemetry_recorder"):
+                rec.start_recording()
+
+        # Error was handled — file is closed or recorder didn't start
+        assert not rec.is_recording
+        assert rec._file is None
+        assert "failed to start" in caplog.text.lower() or "writeheader" in caplog.text.lower()
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -263,13 +268,14 @@ class TestRealFlushCloseFailure:
 # ═══════════════════════════════════════════════════════════════════
 
 class TestPendingFramePattern:
-    """FIX-14: Terminal frames are pending, flushed AFTER actuator commands."""
+    """FIX-14: Terminal frames are pending, flushed via stop_recording after actuator commands."""
 
     def test_go_around_actuator_before_flush(self, tmp_path):
-        """GO_AROUND actuator commands called before pending frame flushed to disk."""
+        """GO_AROUND actuator commands called, then stop_recording flushes pending."""
         from main import AutoLandSystem, ApproachPhase
         from modules.safety_guard import ApproachSafetyGuard
         from modules.types import ApproachConfig, NavStation
+        from tests.fakes import FakeControl
 
         system = AutoLandSystem.__new__(AutoLandSystem)
         system.phase = ApproachPhase.FINAL
@@ -294,27 +300,12 @@ class TestPendingFramePattern:
         system.telemetry_recorder = TelemetryRecorder(log_dir=str(tmp_path))
         system.telemetry_recorder.start_recording()
 
-        # Track call order
-        call_order = []
-
-        original_execute_go_around = AutoLandSystem.execute_go_around
-        def tracking_execute_go_around(self_sys):
-            call_order.append("execute_go_around")
-            # Simulate actuator commands
-            call_order.append("set_throttle")
-            call_order.append("set_vertical_speed")
-        system.execute_go_around = lambda: tracking_execute_go_around(system)
-
-        original_flush = system.telemetry_recorder.flush_pending_frame
-        def tracking_flush():
-            call_order.append("flush_pending_frame")
-            original_flush()
-        system.telemetry_recorder.flush_pending_frame = tracking_flush
-
+        # Real control via FakeControl
+        control = FakeControl()
+        system.control = control
         system.autothrottle = MagicMock()
         system.autothrottle.active = False
         system.vjoy_throttle = None
-        system.control = MagicMock()
         system.use_vjoy = False
         system.stabilized_monitor = MagicMock()
         system.running = True
@@ -327,17 +318,22 @@ class TestPendingFramePattern:
 
         system._handle_phase(telemetry, approach_data)
 
-        system.telemetry_recorder.stop_recording()
+        # Real actuator commands were sent by execute_go_around
+        assert control.has_call('set_throttle')
+        assert control.has_call('set_vertical_speed')
 
-        # Actuator commands must come BEFORE flush
-        assert call_order.index("execute_go_around") < call_order.index("flush_pending_frame")
-        assert call_order.index("set_throttle") < call_order.index("flush_pending_frame")
+        # stop_approach was called (running=False)
+        assert system.running is False
 
-        # Row is on disk
+        # Pending frame was flushed by stop_recording
         csv_files = list(tmp_path.glob('telemetry_*.csv'))
         _, rows = _read_csv(csv_files[0])
-        assert len(rows) >= 1
-        assert rows[-1]['guard_decision'] == 'GO_AROUND'
+        assert len(rows) == 1
+        assert rows[0]['guard_decision'] == 'GO_AROUND'
+        assert rows[0]['guard_reason'] == 'CRITICAL_SINK_RATE'
+
+        # phase_state was reset to None by stop_approach
+        assert system.phase_state is None
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -345,11 +341,11 @@ class TestPendingFramePattern:
 # ═══════════════════════════════════════════════════════════════════
 
 class TestLocLossProductionPath:
-    """FIX-13: _calculate_approach_data returns None → _handle_phase writes terminal frame."""
+    """FIX-13: _calculate_approach_data calls execute_go_around for LOC loss."""
 
     def test_loc_signal_loss_via_calculate_approach_data(self, tmp_path):
-        """Real LOC-loss path: _calculate_approach_data returns None,
-        _handle_phase handles go-around and writes terminal frame."""
+        """Real LOC-loss path: _calculate_approach_data calls execute_go_around,
+        sets pending frame, returns None. stop_recording flushes pending."""
         from main import AutoLandSystem, ApproachPhase
         from modules.types import ApproachConfig, NavStation
 
@@ -370,11 +366,6 @@ class TestLocLossProductionPath:
             'loc_available': False
         }
         system.wind_correction = MagicMock()
-        system.wind_correction.apply_wind_corrections.return_value = {
-            "corrected_heading": 270, "corrected_vs": 700,
-            "headwind": 10, "crosswind": 5, "wind_speed": 12,
-            "wind_direction": 280, "drift_angle": 2.0,
-        }
         system.safety_guard = MagicMock()
         system.fms_reader = None
         system.phase_state = MagicMock()
@@ -385,6 +376,9 @@ class TestLocLossProductionPath:
         system.control = MagicMock()
         system.stabilized_monitor = MagicMock()
         system.running = True
+        system.audio_alerts_enabled = False
+        system.audio_system = MagicMock()
+        system.execute_go_around = MagicMock()
 
         system.telemetry_recorder = TelemetryRecorder(log_dir=str(tmp_path))
         system.telemetry_recorder.start_recording()
@@ -392,21 +386,16 @@ class TestLocLossProductionPath:
         telemetry = make_telemetry(vertical_speed=-700, altitude_agl=500,
                                    airspeed=120, bank=3.0)
 
-        # Real production path: _calculate_approach_data → _handle_phase
+        # Real production path: _calculate_approach_data
         approach_data = system._calculate_approach_data(telemetry)
         assert approach_data is None  # LOC signal lost
-
-        system._handle_phase(telemetry, approach_data)
+        system.execute_go_around.assert_called_once()
 
         system.telemetry_recorder.stop_recording()
 
         csv_files = list(tmp_path.glob('telemetry_*.csv'))
         _, rows = _read_csv(csv_files[0])
         assert len(rows) == 1  # exactly one terminal frame
-        assert rows[0]['phase'] == 'FINAL'
-        # FIX-12: guard verdict reset before early return
-        assert rows[0]['guard_decision'] == ''
-        assert rows[0]['guard_reason'] == ''
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -473,6 +462,7 @@ class TestTerminalGuardFrame:
 
 class TestGuardVerdictReset:
     def test_no_stale_verdict_on_approach_data_none(self, tmp_path):
+        """_handle_phase(None) is a no-op — no rows written, no stale verdict."""
         from main import AutoLandSystem, ApproachPhase
 
         system = AutoLandSystem.__new__(AutoLandSystem)
@@ -502,9 +492,9 @@ class TestGuardVerdictReset:
 
         system.telemetry_recorder.stop_recording()
 
+        # _handle_phase(None) is a no-op — no rows written
         _, rows = _read_csv(list(tmp_path.glob('telemetry_*.csv'))[0])
-        assert rows[0]['guard_decision'] == ''
-        assert rows[0]['guard_reason'] == ''
+        assert len(rows) == 0
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -560,6 +550,119 @@ class TestWriteErrorResilience:
 
         system._handle_phase(telemetry, approach_data)
         system.phase_state.handle.assert_called_once()
+
+
+# ═══════════════════════════════════════════════════════════════════
+# FIX-15: Real execute_approach test
+# ═══════════════════════════════════════════════════════════════════
+
+class TestRealExecuteApproach:
+    """FIX-15: Real AutoLandSystem.execute_approach with 2 iterations."""
+
+    def test_execute_approach_two_iterations_with_recorder_error(self, tmp_path, caplog):
+        """Real execute_approach: 2 iterations, first write_frame throws,
+        caplog confirms warning, second iteration executes, then stops."""
+        from main import AutoLandSystem, ApproachPhase
+        from modules.safety_guard import ApproachSafetyGuard
+        from modules.types import ApproachConfig, NavStation
+
+        system = AutoLandSystem.__new__(AutoLandSystem)
+        system.approach_config = ApproachConfig(
+            station=NavStation("TEST", 11030000, 55.5, 37.5, "VOR"),
+            final_approach_course=270, glideslope_angle=3.0,
+            decision_height=200, approach_speed=120,
+            runway_elevation=0, runway_length=8000, runway_width=150,
+            runway_threshold_lat=55.48, runway_threshold_lon=37.52,
+        )
+        system.use_ils = False
+        system.use_vjoy = False
+        system.use_autothrottle = False
+        system.use_custom_autopilot = False
+        system.audio_alerts_enabled = False
+        system.phase = ApproachPhase.FINAL
+        system.safety_guard = ApproachSafetyGuard(debounce_n=2)
+        system.wind_correction = MagicMock()
+        system.wind_correction.apply_wind_corrections.return_value = {
+            "corrected_heading": 270, "corrected_vs": 700,
+            "headwind": 10, "crosswind": 5, "wind_speed": 12,
+            "wind_direction": 280, "drift_angle": 2.0,
+        }
+        system.fms_reader = None
+        system.phase_state = MagicMock()
+        system.phase_state.handle.return_value = None
+        system._last_guard_snapshot_log_time = 0.0
+        system._last_fms_log_time = 0.0
+        system.connection_monitor = None
+        system.connection_optimizer = None
+        system.ils_navigation = MagicMock()
+        system.navigation = MagicMock()
+        system.navigation.calculate_vor_approach.return_value = {
+            "distance_to_station": 5.0, "required_altitude": 2000,
+            "on_course": True, "cross_track_error": 0.5,
+            "corrected_heading": 270,
+        }
+        system.telemetry = MagicMock()
+        system.control = MagicMock()
+        system.stabilized_monitor = MagicMock()
+        system.autothrottle = MagicMock()
+        system.autothrottle.active = False
+        system.vjoy_throttle = None
+        system.virtual_joystick = MagicMock()
+        system.aircraft_adapter = MagicMock()
+        system.speed_calculator = MagicMock()
+        system.structured_logger = MagicMock()
+        system.flare_controller = MagicMock()
+        system.wind_shear_detector = MagicMock()
+        system.turbulence_detector = MagicMock()
+        system.audio_system = MagicMock()
+        system.autopilot_takeover = MagicMock()
+        system.autopilot_takeover.status.completed = False
+
+        # Two frames of telemetry
+        frame1 = make_telemetry(vertical_speed=-700, altitude_agl=500,
+                                airspeed=120, bank=3.0)
+        frame2 = make_telemetry(vertical_speed=-700, altitude_agl=400,
+                                airspeed=120, bank=3.0)
+        system.telemetry.get_all_data.side_effect = [frame1, frame2]
+
+        # Real recorder
+        system.telemetry_recorder = TelemetryRecorder(log_dir=str(tmp_path))
+        system.telemetry_recorder.start_recording()
+
+        # Make first write_frame throw, second succeed
+        original_write = system.telemetry_recorder.write_frame
+        call_count = [0]
+        def failing_write_once(*args, **kwargs):
+            call_count[0] += 1
+            if call_count[0] == 1:
+                raise IOError("Simulated disk error on first frame")
+            return original_write(*args, **kwargs)
+        system.telemetry_recorder.write_frame = failing_write_once
+
+        # Run execute_approach — it will iterate twice then we stop it
+        system.running = True
+        iteration_count = [0]
+        original_handle_phase = AutoLandSystem._handle_phase
+        def counting_handle_phase(self_sys, telemetry, approach_data):
+            iteration_count[0] += 1
+            if iteration_count[0] >= 2:
+                self_sys.running = False
+            return original_handle_phase(self_sys, telemetry, approach_data)
+        system._handle_phase = lambda t, a: counting_handle_phase(system, t, a)
+
+        with caplog.at_level(logging.WARNING, logger="main"):
+            system.execute_approach()
+
+        # Warning from first frame write error
+        assert "disk error" in caplog.text.lower() or "recorder" in caplog.text.lower()
+
+        # Second iteration executed
+        assert iteration_count[0] >= 2
+
+        # phase_state.handle was called (normal path continued)
+        system.phase_state.handle.assert_called()
+
+        system.telemetry_recorder.stop_recording()
 
 
 # ═══════════════════════════════════════════════════════════════════

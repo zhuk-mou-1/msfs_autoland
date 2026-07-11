@@ -684,7 +684,7 @@ class TestLOCSignalLossFailClosed:
     """LOC signal lost mid-approach → go-around, no commands after loss."""
 
     def test_loc_signal_loss_triggers_go_around(self):
-        """Valid signal → signal lost → returns None for _handle_phase."""
+        """Valid signal → signal lost → execute_go_around called."""
         from main import AutoLandSystem
 
         system = MagicMock()
@@ -695,6 +695,9 @@ class TestLOCSignalLossFailClosed:
         ils_nav.config.localizer_course = 270
         system.ils_navigation = ils_nav
         system.navigation = MagicMock()
+        system.phase = MagicMock()
+        system.phase.value = "FINAL"
+        system.telemetry_recorder = MagicMock()
 
         # Frame 1: valid signal → real _calculate_approach_data returns data
         data_ok = {
@@ -707,7 +710,7 @@ class TestLOCSignalLossFailClosed:
         result_ok = AutoLandSystem._calculate_approach_data(system, data_ok)
         assert result_ok['loc_available'] is True
 
-        # Frame 2: signal lost → returns None, _handle_phase handles go-around
+        # Frame 2: signal lost → execute_go_around + returns None
         data_lost = {
             'position': {'latitude': 55.75, 'longitude': 37.50,
                          'altitude': 1180, 'altitude_agl': 580},
@@ -717,8 +720,9 @@ class TestLOCSignalLossFailClosed:
         }
         result_lost = AutoLandSystem._calculate_approach_data(system, data_lost)
 
+        system.execute_go_around.assert_called_once()
         assert result_lost is None, (
-            "Signal loss should return None for _handle_phase to handle go-around")
+            "Signal loss should return None (go-around), not error dict")
 
     def test_loc_signal_loss_no_commands_after_loss(self):
         """After signal loss, no heading/VS commands are sent."""
@@ -779,7 +783,7 @@ class TestLOCSignalLossFailClosed:
             result = AutoLandSystem._calculate_approach_data(system, data)
 
         assert result is None
-        assert "loc signal lost" in caplog.text.lower()
+        assert "executing go-around" in caplog.text
         assert "falling back" not in caplog.text
 
     def test_red_without_fix_loc_signal_loss(self):
