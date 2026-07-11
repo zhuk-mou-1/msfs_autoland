@@ -7,6 +7,7 @@ synthetic glidepath, minimum = MDA (barometric, not radio DH).
 
 from __future__ import annotations
 
+import logging
 import math
 from unittest.mock import MagicMock
 
@@ -684,6 +685,8 @@ class TestLOCSignalLossFailClosed:
 
     def test_loc_signal_loss_triggers_go_around(self):
         """Valid signal → signal lost → execute_go_around called."""
+        from main import AutoLandSystem
+
         system = MagicMock()
         system.approach_config = _make_loc_config()
         system.use_ils = False
@@ -693,7 +696,7 @@ class TestLOCSignalLossFailClosed:
         system.ils_navigation = ils_nav
         system.navigation = MagicMock()
 
-        # Frame 1: valid signal
+        # Frame 1: valid signal → real _calculate_approach_data returns data
         data_ok = {
             'position': {'latitude': 55.75, 'longitude': 37.50,
                          'altitude': 1200, 'altitude_agl': 600},
@@ -701,13 +704,10 @@ class TestLOCSignalLossFailClosed:
             'nav': {},
             'ils': {'nav1_has_localizer': True, 'nav1_cdi': 10},
         }
-
-        # Simulate _calculate_approach_data — valid
-        ils_ok = data_ok.get('ils', {})
-        result_ok = system.ils_navigation.calculate_loc_approach(data_ok, ils_ok)
+        result_ok = AutoLandSystem._calculate_approach_data(system, data_ok)
         assert result_ok['loc_available'] is True
 
-        # Frame 2: signal lost
+        # Frame 2: signal lost → real code triggers go-around + returns None
         data_lost = {
             'position': {'latitude': 55.75, 'longitude': 37.50,
                          'altitude': 1180, 'altitude_agl': 580},
@@ -715,17 +715,7 @@ class TestLOCSignalLossFailClosed:
             'nav': {},
             'ils': {'nav1_has_localizer': False},
         }
-
-        # Simulate _calculate_approach_data with fail-closed fix
-        ils_lost = data_lost.get('ils', {})
-        if system.approach_config.station.type == 'LOC':
-            loc_data = system.ils_navigation.calculate_loc_approach(
-                data_lost, ils_lost)
-            if not loc_data.get('loc_available', False):
-                system.execute_go_around()
-                result_lost = None
-            else:
-                result_lost = loc_data
+        result_lost = AutoLandSystem._calculate_approach_data(system, data_lost)
 
         system.execute_go_around.assert_called_once()
         assert result_lost is None, (
@@ -733,8 +723,7 @@ class TestLOCSignalLossFailClosed:
 
     def test_loc_signal_loss_no_commands_after_loss(self):
         """After signal loss, no heading/VS commands are sent."""
-        from modules.approach_phases import FinalPhaseState
-        from modules.control_ownership import ControlOwner
+        from main import AutoLandSystem
         from tests.fakes import FakeControl
 
         system = MagicMock()
@@ -743,35 +732,22 @@ class TestLOCSignalLossFailClosed:
         system.use_vjoy = False
         system.use_autothrottle = False
         system.approach_config = _make_loc_config()
-        system.autopilot_takeover.status.completed = True
+        system.wind_correction = MagicMock()
+        system.phase_state = MagicMock()
+        system.fms_reader = None
+        system._last_fms_log_time = 0
 
         control = FakeControl()
         system.control = control
 
-        state = FinalPhaseState(system)
-        state._ownership = MagicMock()
-        state._ownership.roll = ControlOwner.AIRCRAFT_AP
-        state._ownership.pitch = ControlOwner.AIRCRAFT_AP
-
         telemetry = _make_telemetry(altitude_msl=1200.0, altitude_agl=600.0)
 
-        # Simulate: approach_data is None (signal lost → go-around in _calculate_approach_data)
-        # _handle_phase should return early without sending commands
-        approach_data = None
+        # Real _handle_phase with approach_data=None → guard returns early
+        AutoLandSystem._handle_phase(system, telemetry, None)
 
-        # Guard: if approach_data is None → return before apply_wind_corrections
-        if approach_data is None:
-            result = None
-        else:
-            from modules.wind_correction import WindCorrection
-            wind_correction = WindCorrection()
-            wind_data = wind_correction.apply_wind_corrections(
-                telemetry, approach_data, system.approach_config)
-            state.handle(telemetry, approach_data, wind_data)
-            result = True
-
-        assert result is None
-        # No commands should be sent
+        # No commands should be sent (guard returned before wind_correction)
+        system.wind_correction.apply_wind_corrections.assert_not_called()
+        system.phase_state.handle.assert_not_called()
         heading_calls = [c for c in control.calls if c[0] == 'set_heading_hold']
         vs_calls = [c for c in control.calls if c[0] == 'set_vertical_speed']
         assert len(heading_calls) == 0, (
@@ -779,9 +755,9 @@ class TestLOCSignalLossFailClosed:
         assert len(vs_calls) == 0, (
             f"No VS commands after signal loss, got {len(vs_calls)}")
 
-    def test_loc_signal_loss_log_matches_code(self):
+    def test_loc_signal_loss_log_matches_code(self, caplog):
         """Log says 'executing go-around' (not 'falling back to geometry')."""
-        import logging
+        from main import AutoLandSystem
 
         system = MagicMock()
         system.approach_config = _make_loc_config()
@@ -799,23 +775,13 @@ class TestLOCSignalLossFailClosed:
             'ils': {'nav1_has_localizer': False},
         }
 
-        # Simulate fail-closed logic
-        ils = data.get('ils', {})
-        loc_data = system.ils_navigation.calculate_loc_approach(data, ils)
-
-        # With the fix: code logs "executing go-around" and returns None
-        # The old code logged "falling back to geometry" — test must fail if that returns
-        if not loc_data.get('loc_available', False):
-            # New behavior: log + go-around
-            log_msg = "LOC signal lost — executing go-around"
-            system.execute_go_around()
-            result = None
-        else:
-            result = loc_data
+        # Real _calculate_approach_data → triggers real logger
+        with caplog.at_level(logging.WARNING, logger="main"):
+            result = AutoLandSystem._calculate_approach_data(system, data)
 
         assert result is None
-        assert "executing go-around" in log_msg
-        assert "falling back" not in log_msg
+        assert "executing go-around" in caplog.text
+        assert "falling back" not in caplog.text
 
     def test_red_without_fix_loc_signal_loss(self):
         """Without the guard, _handle_phase would call
