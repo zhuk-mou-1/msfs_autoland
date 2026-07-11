@@ -544,8 +544,9 @@ class AutoLandSystem:
                         guard_decision=getattr(self, '_last_guard_decision', None),
                         guard_reason=getattr(self, '_last_guard_reason', None),
                     )
-                except Exception:
-                    pass  # recorder errors never break the loop
+                except Exception as e:
+                    logger.warning("Telemetry recorder frame write failed: %s", e,
+                                   exc_info=True)
 
                 consecutive_errors = 0
                 time.sleep(0.5)
@@ -694,6 +695,18 @@ class AutoLandSystem:
                 self._last_guard_reason = guard_result.reason
                 logger.critical("SAFETY GUARD: GO_AROUND — %s %s",
                                 guard_result.reason, guard_result.details)
+                # Write terminal guard frame BEFORE execute_go_around
+                # (execute_go_around → stop_approach → stop_recording)
+                try:
+                    self.telemetry_recorder.write_frame(
+                        telemetry=telemetry,
+                        phase=self.phase.value if self.phase else "UNKNOWN",
+                        guard_decision="GO_AROUND",
+                        guard_reason=guard_result.reason,
+                    )
+                except Exception:
+                    logger.warning("Failed to write terminal guard frame",
+                                   exc_info=True)
                 self.execute_go_around()
                 return
 
@@ -719,7 +732,8 @@ class AutoLandSystem:
                 logger.info(
                     "GUARD SNAPSHOT: vs=%.0f bank=%.1f ias=%.0f vref=%.0f "
                     "rh=%s alt_agl=%s "
-                    "has_alt=%s has_rh=%s has_ias=%s "
+                    "has_vs=%s has_bank=%s has_ias=%s "
+                    "has_alt=%s has_rh=%s "
                     "has_nav1=%s has_localizer=%s has_glideslope=%s "
                     "ap_master=%s guard_decision=%s guard_reason=%s",
                     spd.get('vertical_speed', 0),
@@ -728,9 +742,11 @@ class AutoLandSystem:
                     self.approach_config.approach_speed,
                     pos.get('radio_height'),
                     pos.get('altitude_agl'),
+                    spd.get('vertical_speed') is not None,
+                    att.get('bank') is not None,
+                    spd.get('airspeed_indicated') is not None,
                     pos.get('altitude_agl') is not None,
                     pos.get('radio_height') is not None,
-                    spd.get('airspeed_indicated') is not None,
                     nav.get('nav1_frequency') is not None,
                     ils.get('nav1_has_localizer', False),
                     ils.get('nav1_has_glideslope', False),
