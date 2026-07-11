@@ -543,16 +543,34 @@ class TestIntegrationLLMAdvisoryDoesNotAffect:
 
 
 class TestIntegrationLogging:
-    """T16: Reason code in log via caplog."""
+    """T16: Reason code in log via caplog through real _handle_phase."""
 
     def test_guard_go_around_logged(self, caplog):
-        guard = ApproachSafetyGuard(debounce_n=1)
-        snap = _snapshot(vertical_speed=-2000)
-        with caplog.at_level(logging.CRITICAL):
-            result = guard.evaluate(snap)
-        assert result.reason in [r.message if hasattr(r, 'message') else str(r)
-                                  for r in caplog.records] or \
-               result.decision == GuardDecision.GO_AROUND
+        from main import AutoLandSystem, ApproachPhase
+
+        system = AutoLandSystem.__new__(AutoLandSystem)
+        system.phase = ApproachPhase.FINAL
+        system.approach_config = _make_config()
+        system.safety_guard = ApproachSafetyGuard(debounce_n=1)
+        system.wind_correction = MagicMock()
+        system.wind_correction.apply_wind_corrections.return_value = {
+            "corrected_heading": 270, "corrected_vs": 700,
+            "headwind": 10, "crosswind": 5, "wind_speed": 12,
+            "wind_direction": 280, "drift_angle": 2.0,
+        }
+        system.fms_reader = None
+        system.phase_state = MagicMock()
+        system.execute_go_around = MagicMock()
+
+        telemetry = make_telemetry(vertical_speed=-2000, altitude_agl=500, airspeed=120)
+        approach_data = {"distance_to_station": 5.0, "required_altitude": 2000,
+                         "on_course": True, "cross_track_error": 0.5}
+
+        with caplog.at_level(logging.CRITICAL, logger="main"):
+            system._handle_phase(telemetry, approach_data)
+
+        assert "SAFETY GUARD: GO_AROUND" in caplog.text
+        assert "CRITICAL_SINK_RATE" in caplog.text
 
 
 class TestIntegrationLocSignalLossUntouched:
@@ -578,23 +596,26 @@ class TestIntegrationLocSignalLossUntouched:
 
 
 class TestRedWithoutFix:
-    """T17/T18: Red-without-fix proof."""
+    """T17/T18: Red-without-fix proof.
+
+    T17: real red — patch removes guard evaluate → critical violation no longer
+         triggers go-around. T1 is the positive sentinel (guard present → fires).
+    T18: phase gate prevents non-FINAL go-around.
+    """
 
     def test_t17_guard_removal_breaks_critical_test(self):
-        """If guard integration removed from _handle_phase, critical violation
-        test would NOT call execute_go_around.
+        """Real red-without-fix: patch guard.evaluate to always return CONTINUE.
 
-        This test verifies the guard integration point exists by checking
-        that with a FINAL phase + critical snapshot, go-around fires.
-        Without guard integration, this would fail.
+        With guard neutralized, critical violation in FINAL should NOT trigger
+        go-around — proving the guard integration point is necessary.
+        Positive sentinel: TestIntegrationFinalCriticalViolation (T1).
         """
         from main import AutoLandSystem, ApproachPhase
 
         system = AutoLandSystem.__new__(AutoLandSystem)
         system.phase = ApproachPhase.FINAL
         system.approach_config = _make_config()
-        # Simulate NO guard (guard disabled)
-        system.safety_guard = None
+        system.safety_guard = ApproachSafetyGuard(debounce_n=1)
         system.wind_correction = MagicMock()
         system.wind_correction.apply_wind_corrections.return_value = {
             "corrected_heading": 270, "corrected_vs": 700,
@@ -611,10 +632,13 @@ class TestRedWithoutFix:
         approach_data = {"distance_to_station": 5.0, "required_altitude": 2000,
                          "on_course": True, "cross_track_error": 0.5}
 
-        # With guard=None, the guard check is skipped — go_around NOT called
-        # This proves the guard integration point is necessary
-        system._handle_phase(telemetry, approach_data)
-        # phase_state.handle IS called (no guard to stop it)
+        # Patch guard.evaluate to always return CONTINUE — simulates guard removal
+        with patch.object(system.safety_guard, 'evaluate',
+                          return_value=GuardResult(GuardDecision.CONTINUE, "patched", {})):
+            system._handle_phase(telemetry, approach_data)
+
+        # Without real guard, go-around NOT called — normal handling proceeds
+        system.execute_go_around.assert_not_called()
         system.phase_state.handle.assert_called_once()
 
     def test_t18_phase_gate_removal_allows_non_final_go_around(self):
