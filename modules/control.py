@@ -2,6 +2,7 @@
 Модуль управления самолётом через SimConnect API
 """
 
+import math
 import logging
 from typing import Optional
 
@@ -16,6 +17,29 @@ class MSFSControl:
     def __init__(self, aircraft_events: AircraftEvents, aircraft_requests=None):
         self.ae = aircraft_events
         self._aq = aircraft_requests  # Optional: для readback SimVars
+
+    @staticmethod
+    def _bounded_number(value, *, name, minimum, maximum):
+        if isinstance(value, bool):
+            raise ValueError(f"{name} must be numeric, not bool")
+        try:
+            value = float(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"{name} must be numeric") from exc
+        if not math.isfinite(value):
+            raise ValueError(f"{name} must be finite")
+        bounded = max(minimum, min(maximum, value))
+        if bounded != value:
+            logger.warning("Clamped %s from %s to %s", name, value, bounded)
+        return bounded
+
+    @classmethod
+    def _unit_input(cls, value, *, name):
+        return cls._bounded_number(value, name=name, minimum=-1.0, maximum=1.0)
+
+    @classmethod
+    def _throttle_input(cls, value, *, name="throttle"):
+        return cls._bounded_number(value, name=name, minimum=0.0, maximum=1.0)
 
     def set_autopilot_master(self, state: bool):
         """Включить/выключить автопилот"""
@@ -122,6 +146,7 @@ class MSFSControl:
     def set_flaps(self, position: int):
         """Установить закрылки (0-3)"""
         try:
+            position = int(self._bounded_number(position, name="flaps", minimum=0, maximum=3))
             self.ae.event("FLAPS_SET", position)
             logger.info("Flaps set: %s", position)
         except Exception as e:
@@ -146,6 +171,7 @@ class MSFSControl:
             percent: Процент тяги (0.0 - 1.0)
         """
         try:
+            percent = self._throttle_input(percent)
             value = int(percent * 16384)
             self.ae.event("THROTTLE_SET", value)
             logger.info("Throttle set: %.1f%%", percent*100)
@@ -161,6 +187,7 @@ class MSFSControl:
             percent: Процент тяги (0.0 - 1.0)
         """
         try:
+            percent = self._throttle_input(percent, name=f"engine_{engine_index}_throttle")
             value = int(percent * 16384)
 
             # SimConnect события для индивидуальных двигателей
@@ -210,6 +237,7 @@ class MSFSControl:
         """
         try:
             # SimConnect использует диапазон -16384 до +16384
+            percent = self._unit_input(percent, name="rudder")
             value = int(percent * 16384)
             self.ae.event("RUDDER_SET", value)
             logger.debug(f"Rudder set: {percent:+.2f} ({value})")
@@ -229,6 +257,7 @@ class MSFSControl:
         """
         try:
             # SimConnect использует диапазон -16384 до +16384
+            percent = self._unit_input(percent, name="aileron")
             value = int(percent * 16384)
             self.ae.event("AILERON_SET", value)
             logger.debug(f"Aileron set: {percent:+.2f} ({value})")

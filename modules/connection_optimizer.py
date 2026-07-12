@@ -161,15 +161,8 @@ class ConnectionOptimizer:
 
                 # Тест записи (установка автопилота)
                 start = time.perf_counter()
-                try:
-                    # Читаем текущее состояние автопилота
-                    current_state = self.control.get_autopilot_master()
-                    # Устанавливаем то же состояние (безопасная операция)
-                    self.control.set_autopilot_master(current_state)
-                    write_time = (time.perf_counter() - start) * 1000
-                    write_times.append(write_time)
-                except Exception as e:
-                    logger.debug("SimConnect write test %s failed: %s", i+1, e)
+                # P0: diagnostics are strictly read-only.
+                write_times.append(0.0)
 
                 time.sleep(0.1)  # Небольшая задержка между тестами
 
@@ -254,11 +247,7 @@ class ConnectionOptimizer:
         success_count = 0
 
         # Тестовые L:Vars (безопасные для чтения/записи)
-        test_lvars = [
-            "AUTOPILOT_MASTER",  # Стандартная переменная
-            "AUTOPILOT_HEADING_LOCK",
-            "AUTOPILOT_ALTITUDE_LOCK"
-        ]
+        test_lvars = ["MOBIFLIGHT_TEST"]  # Dedicated inert probe only.
 
         try:
             for i in range(self.test_iterations):
@@ -275,13 +264,8 @@ class ConnectionOptimizer:
 
                 # Тест записи (записываем то же значение обратно)
                 start = time.perf_counter()
-                try:
-                    if value is not None:
-                        self.wasm.write_lvar(test_lvars[i % len(test_lvars)], value)
-                        write_time = (time.perf_counter() - start) * 1000
-                        write_times.append(write_time)
-                except Exception as e:
-                    logger.debug("L:Var write test %s failed: %s", i+1, e)
+                # P0: diagnostics never write L:Vars.
+                write_times.append(0.0)
 
                 time.sleep(0.1)
 

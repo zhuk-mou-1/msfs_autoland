@@ -18,6 +18,9 @@ from modules.autothrottle import (AutothrottleController,
 from modules.connection_monitor import ConnectionMonitor
 from modules.connection_optimizer import ConnectionOptimizer
 from modules.control import MSFSControl
+from contextlib import nullcontext
+from modules.command_gateway import CommandGateway, CommandSource
+from modules.control_ownership import compute_ownership
 from modules.dme_navigation import DMENavigation
 from modules.flare_controller import FlareController
 from modules.fms_reader import FMSReader
@@ -105,10 +108,21 @@ class AutoLandSystem:
 
         self.structured_logger.info(LogCategory.SYSTEM, "AutoLandSystem initialized")
 
+    def _current_control_ownership(self):
+        phase = self.phase.value if self.phase else "IDLE"
+        return compute_ownership(
+            phase=phase,
+            confirmed_takeover=self.autopilot_takeover.status.completed,
+            use_vjoy=self.use_vjoy,
+            vjoy_ready=bool(getattr(self.virtual_joystick, "enabled", False)),
+            use_autothrottle=self.use_autothrottle,
+        )
+
     def connect(self) -> bool:
         """Подключение к MSFS"""
         if self.telemetry.connect():
-            self.control = MSFSControl(self.telemetry.ae, self.telemetry.aq)
+            raw_control = MSFSControl(self.telemetry.ae, self.telemetry.aq)
+            self.control = CommandGateway(raw_control, self._current_control_ownership)
 
             # Инициализация FMS reader
             self.fms_reader = FMSReader(self.telemetry)
@@ -414,20 +428,20 @@ class AutoLandSystem:
             self.autothrottle.deactivate()
             logger.info("Go-around: Autothrottle deactivated")
 
-        # 1. Полный газ
-        if self.vjoy_throttle and self.vjoy_throttle.enabled:
-            self.vjoy_throttle.set_throttle(1.0)
-        else:
-            self.control.set_throttle(1.0)
-        logger.info("Go-around: Full throttle")
+        scope = (self.control.source_scope(CommandSource.SAFETY)
+                 if hasattr(self.control, "source_scope") else nullcontext())
+        with scope:
+            if self.vjoy_throttle and self.vjoy_throttle.enabled:
+                self.vjoy_throttle.set_throttle(1.0)
+            else:
+                self.control.set_throttle(1.0)
+            logger.info("Go-around: Full throttle")
 
-        # 2. Установка тангажа на набор высоты
-        self.control.set_vertical_speed(1500)  # 1500 fpm набор
-        logger.info("Go-around: Climb 1500 fpm")
+            self.control.set_vertical_speed(1500)
+            logger.info("Go-around: Climb 1500 fpm")
 
-        # 3. Уборка закрылков (постепенно)
-        self.control.set_flaps(2)  # Сначала до взлётной конфигурации
-        logger.info("Go-around: Flaps to takeoff position")
+            self.control.set_flaps(2)
+            logger.info("Go-around: Flaps to takeoff position")
 
         # 4. Уборка шасси (после положительного набора)
         # Шасси убираем только если набираем высоту
