@@ -35,7 +35,7 @@ class Settings:
                 logger.warning(f"Settings file not found: {self.settings_path}, using defaults")
                 return self._get_default_settings()
 
-            with open(self.settings_path, 'r', encoding='utf-8') as f:
+            with open(self.settings_path, encoding='utf-8') as f:
                 settings = json.load(f)
                 logger.info(f"Settings loaded from {self.settings_path}")
                 return settings

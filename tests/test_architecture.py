@@ -9,7 +9,6 @@
 """
 
 import ast
-import os
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 import pytest
@@ -28,7 +27,7 @@ class ArchitectureAnalyzer:
     def get_imports(self, file_path: Path) -> Set[str]:
         """Извлекает все импорты из Python файла"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 tree = ast.parse(f.read(), filename=str(file_path))
         except Exception as e:
             print(f"Warning: Could not parse {file_path}: {e}")
@@ -188,7 +187,7 @@ def test_controller_interface_contract():
         if not module_path.exists():
             continue
 
-        with open(module_path, 'r', encoding='utf-8') as f:
+        with open(module_path, encoding='utf-8') as f:
             content = f.read()
             tree = ast.parse(content)
 
@@ -249,7 +248,7 @@ def test_main_uses_dependency_injection():
     analyzer = ArchitectureAnalyzer()
     main_path = analyzer.project_root / "main.py"
 
-    with open(main_path, 'r', encoding='utf-8') as f:
+    with open(main_path, encoding='utf-8') as f:
         content = f.read()
         tree = ast.parse(content)
 
@@ -326,7 +325,7 @@ def test_config_separation():
         if not module_path.exists():
             continue
 
-        with open(module_path, 'r', encoding='utf-8') as f:
+        with open(module_path, encoding='utf-8') as f:
             content = f.read()
 
         # Config модули не должны импортировать control/navigation

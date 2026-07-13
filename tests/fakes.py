@@ -7,9 +7,7 @@ Fake не дублирует production algorithm; его задача —
 
 from __future__ import annotations
 
-import time
-from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, List, Tuple
 
 
 class FakeControl:

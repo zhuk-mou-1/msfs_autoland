@@ -8,7 +8,7 @@ WP-3: Readback-verified takeover — подтверждение через obser
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 

@@ -7,15 +7,14 @@
 
 import sys
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
-import pytest
 
 _project_root = str(Path(__file__).resolve().parent.parent)
 if _project_root not in sys.path:
     sys.path.insert(0, _project_root)
 
-from modules.autopilot_takeover import AutopilotTakeover, TakeoverStatus
+from modules.autopilot_takeover import AutopilotTakeover
 from tests.fakes import FakeControl
 
 

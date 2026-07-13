@@ -1,7 +1,6 @@
 """F5 tests: defensive telemetry access in AutopilotTakeover."""
-import pytest
 from modules.autopilot_takeover import AutopilotTakeover, TakeoverConfig
-from tests.fakes import FakeControl, FakeClock
+from tests.fakes import FakeClock
 
 
 def _make_telemetry(alt=3000, agl=1500, ias=120, heading=270,

@@ -51,7 +51,7 @@ class AirportsDatabase:
                 logger.error("Database file not found: %s", self.db_path)
                 return False
 
-            with open(self.db_path, 'r', encoding='utf-8') as f:
+            with open(self.db_path, encoding='utf-8') as f:
                 self.data = json.load(f)
 
             logger.info("Loaded %s airports from database", len(self.data.get('airports', {})))

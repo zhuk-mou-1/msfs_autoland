@@ -6,7 +6,7 @@ import logging
 import math
 from typing import Dict
 
-from modules.types import ApproachConfig, BeaconCheckResult, NavStation, RunwayBeacon
+from modules.types import ApproachConfig, BeaconCheckResult, RunwayBeacon
 
 logger = logging.getLogger(__name__)
 

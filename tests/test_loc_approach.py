@@ -8,7 +8,6 @@ synthetic glidepath, minimum = MDA (barometric, not radio DH).
 from __future__ import annotations
 
 import logging
-import math
 from unittest.mock import MagicMock
 
 import pytest
@@ -369,7 +368,7 @@ class TestLOC_SinkRateClassification:
     def test_loc_sink_rate_is_retryable(self):
         """LOC approach: sink_rate_safe failure → retryable, not hard abort."""
         from modules.autopilot_takeover import (
-            AutopilotTakeover, _HARD_FAIL_CHECKS, _RETRYABLE_CHECKS
+            _HARD_FAIL_CHECKS, _RETRYABLE_CHECKS
         )
 
         # Simulate: sink_rate_safe=False for LOC (not ILS)

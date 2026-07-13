@@ -116,7 +116,7 @@ class AircraftConfigReader:
             return None
 
         try:
-            with open(manifest_path, 'r', encoding='utf-8') as f:
+            with open(manifest_path, encoding='utf-8') as f:
                 manifest = json.load(f)
                 logger.info("Successfully read manifest.json from %s", aircraft_folder.name)
                 return manifest

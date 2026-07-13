@@ -13,7 +13,7 @@ _project_root = str(Path(__file__).resolve().parent.parent)
 if _project_root not in sys.path:
     sys.path.insert(0, _project_root)
 
-from modules.autopilot_takeover import AutopilotTakeover, TakeoverConfig
+from modules.autopilot_takeover import AutopilotTakeover
 
 FEET_PER_METER = 3.28084
 SHORT_RUNWAY_THRESHOLD_M = 1500.0

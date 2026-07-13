@@ -171,7 +171,7 @@ class ThresholdsConfig:
         if not self.config_path.exists():
             raise FileNotFoundError(f"Thresholds config not found: {self.config_path}")
 
-        with open(self.config_path, 'r', encoding='utf-8') as f:
+        with open(self.config_path, encoding='utf-8') as f:
             self._data = json.load(f)
 
     @property

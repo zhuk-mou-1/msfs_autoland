@@ -123,7 +123,7 @@ class LogAnalyzer:
     def _load_logs(self, log_file: Path) -> List[Dict]:
         """Загрузить логи из JSONL файла"""
         logs = []
-        with open(log_file, 'r', encoding='utf-8') as f:
+        with open(log_file, encoding='utf-8') as f:
             for line in f:
                 try:
                     logs.append(json.loads(line))

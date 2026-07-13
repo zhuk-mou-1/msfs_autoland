@@ -48,7 +48,7 @@ class MobiFlightVersionChecker:
             return None
 
         try:
-            with open(manifest_path, 'r', encoding='utf-8') as f:
+            with open(manifest_path, encoding='utf-8') as f:
                 manifest = json.load(f)
 
             # Версия в формате package_version

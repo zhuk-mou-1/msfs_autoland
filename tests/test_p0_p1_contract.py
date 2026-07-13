@@ -1,6 +1,4 @@
 """F1 contract tests: all consumer keys present in producer returns."""
-import math
-import pytest
 from modules.ils_navigation import ILSNavigation, ILSConfig
 from modules.types import ApproachConfig, NavStation
 

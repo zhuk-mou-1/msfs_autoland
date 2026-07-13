@@ -1,9 +1,6 @@
 """F3/F4 tests: execute_go_around re-engages AP + error budget go-around."""
-import pytest
 from unittest.mock import MagicMock, patch
-from tests.fakes import FakeControl, FakeClock
-from modules.autopilot_takeover import AutopilotTakeover, TakeoverConfig
-from modules.command_gateway import CommandGateway, CommandSource
+from tests.fakes import FakeControl
 
 
 class TestGoAroundF3:

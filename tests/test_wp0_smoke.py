@@ -1,7 +1,7 @@
 """WP-0 smoke: test fakes are functional, AutopilotTakeover can be created offline."""
 
-from modules.autopilot_takeover import AutopilotTakeover, TakeoverConfig
-from tests.fakes import FakeAircraftAdapter, FakeControl, FakeVJoy, make_telemetry
+from modules.autopilot_takeover import AutopilotTakeover
+from tests.fakes import FakeControl, make_telemetry
 
 
 def test_fake_control_records_commands():

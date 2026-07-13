@@ -33,7 +33,7 @@ class ApproachSpeedCalculator:
                 logger.error("Aircraft performance database not found: %s", self.config_path)
                 return
 
-            with open(config_file, 'r', encoding='utf-8') as f:
+            with open(config_file, encoding='utf-8') as f:
                 data = json.load(f)
 
             self.aircraft_db = data.get('aircraft_performance', {})

@@ -1,0 +1,39 @@
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "UP"]
+ignore = [
+    "E501",   # line-too-long — too noisy for legacy codebase
+    "E402",   # module-import-not-at-top — required for sys.path manipulation in main.py
+    "UP006",  # non-pep585-annotation — type annotation style, not safe to auto-fix across codebase
+    "UP045",  # non-pep604-annotation-optional — Optional[X] vs X | None, style choice
+    "UP035",  # deprecated-import — some imports are intentional for compatibility
+    "UP024",  # os-error-alias — OSError alias changes, cosmetic
+    "UP037",  # quoted-annotation — cosmetic
+    "UP031",  # printf-string-formatting — mixed style in codebase, not blocking
+    "B905",   # zip-without-explicit-strict — not applicable to all cases
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["F841"]
+"tests/test_p0_architecture.py" = ["E701", "E702"]
+"gui.py" = ["E", "F", "B007", "UP"]
+"modules/command_gateway.py" = ["E701"]  # compact one-liner if/return pattern
+"modules/log_analyzer.py" = ["B007"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+warn_unused_ignores = false
+warn_redundant_casts = false
+warn_unused_configs = false
+
+[[tool.mypy.overrides]]
+module = ["SimConnect", "pyvjoy", "pyvjoy.*", "gtts", "pygame", "pygame.*"]
+ignore_missing_imports = true

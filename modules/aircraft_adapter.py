@@ -57,7 +57,7 @@ class AircraftCommandAdapter:
         """Загрузить профили самолётов из JSON"""
         try:
             profile_path = Path(__file__).parent.parent / "config" / "aircraft_profiles.json"
-            with open(profile_path, 'r', encoding='utf-8') as f:
+            with open(profile_path, encoding='utf-8') as f:
                 return json.load(f)
         except Exception as e:
             logger.error("Failed to load aircraft profiles: %s", e)

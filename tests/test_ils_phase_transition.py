@@ -1,8 +1,6 @@
 """F2 tests: ILS INTERMEDIATE→FINAL transition (deadlock fix)."""
-import pytest
-from unittest.mock import MagicMock, PropertyMock
+from unittest.mock import MagicMock
 from modules.approach_phases import IntermediatePhaseState, FinalPhaseState
-from modules.types import ApproachConfig, NavStation
 
 
 def _make_system(approach_type='ILS', takeover_completed=False,

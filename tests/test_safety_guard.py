@@ -19,7 +19,6 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 _project_root = str(Path(__file__).resolve().parent.parent)
 if _project_root not in sys.path:
@@ -30,10 +29,9 @@ from modules.safety_guard import (
     GuardDecision,
     GuardResult,
     SafetySnapshot,
-    DEBOUNCE_N,
 )
 from modules.types import ApproachConfig, NavStation
-from tests.fakes import FakeControl, FakeVJoy, make_telemetry
+from tests.fakes import make_telemetry
 
 
 # ═══════════════════════════════════════════════════════════════════

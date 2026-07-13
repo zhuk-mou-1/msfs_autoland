@@ -9,7 +9,6 @@ import sys
 from pathlib import Path
 from typing import List
 
-import pytest
 
 _project_root = str(Path(__file__).resolve().parent.parent.parent)
 if _project_root not in sys.path:
@@ -26,7 +25,7 @@ def load_fixture(name: str) -> List[dict]:
     """Загрузить JSONL fixture."""
     path = FIXTURES_DIR / name
     snapshots = []
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if line:

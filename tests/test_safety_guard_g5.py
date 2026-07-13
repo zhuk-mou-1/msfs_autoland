@@ -1,5 +1,4 @@
 """F6 tests: G5 expansion — safety guard triggers on missing VS/bank."""
-import pytest
 from modules.safety_guard import (
     ApproachSafetyGuard, SafetySnapshot, GuardDecision,
 )

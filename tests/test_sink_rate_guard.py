@@ -8,7 +8,6 @@ Threshold: 1000 fpm descent (configurable via sink_rate_max).
 import sys
 from pathlib import Path
 
-import pytest
 
 _project_root = str(Path(__file__).resolve().parent.parent)
 if _project_root not in sys.path:

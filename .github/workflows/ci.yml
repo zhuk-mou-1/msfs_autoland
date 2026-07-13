@@ -30,3 +30,50 @@ jobs:
 
       - name: Run tests
         run: pytest tests/ -q --tb=short
+
+  lint-ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff
+      - run: ruff check .
+
+  type-check-mypy:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install mypy
+      - name: Run mypy on safety-critical modules
+        run: mypy modules/approach_phases.py modules/autopilot_takeover.py modules/safety_guard.py --ignore-missing-imports || true
+
+  radon-complexity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install radon
+      - name: Cyclomatic complexity
+        run: radon cc modules/ main.py -s -a
+      - name: Maintainability index
+        run: radon mi modules/ main.py -s
+
+  bandit-security:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install bandit
+      - name: Run bandit security scan
+        run: bandit -r modules/ main.py -ll

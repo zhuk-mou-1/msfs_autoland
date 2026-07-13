@@ -5,8 +5,7 @@
 import unittest
 from unittest.mock import Mock
 from modules.rudder_compensation import (
-    RudderCompensation,
-    RudderCompensationConfig
+    RudderCompensation
 )
 from modules.control import MSFSControl
 

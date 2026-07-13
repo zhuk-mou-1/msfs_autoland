@@ -3,11 +3,9 @@
 """
 
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 from modules.engine_failure_detector import (
-    EngineFailureDetector,
-    EngineFailureThresholds,
-    EngineState
+    EngineFailureDetector
 )
 from modules.autothrottle import AutothrottleController
 from modules.control import MSFSControl

@@ -7,13 +7,12 @@
 import sys
 from pathlib import Path
 
-import pytest
 
 _project_root = str(Path(__file__).resolve().parent.parent)
 if _project_root not in sys.path:
     sys.path.insert(0, _project_root)
 
-from modules.control_ownership import ControlOwner, ControlOwnership, compute_ownership
+from modules.control_ownership import ControlOwner, compute_ownership
 from tests.fakes import FakeControl, FakeVJoy
 
 

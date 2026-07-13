@@ -21,7 +21,6 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 _project_root = str(Path(__file__).resolve().parent.parent)
 if _project_root not in sys.path:
@@ -64,7 +63,7 @@ def _full_telemetry() -> dict:
 
 def _read_csv(path: Path) -> tuple:
     """Read CSV file, return (header, list-of-row-dicts)."""
-    with open(path, 'r', encoding='utf-8') as f:
+    with open(path, encoding='utf-8') as f:
         reader = csv.DictReader(f)
         header = reader.fieldnames or []
         rows = list(reader)
@@ -811,7 +810,7 @@ class TestRecorderReadOnlyContract:
         original = copy.deepcopy(t)
         rec.write_frame(t, phase="FINAL")
         rec.stop_recording()
-        assert t == original, f"Telemetry was mutated by write_frame"
+        assert t == original, "Telemetry was mutated by write_frame"
 
 
 # ═══════════════════════════════════════════════════════════════════

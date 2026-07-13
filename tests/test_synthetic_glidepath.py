@@ -16,7 +16,6 @@ from __future__ import annotations
 import math
 from unittest.mock import MagicMock
 
-import pytest
 
 from modules.synthetic_glidepath import SyntheticGlidepath
 from modules.types import ApproachConfig, NavStation

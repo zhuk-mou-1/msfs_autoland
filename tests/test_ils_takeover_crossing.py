@@ -8,7 +8,6 @@
 import sys
 from pathlib import Path
 
-import pytest
 
 _project_root = str(Path(__file__).resolve().parent.parent)
 if _project_root not in sys.path:
@@ -226,7 +225,7 @@ class TestILSCrossingDetection:
 
         Проверяет DH guard в approach_phases.py FinalPhaseState.
         """
-        from unittest.mock import MagicMock, PropertyMock
+        from unittest.mock import MagicMock
         from modules.approach_phases import FinalPhaseState
 
         system = MagicMock()
