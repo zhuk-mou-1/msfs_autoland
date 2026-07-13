@@ -45,40 +45,19 @@ class WindCorrection:
         Расчёт угла сноса
 
         Args:
-            crosswind: Боковой ветер (узлы)
+            crosswind: Боковой ветер (узлы, > 0 = справа)
             true_airspeed: Истинная воздушная скорость (узлы)
 
         Returns:
-            Угол сноса (градусы)
+            Угол сноса (градусы): отрицательный = снос влево,
+            положительный = снос вправо.
+            Ветер справа (crosswind > 0) → снос влево (drift < 0).
         """
         if true_airspeed <= 0:
             return 0.0
 
-        # Угол сноса = arcsin(боковой ветер / истинная скорость)
-        drift = math.degrees(math.asin(min(1.0, abs(crosswind) / true_airspeed)))
-
-        # Знак зависит от направления бокового ветра
-        return drift if crosswind > 0 else -drift
-
-    @staticmethod
-    def calculate_crab_angle(crosswind: float, ground_speed: float) -> float:
-        """
-        Расчёт угла упреждения (crab angle) для компенсации сноса
-
-        Args:
-            crosswind: Боковой ветер (узлы)
-            ground_speed: Путевая скорость (узлы)
-
-        Returns:
-            Угол упреждения (градусы)
-        """
-        if ground_speed <= 0:
-            return 0.0
-
-        # Угол упреждения противоположен углу сноса
-        crab = math.degrees(math.atan2(crosswind, ground_speed))
-
-        return -crab  # Отрицательный, чтобы компенсировать снос
+        ratio = max(-1.0, min(1.0, -crosswind / true_airspeed))
+        return math.degrees(math.asin(ratio))
 
     def calculate_corrected_heading(self, desired_track: float, wind_speed: float,
                                    wind_direction: float, true_airspeed: float) -> float:
@@ -99,11 +78,10 @@ class WindCorrection:
             wind_speed, wind_direction, desired_track
         )
 
-        # Угол упреждения
+        # Угол упреждения: crosswind > 0 (справа) → crab > 0 (нос вправо)
         if true_airspeed > 0:
-            crab = math.degrees(math.asin(min(1.0, abs(crosswind) / true_airspeed)))
-            if crosswind > 0:
-                crab = -crab  # Ветер справа - лететь левее
+            ratio = max(-1.0, min(1.0, crosswind / true_airspeed))
+            crab = math.degrees(math.asin(ratio))
         else:
             crab = 0.0
 
@@ -144,7 +122,10 @@ class WindCorrection:
     def calculate_pitch_correction(self, headwind: float, target_vs: float,
                                   airspeed: float) -> float:
         """
-        Расчёт коррекции тангажа при встречном/попутном ветре
+        .. deprecated::
+            Не использовать. VS = GS × tan(γ) уже полностью определяет
+            вертикальную скорость; headwind * 10 — недокументированная
+            эвристика, повторно учитывающая ветер. Оставлен для совместимости.
 
         Args:
             headwind: Встречный ветер (узлы, + встречный, - попутный)
@@ -154,9 +135,6 @@ class WindCorrection:
         Returns:
             Коррекция вертикальной скорости (футы/мин)
         """
-        # При встречном ветре нужно увеличить VS для сохранения глиссады
-        # При попутном - уменьшить
-        # Примерно 10 fpm на 1 узел встречного ветра
         correction = headwind * 10
 
         logger.debug("Headwind: %skt, VS correction: %s fpm", headwind, correction)
@@ -190,6 +168,31 @@ class WindCorrection:
         desired_track = approach_data.get('corrected_heading',
                                           config.final_approach_course)
 
+        # F-W2: fail-closed on invalid wind inputs
+        if (not math.isfinite(wind_speed)
+                or not math.isfinite(wind_direction)
+                or wind_speed < 0):
+            logger.warning(
+                "Invalid wind inputs: speed=%s, direction=%s; "
+                "returning zero corrections",
+                wind_speed, wind_direction,
+            )
+            base_vs = self.calculate_descent_rate(
+                ground_speed, config.glideslope_angle
+            )
+            return {
+                'wind_speed': wind_speed,
+                'wind_direction': wind_direction,
+                'headwind': 0.0,
+                'crosswind': 0.0,
+                'drift_angle': 0.0,
+                'corrected_heading': desired_track,
+                'recommended_bank': 0.0,
+                'base_vs': base_vs,
+                'vs_correction': 0.0,
+                'corrected_vs': base_vs,
+            }
+
         # Компоненты ветра
         headwind, crosswind = self.calculate_wind_components(
             wind_speed, wind_direction, desired_track
@@ -208,12 +211,8 @@ class WindCorrection:
             crosswind, speed.get('airspeed_indicated', 0)
         )
 
-        # Коррекция вертикальной скорости
+        # F-W3: corrected_vs = base_vs (geometric VS = GS × tan(γ))
         base_vs = self.calculate_descent_rate(ground_speed, config.glideslope_angle)
-        vs_correction = self.calculate_pitch_correction(
-            headwind, base_vs, speed.get('airspeed_indicated', 0)
-        )
-        corrected_vs = base_vs + vs_correction
 
         return {
             'wind_speed': wind_speed,
@@ -224,8 +223,8 @@ class WindCorrection:
             'corrected_heading': corrected_heading,
             'recommended_bank': recommended_bank,
             'base_vs': base_vs,
-            'vs_correction': vs_correction,
-            'corrected_vs': corrected_vs,
+            'vs_correction': 0.0,
+            'corrected_vs': base_vs,
         }
 
     @staticmethod
@@ -238,7 +237,13 @@ class WindCorrection:
             glideslope_angle: Угол глиссады (градусы)
 
         Returns:
-            Вертикальная скорость (футы/мин)
+            Вертикальная скорость (футы/мин). 0.0 если угол вне (0, 10].
         """
+        if glideslope_angle <= 0 or glideslope_angle > 10:
+            logger.warning(
+                "Glideslope angle %.1f° outside valid range (0, 10]; returning 0.0",
+                glideslope_angle,
+            )
+            return 0.0
         vs = ground_speed * math.tan(math.radians(glideslope_angle)) * 101.3
         return vs
