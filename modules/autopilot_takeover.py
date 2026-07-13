@@ -291,19 +291,33 @@ class AutopilotTakeover:
         return checks
 
     def _send_disengage_commands(self, aircraft_adapter, control):
-        """Отправить команды выключения AP/A/T (без подтверждения)."""
+        """Отправить команды выключения AP/A/T (без подтверждения).
+
+        FIX-P1-1: control.set_heading_hold / set_altitude_hold /
+        set_airspeed_hold / set_vertical_speed take an optional *target*
+        value, not an on/off flag - calling them with False does not
+        disengage anything; it unconditionally ENGAGES the sub-mode and
+        (since int(False) == 0) drives its target to zero. The previous
+        call to the non-existent set_vertical_speed_hold(False) additionally
+        raised AttributeError on a real MSFSControl instance. AP master
+        disengage (set_autopilot_master(False)) already disengages all AP
+        sub-modes at the hardware/sim level, so the fix relies on that
+        single authoritative disengage command instead of issuing
+        contradictory sub-mode "hold" calls.
+        """
         logger.info("Sending disengage commands...")
 
         # Try adapter first
         if aircraft_adapter and hasattr(aircraft_adapter, 'disengage_autopilot'):
             aircraft_adapter.disengage_autopilot()
 
-        # SimConnect fallback
+        # SimConnect fallback: master AP off disengages all AP sub-modes
+        # (heading/altitude/airspeed/vertical-speed hold) at the sim level.
+        # Do NOT call set_heading_hold/set_altitude_hold/set_airspeed_hold/
+        # set_vertical_speed here with False - those methods take a target
+        # value, not a boolean, and would erroneously re-engage the sub-mode
+        # with a zeroed target instead of disengaging it.
         control.set_autopilot_master(False)
-        control.set_heading_hold(False)
-        control.set_altitude_hold(False)
-        control.set_airspeed_hold(False)
-        control.set_vertical_speed_hold(False)
 
         if aircraft_adapter and hasattr(aircraft_adapter, 'disengage_autothrottle'):
             aircraft_adapter.disengage_autothrottle()

@@ -335,10 +335,14 @@ class ConnectionMonitor:
             self.current_phase = FlightPhase.CRUISE
         elif altitude_agl > 10000 and vertical_speed < -500:
             self.current_phase = FlightPhase.DESCENT
+        elif altitude_agl < 500:
+            # FIX-P1-3: LANDING must be checked before the broader APPROACH
+            # window (altitude_agl < 3000 and vertical_speed < 0), which
+            # previously shadowed LANDING for nearly all normal descending
+            # approaches below 500ft.
+            self.current_phase = FlightPhase.LANDING
         elif altitude_agl < 3000 and vertical_speed < 0:
             self.current_phase = FlightPhase.APPROACH
-        elif altitude_agl < 500:
-            self.current_phase = FlightPhase.LANDING
 
         if old_phase != self.current_phase:
             logger.info("Flight phase changed: %s -> %s", old_phase.value, self.current_phase.value)

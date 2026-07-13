@@ -288,12 +288,15 @@ class FinalPhaseState(ApproachPhaseState):
 
         # Переход к посадке
         if radio_height < self.system.approach_config.decision_height:
-            # WP-4 DH guard: ниже DH без confirmed takeover → go-around
-            if (self.system.use_ils and
-                    not self.system.autopilot_takeover.status.completed):
+            # WP-4 DH guard: ниже DH/MDA без confirmed takeover → go-around
+            # FIX-P0-1: guard now applies to ALL approach types (ILS, LOC,
+            # VOR, NDB), not only ILS. Non-ILS approaches receive takeover
+            # initiation in IntermediatePhaseState, so status.completed is
+            # populated the same way regardless of approach type.
+            if not self.system.autopilot_takeover.status.completed:
                 logger.critical(
-                    "DH GUARD: Below DH (%.0fft) without confirmed takeover "
-                    "- GO AROUND", radio_height)
+                    "DH GUARD: Below DH/MDA (%.0fft) without confirmed "
+                    "takeover - GO AROUND", radio_height)
                 self.system.execute_go_around()
                 return None
 
