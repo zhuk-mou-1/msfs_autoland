@@ -102,8 +102,17 @@ class SyntheticGlidepath:
             Target VS in fpm (**positive = descend**).
             Guaranteed ≤ 0 when altitude_msl ≤ MDA_MSL + hysteresis.
         """
-        altitude_msl = telemetry["position"]["altitude"]
-        altitude_agl = telemetry["position"]["altitude_agl"]
+        # FIX-P1-5: defensive telemetry access - the rest of the codebase
+        # treats missing telemetry keys as a fail-safe "hold / do not
+        # command further descent" signal rather than raising KeyError.
+        position = telemetry.get("position", {})
+        altitude_msl = position.get("altitude")
+        altitude_agl = position.get("altitude_agl")
+        latitude = position.get("latitude")
+        longitude = position.get("longitude")
+
+        if altitude_msl is None or altitude_agl is None or latitude is None or longitude is None:
+            return 0.0
 
         # ── MDA hard floor (MSL comparison) ─────────────────────────
         # _mda_msl = decision_height (AGL) + runway_elevation
@@ -112,8 +121,8 @@ class SyntheticGlidepath:
 
         # ── Descent status via existing helper ──────────────────────
         descent_info = self._nav.should_start_descent(
-            current_lat=telemetry["position"]["latitude"],
-            current_lon=telemetry["position"]["longitude"],
+            current_lat=latitude,
+            current_lon=longitude,
             current_altitude_agl=altitude_agl,
             intercept_point=self._intercept_point,
         )
@@ -128,8 +137,8 @@ class SyntheticGlidepath:
 
         # ── Position-based ideal altitude (MSL) ────────────────────
         distance_nm = self._nav.calculate_distance_to_threshold(
-            telemetry["position"]["latitude"],
-            telemetry["position"]["longitude"],
+            latitude,
+            longitude,
             self._config,
         )
 

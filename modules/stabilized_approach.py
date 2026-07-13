@@ -139,7 +139,10 @@ class StabilizedApproachMonitor:
                                  f"(max {self.criteria.max_vertical_speed} fpm)")
 
         # 3. Проверка отклонения от глиссады
-        altitude_deviation = telemetry['position']['altitude'] - approach_data.get('required_altitude', 0)
+        # FIX-P1-4: use the already-defensive position_data.get(...)
+        # instead of a direct bracket access, avoiding an uncaught
+        # KeyError if 'altitude' is missing from telemetry['position'].
+        altitude_deviation = position_data.get('altitude', 0) - approach_data.get('required_altitude', 0)
         # Преобразование в "dots" (примерно 200ft = 1 dot)
         glideslope_dots = abs(altitude_deviation) / 200.0
         if glideslope_dots > self.criteria.max_glideslope_deviation:

@@ -310,11 +310,16 @@ class TestILSCrossingDetection:
         assert status.completed is True, \
             "ILS takeover should complete with AP/AT readback confirmed"
 
-        # Verify AP/AT commands were actually sent
+        # Verify AP disengage command was actually sent
         assert ctrl.has_call("set_autopilot_master"), \
             "AP disengage command should be sent"
-        assert ctrl.has_call("set_airspeed_hold"), \
-            "AT-related command should be sent"
+        # FIX-P1-1: set_airspeed_hold(False) must NOT be sent anymore.
+        # control.py hold setters take a target value (not a bool), so
+        # the old call actually RE-ENGAGED airspeed hold with a zeroed
+        # target. set_autopilot_master(False) alone disengages all AP
+        # sub-modes at the SimConnect level.
+        assert not ctrl.has_call("set_airspeed_hold"), \
+            "set_airspeed_hold must NOT be called during disengage (FIX-P1-1)"
 
     def test_ils_without_decision_height_fail_closed(self):
         """FIX-9: ILS without decision_height → altitude_safe=False, no commands."""
