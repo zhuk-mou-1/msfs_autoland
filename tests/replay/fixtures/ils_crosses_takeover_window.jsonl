@@ -1,0 +1,2 @@
+{"t": 0.0, "position": {"altitude_agl": 270, "radio_height": 270, "on_ground": false, "latitude": 55.5, "longitude": 37.5}, "attitude": {"bank": 0, "pitch": 2.5, "heading_magnetic": 270}, "speed": {"airspeed_indicated": 140, "vertical_speed": -700, "ground_speed": 140}}
+{"t": 0.5, "position": {"altitude_agl": 190, "radio_height": 190, "on_ground": false, "latitude": 55.5, "longitude": 37.5}, "attitude": {"bank": 0, "pitch": 2.5, "heading_magnetic": 270}, "speed": {"airspeed_indicated": 140, "vertical_speed": -700, "ground_speed": 140}}

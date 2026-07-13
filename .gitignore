@@ -42,6 +42,7 @@ env/
 # Claude Code - Transcripts and Local Docs
 logs/*.jsonl
 *.jsonl
+!tests/replay/fixtures/*.jsonl
 SUMMARY_*.md
 CHANGELOG_*.md
 BUGFIX_*.md
