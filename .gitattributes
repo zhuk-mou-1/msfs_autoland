@@ -1,0 +1,2 @@
+﻿# Architecture docs - enforce LF for cross-platform hash consistency
+docs/architecture/** text eol=lf.github/workflows/** text eol=lf
