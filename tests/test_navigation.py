@@ -964,3 +964,204 @@ def test_navf1_downstream_no_false_profile_after_threshold():
     assert vs_past <= 0, (
         f"NAV-F1 downstream: past threshold got VS={vs_past} (should be <= 0)"
     )
+
+
+# --- NAV-F1 addendum-2: on-profile decision logic tests ---
+
+def test_navf1_on_profile_75_50_25_should_descend():
+    """NAV-F1 addendum-2: on-profile at 75/50/25% → ON_PROFILE, should_descend=True."""
+    nav, ip = _make_nav_and_intercept()
+    threshold_lat = 45.0
+    threshold_lon = 90.0
+    cos_lat = math.cos(math.radians(threshold_lat))
+    intercept_to_thresh = ip['intercept_to_threshold_nm']
+
+    for pct in [0.75, 0.50, 0.25]:
+        along_nm = intercept_to_thresh * pct
+        lon_offset = along_nm / (60.0 * cos_lat)
+        lat = threshold_lat
+        lon = threshold_lon - lon_offset
+
+        # Get ideal altitude
+        result = nav.should_start_descent(
+            current_lat=lat, current_lon=lon,
+            current_altitude_agl=ip['altitude_agl'],
+            intercept_point=ip,
+        )
+        ideal = result['ideal_altitude_agl']
+
+        # Test with aircraft exactly on profile
+        result_on = nav.should_start_descent(
+            current_lat=lat, current_lon=lon,
+            current_altitude_agl=ideal,
+            intercept_point=ip,
+        )
+        assert result_on['status'] == 'ON_PROFILE', (
+            f"At {pct*100:.0f}% path: expected ON_PROFILE, got {result_on['status']}"
+        )
+        assert result_on['should_descend'] is True, (
+            f"At {pct*100:.0f}% path: expected should_descend=True, got False"
+        )
+
+
+def test_navf1_on_profile_downstream_positive_vs():
+    """NAV-F1 addendum-2: on-profile at 50% via SyntheticGlidepath → non-negative VS."""
+    from modules.navigation import Navigation
+    from modules.types import ApproachConfig, NavStation
+    from modules.synthetic_glidepath import SyntheticGlidepath
+
+    nav = Navigation.__new__(Navigation)
+    station = NavStation(name="TEST", frequency=110.0,
+                         latitude=45.0, longitude=90.0, type="VOR")
+    config = ApproachConfig(
+        station=station,
+        final_approach_course=90,
+        glideslope_angle=3.0,
+        decision_height=200,
+        approach_speed=90,
+        runway_elevation=100,
+        runway_length=3000,
+        runway_width=45,
+        runway_threshold_lat=45.0,
+        runway_threshold_lon=90.0,
+    )
+    glidepath = SyntheticGlidepath(nav, config)
+
+    ip = nav.calculate_glideslope_intercept_point(
+        45.0, 90.0, 90.0, 100.0, 3.0,
+    )
+    intercept_to_thresh = ip['intercept_to_threshold_nm']
+    cos_lat = math.cos(math.radians(45.0))
+
+    along_nm = intercept_to_thresh * 0.5
+    lon_offset = along_nm / (60.0 * cos_lat)
+    ideal_agl = along_nm * ip['feet_per_nm']
+
+    telemetry = {
+        'position': {
+            'latitude': 45.0,
+            'longitude': 90.0 - lon_offset,
+            'altitude': 100 + ideal_agl,
+            'altitude_agl': ideal_agl,
+        }
+    }
+    vs = glidepath.compute_target_vs(telemetry, wind_correction_vs=0.0)
+    descent_info = nav.should_start_descent(
+        current_lat=45.0, current_lon=90.0 - lon_offset,
+        current_altitude_agl=ideal_agl, intercept_point=ip,
+    )
+    assert descent_info['should_descend'] is True, (
+        "NAV-F1 addendum-2: on-profile should_descend should be True"
+    )
+    assert descent_info['status'] == 'ON_PROFILE'
+    assert vs >= 0
+
+
+def test_navf1_before_intercept_no_descend():
+    """NAV-F1 addendum-2: before intercept → should_descend=False."""
+    nav, ip = _make_nav_and_intercept()
+    threshold_lat = 45.0
+    threshold_lon = 90.0
+    cos_lat = math.cos(math.radians(threshold_lat))
+    intercept_to_thresh = ip['intercept_to_threshold_nm']
+
+    before_nm = intercept_to_thresh + 1.0
+    lon_offset = before_nm / (60.0 * cos_lat)
+    result = nav.should_start_descent(
+        current_lat=threshold_lat,
+        current_lon=threshold_lon - lon_offset,
+        current_altitude_agl=ip['altitude_agl'],
+        intercept_point=ip,
+    )
+    assert result['should_descend'] is False
+    assert result['status'] == 'OK'
+
+
+def test_navf1_after_threshold_no_descend():
+    """NAV-F1 addendum-2: after threshold → should_descend=False."""
+    nav, ip = _make_nav_and_intercept()
+    threshold_lat = 45.0
+    threshold_lon = 90.0
+    cos_lat = math.cos(math.radians(threshold_lat))
+
+    past_nm = 1.0
+    lon_offset = past_nm / (60.0 * cos_lat)
+    result = nav.should_start_descent(
+        current_lat=threshold_lat,
+        current_lon=threshold_lon + lon_offset,
+        current_altitude_agl=0.0,
+        intercept_point=ip,
+    )
+    assert result['should_descend'] is False
+    assert result['status'] == 'PAST_THRESHOLD'
+
+
+# --- NAV-F3 addendum-2: boundary tests ---
+
+def test_runway_beacons_longitude_boundary():
+    """NAV-F3: longitude boundary — -180, 180 ok; out of range raises ValueError."""
+    from modules.navigation import Navigation
+
+    nav = Navigation.__new__(Navigation)
+    nav.calculate_runway_beacons(
+        runway_threshold_lat=45.0, runway_threshold_lon=-180.0,
+        runway_heading=90, runway_elevation=100,
+    )
+    nav.calculate_runway_beacons(
+        runway_threshold_lat=45.0, runway_threshold_lon=180.0,
+        runway_heading=90, runway_elevation=100,
+    )
+    try:
+        nav.calculate_runway_beacons(
+            runway_threshold_lat=45.0, runway_threshold_lon=181.0,
+            runway_heading=90, runway_elevation=100,
+        )
+        raise AssertionError("Should have raised ValueError for lon > 180")
+    except ValueError:
+        pass
+    try:
+        nav.calculate_runway_beacons(
+            runway_threshold_lat=45.0, runway_threshold_lon=-181.0,
+            runway_heading=90, runway_elevation=100,
+        )
+        raise AssertionError("Should have raised ValueError for lon < -180")
+    except ValueError:
+        pass
+    try:
+        nav.calculate_runway_beacons(
+            runway_threshold_lat=45.0, runway_threshold_lon=1000.0,
+            runway_heading=90, runway_elevation=100,
+        )
+        raise AssertionError("Should have raised ValueError for lon=1000")
+    except ValueError:
+        pass
+
+
+def test_runway_beacons_heading_normalization():
+    """NAV-F3: heading is normalized to [0, 360) via % 360."""
+    from modules.navigation import Navigation
+
+    nav = Navigation.__new__(Navigation)
+    result = nav.calculate_runway_beacons(
+        runway_threshold_lat=45.0, runway_threshold_lon=90.0,
+        runway_heading=360.0, runway_elevation=100,
+    )
+    assert result['outer'] is not None
+
+    result = nav.calculate_runway_beacons(
+        runway_threshold_lat=45.0, runway_threshold_lon=90.0,
+        runway_heading=450.0, runway_elevation=100,
+    )
+    assert result['outer'] is not None
+
+    result = nav.calculate_runway_beacons(
+        runway_threshold_lat=45.0, runway_threshold_lon=90.0,
+        runway_heading=-90.0, runway_elevation=100,
+    )
+    assert result['outer'] is not None
+
+    result = nav.calculate_runway_beacons(
+        runway_threshold_lat=45.0, runway_threshold_lon=90.0,
+        runway_heading=100000.0, runway_elevation=100,
+    )
+    assert result['outer'] is not None

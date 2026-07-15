@@ -487,36 +487,50 @@ class Navigation:
             angle_error = actual_angle - glideslope_angle
             vertical_deviation_dots = angle_error / 0.35
 
-        # Решение о начале снижения
+        # Решение о начале снижения — NAV-F1: use along-track phase
         should_descend = False
         reason = ""
         status = "OK"
 
-        if distance_to_intercept <= tolerance_nm:
-            # Достигли точки входа
-            should_descend = True
-            reason = f"Reached glideslope intercept point ({distance_to_intercept:.1f} NM)"
-            status = "INTERCEPT"
-        elif altitude_error > 300:
-            # Слишком высоко для текущей позиции
-            should_descend = True
-            reason = f"Too high by {altitude_error:.0f} ft - start early descent"
-            status = "HIGH"
-        elif altitude_error < -300:
-            # Слишком низко - опасно!
+        # Phase determination from along-track position
+        is_before_intercept = along_track_nm > intercept_to_threshold + tolerance_nm
+        is_at_intercept = abs(along_track_nm - intercept_to_threshold) <= tolerance_nm
+        is_past_threshold = along_track_nm <= 0.0
+        is_between = not is_before_intercept and not is_at_intercept and not is_past_threshold
+
+        if is_before_intercept:
+            # Not yet at intercept: hold altitude
             should_descend = False
-            reason = f"Too low by {abs(altitude_error):.0f} ft - MAINTAIN or CLIMB"
-            status = "LOW"
-        elif abs(altitude_error) <= 200:
-            # В пределах нормы
-            should_descend = (distance_to_intercept <= tolerance_nm)
-            reason = "On profile"
-            status = "ON_PROFILE"
-        else:
-            # Небольшое отклонение
-            should_descend = (distance_to_intercept <= tolerance_nm * 1.5)
-            reason = f"Slight deviation: {altitude_error:+.0f} ft"
-            status = "DEVIATION"
+            reason = f"Before intercept ({along_track_nm:.1f} NM from threshold)"
+            status = "OK"
+        elif is_at_intercept:
+            # At intercept point
+            should_descend = True
+            reason = "Reached glideslope intercept point"
+            status = "INTERCEPT"
+        elif is_past_threshold:
+            # Past threshold: do not descend further
+            should_descend = False
+            reason = f"Past threshold ({along_track_nm:.1f} NM)"
+            status = "PAST_THRESHOLD"
+        elif is_between:
+            # Between intercept and threshold
+            if altitude_error > 300:
+                should_descend = True
+                reason = f"Too high by {altitude_error:.0f} ft - descend"
+                status = "HIGH"
+            elif altitude_error < -300:
+                should_descend = False
+                reason = f"Too low by {abs(altitude_error):.0f} ft - MAINTAIN"
+                status = "LOW"
+            elif abs(altitude_error) <= 200:
+                should_descend = True  # On profile: continue descent
+                reason = "On profile"
+                status = "ON_PROFILE"
+            else:
+                should_descend = True  # Slight deviation: continue
+                reason = f"Slight deviation: {altitude_error:+.0f} ft"
+                status = "DEVIATION"
 
         return {
             'should_descend': should_descend,
@@ -611,8 +625,12 @@ class Navigation:
             raise ValueError(f"runway_threshold_lat must be in [-90, 90], got {runway_threshold_lat}")
         if not math.isfinite(runway_threshold_lon):
             raise ValueError(f"runway_threshold_lon must be finite, got {runway_threshold_lon}")
+        if not (-180.0 <= runway_threshold_lon <= 180.0):
+            raise ValueError(f"runway_threshold_lon must be in [-180, 180], got {runway_threshold_lon}")
         if not math.isfinite(runway_heading):
             raise ValueError(f"runway_heading must be finite, got {runway_heading}")
+        # Normalize heading to [0, 360)
+        runway_heading = runway_heading % 360.0
         if not math.isfinite(runway_elevation):
             raise ValueError(f"runway_elevation must be finite, got {runway_elevation}")
         if not math.isfinite(glideslope_angle) or glideslope_angle <= 0:
