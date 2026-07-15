@@ -57,6 +57,54 @@ class Navigation:
             diff += 360
         return diff
 
+    def calculate_signed_along_track(
+        self,
+        aircraft_lat: float,
+        aircraft_lon: float,
+        threshold_lat: float,
+        threshold_lon: float,
+        runway_heading: float,
+    ) -> tuple:
+        """
+        Calculate signed along-track and cross-track distances using local tangent-plane projection.
+
+        Returns:
+            (along_track_nm, cross_track_nm):
+            - along_track_nm: positive before threshold (approach side), 0 at threshold, negative after
+            - cross_track_nm: lateral offset from extended centerline (sign convention: + = right of course)
+        """
+        NM_PER_DEG_LAT = 60.0
+
+        # Delta from threshold to aircraft in degrees
+        delta_lat = aircraft_lat - threshold_lat
+        delta_lon = aircraft_lon - threshold_lon
+
+        # Convert to NM using local tangent-plane approximation
+        delta_north_nm = delta_lat * NM_PER_DEG_LAT
+        cos_lat = math.cos(math.radians(threshold_lat))
+        if abs(cos_lat) < 1e-6:
+            # Near pole: longitude projection undefined, use 0 for east-west
+            delta_east_nm = 0.0
+        else:
+            delta_east_nm = delta_lon * NM_PER_DEG_LAT * cos_lat
+
+        # Outbound runway axis (from threshold away from approach)
+        # Inbound final course = runway_heading, so outbound = runway_heading + 180
+        # Convert navigation heading to math angle: math_angle = 90 - heading
+        outbound_heading = (runway_heading + 180) % 360
+        outbound_math_rad = math.radians(90 - outbound_heading)
+
+        # Project delta onto outbound axis (along-track) and perpendicular (cross-track)
+        along_track_nm = (delta_north_nm * math.sin(outbound_math_rad) +
+                          delta_east_nm * math.cos(outbound_math_rad))
+
+        # Right perpendicular to outbound: math_angle = outbound_math - 90°
+        right_math_rad = math.radians(90 - outbound_heading - 90)
+        cross_track_nm = (delta_north_nm * math.sin(right_math_rad) +
+                           delta_east_nm * math.cos(right_math_rad))
+
+        return along_track_nm, cross_track_nm
+
     def calculate_intercept_heading(self, current_heading: float, target_radial: float,
                                    cross_track_error: float) -> float:
         """
@@ -144,11 +192,12 @@ class Navigation:
             config.station.longitude
         )
 
-        # Текущий радиал (обратный пеленг)
+        # Текущий радиал (обратный пеленг) — сохранён для observability/совместимости
         current_radial = self.normalize_angle(bearing_to_station + 180)
 
-        # Боковое отклонение от курса
-        cross_track_error = self.angle_difference(current_radial, config.final_approach_course)
+        # NAV-F2 fix: cross_track_error строится из inbound bearing (к станции),
+        # а НЕ из outbound radial. final_approach_course — inbound курс захода.
+        cross_track_error = self.angle_difference(bearing_to_station, config.final_approach_course)
 
         # Требуемая высота на глиссаде
         required_altitude = self.calculate_required_altitude(
@@ -371,7 +420,11 @@ class Navigation:
             'altitude_msl': intercept_altitude_agl + runway_elevation,
             'glideslope_angle': glideslope_angle,
             'runway_heading': runway_heading,
-            'feet_per_nm': intercept_altitude_agl / distance_nm if distance_nm > 0 else 0
+            'feet_per_nm': intercept_altitude_agl / distance_nm if distance_nm > 0 else 0,
+            # NAV-F1: downstream data for threshold-based profile
+            'threshold_lat': runway_threshold_lat,
+            'threshold_lon': runway_threshold_lon,
+            'intercept_to_threshold_nm': distance_nm,
         }
 
     def should_start_descent(self,
@@ -393,69 +446,96 @@ class Navigation:
         Returns:
             Dict с решением и параметрами
         """
-        # Расстояние до точки входа
+        threshold_lat = intercept_point['threshold_lat']
+        threshold_lon = intercept_point['threshold_lon']
+        runway_heading = intercept_point['runway_heading']
+        intercept_to_threshold = intercept_point['intercept_to_threshold_nm']
+        feet_per_nm = intercept_point['feet_per_nm']
+        glideslope_angle = intercept_point['glideslope_angle']
+
+        # NAV-F1: signed along-track projection via local tangent-plane
+        along_track_nm, cross_track_nm = self.calculate_signed_along_track(
+            current_lat, current_lon,
+            threshold_lat, threshold_lon,
+            runway_heading,
+        )
+
+        # Scalar distance to intercept (for status/reason messages)
         distance_to_intercept = self.calculate_distance(
             current_lat, current_lon,
             intercept_point['latitude'], intercept_point['longitude']
         )
 
-        # Идеальная высота для текущей позиции на глиссаде
-        glideslope_angle = intercept_point['glideslope_angle']
-        ideal_altitude = self.calculate_glideslope_distance(
-            distance_to_intercept * (intercept_point['feet_per_nm']),
-            glideslope_angle
-        ) * intercept_point['feet_per_nm']
+        # NAV-F1: profile distance along final axis, clamped to [0, intercept_to_threshold]
+        # along_track_nm > 0 means approach side (before threshold)
+        # along_track_nm = 0 means at threshold
+        # along_track_nm < 0 means past threshold
+        profile_distance = max(0.0, min(along_track_nm, intercept_to_threshold))
 
-        # Или проще: пропорционально расстоянию
-        if distance_to_intercept <= intercept_point['distance_from_threshold_nm']:
-            # Находимся между точкой входа и порогом
-            ideal_altitude = distance_to_intercept * intercept_point['feet_per_nm']
-        else:
-            # Ещё не достигли точки входа
-            ideal_altitude = intercept_point['altitude_agl']
+        # Ideal altitude from profile
+        ideal_altitude = profile_distance * feet_per_nm
 
         # Разница высот
         altitude_error = current_altitude_agl - ideal_altitude
 
         # Вертикальное отклонение в точках (dots)
         # 1 dot = 0.35° для ILS glideslope
-        # Full scale = ±2.5 dots = ±0.7°
+        # Use along-track distance for angle calculation (not scalar)
         vertical_deviation_dots = 0.0
-        if distance_to_intercept > 0.1:  # Избегаем деления на ноль
-            actual_angle = math.degrees(math.atan(current_altitude_agl / (distance_to_intercept * 6076.12)))
+        if along_track_nm > 0.1:
+            actual_angle = math.degrees(math.atan(current_altitude_agl / (along_track_nm * 6076.12)))
             angle_error = actual_angle - glideslope_angle
             vertical_deviation_dots = angle_error / 0.35
 
-        # Решение о начале снижения
+        # Решение о начале снижения — NAV-F1: use along-track phase
         should_descend = False
         reason = ""
         status = "OK"
 
-        if distance_to_intercept <= tolerance_nm:
-            # Достигли точки входа
+        # Phase determination from along-track position
+        is_before_intercept = along_track_nm > intercept_to_threshold + tolerance_nm
+        is_at_intercept = abs(along_track_nm - intercept_to_threshold) <= tolerance_nm
+        is_past_threshold = along_track_nm <= 0.0
+        is_between = not is_before_intercept and not is_at_intercept and not is_past_threshold
+
+        if is_before_intercept:
+            # Before intercept: allow descent only if significantly above intercept altitude
+            if altitude_error > 300:
+                should_descend = True
+                reason = f"Too high by {altitude_error:.0f} ft before intercept - descend"
+                status = "HIGH"
+            else:
+                should_descend = False
+                reason = f"Before intercept ({along_track_nm:.1f} NM from threshold)"
+                status = "OK"
+        elif is_at_intercept:
+            # At intercept point
             should_descend = True
-            reason = f"Reached glideslope intercept point ({distance_to_intercept:.1f} NM)"
+            reason = "Reached glideslope intercept point"
             status = "INTERCEPT"
-        elif altitude_error > 300:
-            # Слишком высоко для текущей позиции
-            should_descend = True
-            reason = f"Too high by {altitude_error:.0f} ft - start early descent"
-            status = "HIGH"
-        elif altitude_error < -300:
-            # Слишком низко - опасно!
+        elif is_past_threshold:
+            # Past threshold: do not descend further
             should_descend = False
-            reason = f"Too low by {abs(altitude_error):.0f} ft - MAINTAIN or CLIMB"
-            status = "LOW"
-        elif abs(altitude_error) <= 200:
-            # В пределах нормы
-            should_descend = (distance_to_intercept <= tolerance_nm)
-            reason = "On profile"
-            status = "ON_PROFILE"
-        else:
-            # Небольшое отклонение
-            should_descend = (distance_to_intercept <= tolerance_nm * 1.5)
-            reason = f"Slight deviation: {altitude_error:+.0f} ft"
-            status = "DEVIATION"
+            reason = f"Past threshold ({along_track_nm:.1f} NM)"
+            status = "PAST_THRESHOLD"
+        elif is_between:
+            # Between intercept and threshold
+            if altitude_error > 300:
+                should_descend = True
+                reason = f"Too high by {altitude_error:.0f} ft - descend"
+                status = "HIGH"
+            elif altitude_error < -300:
+                should_descend = False
+                reason = f"Too low by {abs(altitude_error):.0f} ft - MAINTAIN"
+                status = "LOW"
+            elif abs(altitude_error) <= 200:
+                should_descend = True  # On profile: continue descent
+                reason = "On profile"
+                status = "ON_PROFILE"
+            else:
+                should_descend = True  # Slight deviation: continue
+                reason = f"Slight deviation: {altitude_error:+.0f} ft"
+                status = "DEVIATION"
 
         return {
             'should_descend': should_descend,
@@ -543,13 +623,43 @@ class Navigation:
         # Обратный курс (от порога к приводам)
         reverse_heading = (runway_heading + 180) % 360
 
-        # Расчёт ожидаемых высот на приводах
-        outer_altitude_agl = self.calculate_glideslope_distance(outer_distance_nm, glideslope_angle) * \
-                            (outer_distance_nm / self.calculate_glideslope_distance(
-                                outer_distance_nm * math.tan(math.radians(glideslope_angle)) * 6076.12,
-                                glideslope_angle)) * math.tan(math.radians(glideslope_angle)) * 6076.12
+        # NAV-F3: валидация всех входных параметров
+        if not math.isfinite(runway_threshold_lat):
+            raise ValueError(f"runway_threshold_lat must be finite, got {runway_threshold_lat}")
+        if not (-90.0 <= runway_threshold_lat <= 90.0):
+            raise ValueError(f"runway_threshold_lat must be in [-90, 90], got {runway_threshold_lat}")
+        if not math.isfinite(runway_threshold_lon):
+            raise ValueError(f"runway_threshold_lon must be finite, got {runway_threshold_lon}")
+        if not (-180.0 <= runway_threshold_lon <= 180.0):
+            raise ValueError(f"runway_threshold_lon must be in [-180, 180], got {runway_threshold_lon}")
+        if not math.isfinite(runway_heading):
+            raise ValueError(f"runway_heading must be finite, got {runway_heading}")
+        # Normalize heading to [0, 360)
+        runway_heading = runway_heading % 360.0
+        if not math.isfinite(runway_elevation):
+            raise ValueError(f"runway_elevation must be finite, got {runway_elevation}")
+        if not math.isfinite(glideslope_angle) or glideslope_angle <= 0:
+            raise ValueError(
+                f"glideslope_angle must be finite and positive, got {glideslope_angle}"
+            )
+        if glideslope_angle > 15.0:
+            raise ValueError(
+                f"glideslope_angle must be <= 15.0 (physically realistic), got {glideslope_angle}"
+            )
+        if not math.isfinite(outer_distance_nm) or outer_distance_nm < 0:
+            raise ValueError(
+                f"outer_distance_nm must be finite and >= 0, got {outer_distance_nm}"
+            )
+        if not math.isfinite(inner_distance_nm) or inner_distance_nm < 0:
+            raise ValueError(
+                f"inner_distance_nm must be finite and >= 0, got {inner_distance_nm}"
+            )
+        if outer_distance_nm < inner_distance_nm:
+            raise ValueError(
+                f"outer_distance_nm ({outer_distance_nm}) must be >= inner_distance_nm ({inner_distance_nm})"
+            )
 
-        # Упрощённый расчёт: высота = расстояние * тангенс угла * 6076.12
+        # Расчёт ожидаемых высот на приводах: высота = расстояние * tan(угол) * 6076.12
         outer_altitude_agl = outer_distance_nm * math.tan(math.radians(glideslope_angle)) * 6076.12
         inner_altitude_agl = inner_distance_nm * math.tan(math.radians(glideslope_angle)) * 6076.12
 
@@ -646,8 +756,9 @@ class Navigation:
         altitude_error = current_altitude_agl - beacon.expected_altitude_agl
         altitude_ok = abs(altitude_error) <= beacon.tolerance_altitude_ft
 
-        # Проверка курса
-        course_error = self.normalize_angle(current_heading - expected_course)
+        # Проверка курса — NAV-F4 fix: signed shortest-angle error [-180, +180]
+        # angle_difference(a, b) = b - a, so we pass (expected, current) to get (current - expected)
+        course_error = self.angle_difference(expected_course, current_heading)
         course_ok = abs(course_error) <= beacon.tolerance_course_deg
 
         # Проверка скорости
