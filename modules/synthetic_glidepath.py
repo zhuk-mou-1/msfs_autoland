@@ -134,18 +134,9 @@ class SyntheticGlidepath:
         if not descent_info["should_descend"] and descent_info["status"] != "HIGH":
             return 0.0
 
-        # ── Position-based ideal altitude (MSL) ────────────────────
-        distance_nm = self._nav.calculate_distance_to_threshold(
-            latitude,
-            longitude,
-            self._config,
-        )
-
-        ideal_alt_msl = self._nav.calculate_required_altitude(
-            distance_nm,
-            self._config.glideslope_angle,
-            self._config.runway_elevation,
-        )
+        # ── Use along-track profile from Navigation (single source of truth) ──
+        ideal_alt_agl = descent_info['ideal_altitude_agl']
+        ideal_alt_msl = ideal_alt_agl + float(self._config.runway_elevation)
 
         # Positive error = aircraft is above glideslope (both MSL)
         altitude_error = altitude_msl - ideal_alt_msl

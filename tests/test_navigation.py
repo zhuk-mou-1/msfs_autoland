@@ -1054,7 +1054,8 @@ def test_navf1_on_profile_downstream_positive_vs():
         "NAV-F1 addendum-2: on-profile should_descend should be True"
     )
     assert descent_info['status'] == 'ON_PROFILE'
-    assert vs >= 0
+    # VS is 0 (proportional controller has no error) — accept tiny floating point noise
+    assert abs(vs) < 1e-6, f"On-profile VS should be ~0, got {vs}"
 
 
 def test_navf1_before_intercept_no_descend():
@@ -1094,6 +1095,67 @@ def test_navf1_after_threshold_no_descend():
     )
     assert result['should_descend'] is False
     assert result['status'] == 'PAST_THRESHOLD'
+
+
+# --- NAV-F1 addendum-3: HIGH before intercept ---
+
+def test_navf1_before_intercept_at_altitude_no_descend():
+    """NAV-F1 addendum-3: before intercept at intercept altitude → should_descend=False."""
+    nav, ip = _make_nav_and_intercept()
+    threshold_lat = 45.0
+    threshold_lon = 90.0
+    cos_lat = math.cos(math.radians(threshold_lat))
+    intercept_to_thresh = ip['intercept_to_threshold_nm']
+
+    before_nm = intercept_to_thresh + 1.0
+    lon_offset = before_nm / (60.0 * cos_lat)
+    result = nav.should_start_descent(
+        current_lat=threshold_lat,
+        current_lon=threshold_lon - lon_offset,
+        current_altitude_agl=ip['altitude_agl'],  # At intercept altitude
+        intercept_point=ip,
+    )
+    assert result['should_descend'] is False
+    assert result['status'] == 'OK'
+
+
+def test_navf1_before_intercept_high_should_descend():
+    """NAV-F1 addendum-3: before intercept 301ft above → HIGH, should_descend=True."""
+    nav, ip = _make_nav_and_intercept()
+    threshold_lat = 45.0
+    threshold_lon = 90.0
+    cos_lat = math.cos(math.radians(threshold_lat))
+    intercept_to_thresh = ip['intercept_to_threshold_nm']
+
+    before_nm = intercept_to_thresh + 1.0
+    lon_offset = before_nm / (60.0 * cos_lat)
+    result = nav.should_start_descent(
+        current_lat=threshold_lat,
+        current_lon=threshold_lon - lon_offset,
+        current_altitude_agl=ip['altitude_agl'] + 301,  # 301ft above intercept
+        intercept_point=ip,
+    )
+    assert result['should_descend'] is True
+    assert result['status'] == 'HIGH'
+
+
+def test_navf1_before_intercept_low_no_descend():
+    """NAV-F1 addendum-3: before intercept below profile → no false descent."""
+    nav, ip = _make_nav_and_intercept()
+    threshold_lat = 45.0
+    threshold_lon = 90.0
+    cos_lat = math.cos(math.radians(threshold_lat))
+    intercept_to_thresh = ip['intercept_to_threshold_nm']
+
+    before_nm = intercept_to_thresh + 1.0
+    lon_offset = before_nm / (60.0 * cos_lat)
+    result = nav.should_start_descent(
+        current_lat=threshold_lat,
+        current_lon=threshold_lon - lon_offset,
+        current_altitude_agl=ip['altitude_agl'] - 100,  # 100ft below intercept
+        intercept_point=ip,
+    )
+    assert result['should_descend'] is False
 
 
 # --- NAV-F3 addendum-2: boundary tests ---
@@ -1165,3 +1227,211 @@ def test_runway_beacons_heading_normalization():
         runway_heading=100000.0, runway_elevation=100,
     )
     assert result['outer'] is not None
+
+
+# --- NAV-F1 addendum-3: SyntheticGlidepath single profile source ---
+
+def test_synthetic_glidepath_cross_track_consistency():
+    """NAV-F1 addendum-3: same along-track with cross-track 0, 0.5, 2 NM → same VS."""
+    import pytest
+    from modules.navigation import Navigation
+    from modules.types import ApproachConfig, NavStation
+    from modules.synthetic_glidepath import SyntheticGlidepath
+
+    nav = Navigation.__new__(Navigation)
+    station = NavStation(name="TEST", frequency=110.0,
+                         latitude=45.0, longitude=90.0, type="VOR")
+    config = ApproachConfig(
+        station=station,
+        final_approach_course=90,
+        glideslope_angle=3.0,
+        decision_height=200,
+        approach_speed=90,
+        runway_elevation=100,
+        runway_length=3000,
+        runway_width=45,
+        runway_threshold_lat=45.0,
+        runway_threshold_lon=90.0,
+    )
+    glidepath = SyntheticGlidepath(nav, config)
+
+    ip = nav.calculate_glideslope_intercept_point(45.0, 90.0, 90.0, 100.0, 3.0)
+    intercept_to_thresh = ip['intercept_to_threshold_nm']
+    cos_lat = math.cos(math.radians(45.0))
+
+    # 50% point on centerline
+    along_nm = intercept_to_thresh * 0.5
+    lon_offset = along_nm / (60.0 * cos_lat)
+    ideal_agl = along_nm * ip['feet_per_nm']
+
+    base_vs = 500.0  # Non-zero wind correction
+
+    # Centerline
+    vs_center = glidepath.compute_target_vs({
+        'position': {
+            'latitude': 45.0,
+            'longitude': 90.0 - lon_offset,
+            'altitude': 100 + ideal_agl,
+            'altitude_agl': ideal_agl,
+        }
+    }, wind_correction_vs=base_vs)
+
+    # 0.5 NM cross-track (latitude offset)
+    ct_deg = 0.5 / 60.0
+    vs_05 = glidepath.compute_target_vs({
+        'position': {
+            'latitude': 45.0 + ct_deg,
+            'longitude': 90.0 - lon_offset,
+            'altitude': 100 + ideal_agl,
+            'altitude_agl': ideal_agl,
+        }
+    }, wind_correction_vs=base_vs)
+
+    # 2 NM cross-track
+    ct_deg = 2.0 / 60.0
+    vs_2 = glidepath.compute_target_vs({
+        'position': {
+            'latitude': 45.0 + ct_deg,
+            'longitude': 90.0 - lon_offset,
+            'altitude': 100 + ideal_agl,
+            'altitude_agl': ideal_agl,
+        }
+    }, wind_correction_vs=base_vs)
+
+    # All should be approximately equal (cross-track shouldn't affect VS)
+    assert vs_center == pytest.approx(vs_05, rel=1e-3, abs=1.0), (
+        f"Cross-track 0.5 NM changed VS: {vs_center} vs {vs_05}"
+    )
+    assert vs_center == pytest.approx(vs_2, rel=1e-3, abs=1.0), (
+        f"Cross-track 2 NM changed VS: {vs_center} vs {vs_2}"
+    )
+
+
+def test_synthetic_glidepath_on_profile_with_wind():
+    """NAV-F1 addendum-3: on-profile with wind_correction_vs=500 → positive descent."""
+    import pytest
+    from modules.navigation import Navigation
+    from modules.types import ApproachConfig, NavStation
+    from modules.synthetic_glidepath import SyntheticGlidepath
+
+    nav = Navigation.__new__(Navigation)
+    station = NavStation(name="TEST", frequency=110.0,
+                         latitude=45.0, longitude=90.0, type="VOR")
+    config = ApproachConfig(
+        station=station,
+        final_approach_course=90,
+        glideslope_angle=3.0,
+        decision_height=200,
+        approach_speed=90,
+        runway_elevation=100,
+        runway_length=3000,
+        runway_width=45,
+        runway_threshold_lat=45.0,
+        runway_threshold_lon=90.0,
+    )
+    glidepath = SyntheticGlidepath(nav, config)
+
+    ip = nav.calculate_glideslope_intercept_point(45.0, 90.0, 90.0, 100.0, 3.0)
+    intercept_to_thresh = ip['intercept_to_threshold_nm']
+    cos_lat = math.cos(math.radians(45.0))
+
+    along_nm = intercept_to_thresh * 0.5
+    lon_offset = along_nm / (60.0 * cos_lat)
+    ideal_agl = along_nm * ip['feet_per_nm']
+
+    wind_vs = 500.0
+    vs = glidepath.compute_target_vs({
+        'position': {
+            'latitude': 45.0,
+            'longitude': 90.0 - lon_offset,
+            'altitude': 100 + ideal_agl,
+            'altitude_agl': ideal_agl,
+        }
+    }, wind_correction_vs=wind_vs)
+
+    # On-profile: altitude_error=0, so VS = wind_correction_vs + 0 = 500
+    assert vs > 0, f"On-profile with wind should descend, got VS={vs}"
+    assert vs == pytest.approx(wind_vs, rel=1e-3), (
+        f"Expected VS≈{wind_vs}, got {vs}"
+    )
+
+
+def test_synthetic_glidepath_mda_floor():
+    """NAV-F1 addendum-3: at/below MDA → VS=0."""
+    from modules.navigation import Navigation
+    from modules.types import ApproachConfig, NavStation
+    from modules.synthetic_glidepath import SyntheticGlidepath
+
+    nav = Navigation.__new__(Navigation)
+    station = NavStation(name="TEST", frequency=110.0,
+                         latitude=45.0, longitude=90.0, type="VOR")
+    config = ApproachConfig(
+        station=station,
+        final_approach_course=90,
+        glideslope_angle=3.0,
+        decision_height=200,
+        approach_speed=90,
+        runway_elevation=100,
+        runway_length=3000,
+        runway_width=45,
+        runway_threshold_lat=45.0,
+        runway_threshold_lon=90.0,
+    )
+    glidepath = SyntheticGlidepath(nav, config)
+
+    # MDA = 200 + 100 = 300 MSL
+    # At MDA
+    vs_at_mda = glidepath.compute_target_vs({
+        'position': {
+            'latitude': 45.0,
+            'longitude': 89.95,
+            'altitude': 300,  # At MDA
+            'altitude_agl': 200,
+        }
+    }, wind_correction_vs=500.0)
+    assert vs_at_mda == 0.0
+
+    # Below MDA
+    vs_below = glidepath.compute_target_vs({
+        'position': {
+            'latitude': 45.0,
+            'longitude': 89.95,
+            'altitude': 250,  # Below MDA
+            'altitude_agl': 150,
+        }
+    }, wind_correction_vs=500.0)
+    assert vs_below == 0.0
+
+
+def test_synthetic_glidepath_past_threshold_no_descent():
+    """NAV-F1 addendum-3: past threshold → no descent command."""
+    from modules.navigation import Navigation
+    from modules.types import ApproachConfig, NavStation
+    from modules.synthetic_glidepath import SyntheticGlidepath
+
+    nav = Navigation.__new__(Navigation)
+    station = NavStation(name="TEST", frequency=110.0,
+                         latitude=45.0, longitude=90.0, type="VOR")
+    config = ApproachConfig(
+        station=station,
+        final_approach_course=90,
+        glideslope_angle=3.0,
+        decision_height=200,
+        approach_speed=90,
+        runway_elevation=100,
+        runway_length=3000,
+        runway_width=45,
+        runway_threshold_lat=45.0,
+        runway_threshold_lon=90.0,
+    )
+    glidepath = SyntheticGlidepath(nav, config)
+
+    vs_past = glidepath.compute_target_vs({
+        'position': {
+            'latitude': 45.0,
+            'longitude': 90.5,  # Past threshold
+            'altitude': 100,
+            'altitude_agl': 0,
+        }
+    }, wind_correction_vs=500.0)
+    assert vs_past <= 0, f"Past threshold should not descend, got VS={vs_past}"

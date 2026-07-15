@@ -499,10 +499,15 @@ class Navigation:
         is_between = not is_before_intercept and not is_at_intercept and not is_past_threshold
 
         if is_before_intercept:
-            # Not yet at intercept: hold altitude
-            should_descend = False
-            reason = f"Before intercept ({along_track_nm:.1f} NM from threshold)"
-            status = "OK"
+            # Before intercept: allow descent only if significantly above intercept altitude
+            if altitude_error > 300:
+                should_descend = True
+                reason = f"Too high by {altitude_error:.0f} ft before intercept - descend"
+                status = "HIGH"
+            else:
+                should_descend = False
+                reason = f"Before intercept ({along_track_nm:.1f} NM from threshold)"
+                status = "OK"
         elif is_at_intercept:
             # At intercept point
             should_descend = True
