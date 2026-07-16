@@ -6,6 +6,7 @@
 
 import json
 import logging
+import math
 import time
 from collections import deque
 from dataclasses import asdict, dataclass, field
@@ -327,22 +328,35 @@ class ConnectionMonitor:
 
         if on_ground:
             self.current_phase = FlightPhase.GROUND
-        elif altitude_agl < 1500 and vertical_speed > 500:
-            self.current_phase = FlightPhase.TAKEOFF
-        elif altitude_agl < 10000 and vertical_speed > 500:
-            self.current_phase = FlightPhase.CLIMB
-        elif altitude_agl > 10000 and abs(vertical_speed) < 500:
-            self.current_phase = FlightPhase.CRUISE
-        elif altitude_agl > 10000 and vertical_speed < -500:
-            self.current_phase = FlightPhase.DESCENT
-        elif altitude_agl < 500:
-            # FIX-P1-3: LANDING must be checked before the broader APPROACH
-            # window (altitude_agl < 3000 and vertical_speed < 0), which
-            # previously shadowed LANDING for nearly all normal descending
-            # approaches below 500ft.
-            self.current_phase = FlightPhase.LANDING
-        elif altitude_agl < 3000 and vertical_speed < 0:
-            self.current_phase = FlightPhase.APPROACH
+        else:
+            # Validate inputs: must be finite real numbers (not None, NaN, inf, bool, str, object)
+            alt_valid = isinstance(altitude_agl, (int, float)) and not isinstance(altitude_agl, bool) and math.isfinite(altitude_agl)
+            vs_valid = isinstance(vertical_speed, (int, float)) and not isinstance(vertical_speed, bool) and math.isfinite(vertical_speed)
+
+            if not alt_valid or not vs_valid:
+                logger.warning(
+                    "update_flight_phase: non-finite inputs altitude_agl=%r vertical_speed=%r — "
+                    "preserving previous phase %s",
+                    altitude_agl, vertical_speed, old_phase.value,
+                )
+                return
+
+            if altitude_agl < 1500 and vertical_speed > 500:
+                self.current_phase = FlightPhase.TAKEOFF
+            elif altitude_agl < 10000 and vertical_speed > 500:
+                self.current_phase = FlightPhase.CLIMB
+            elif altitude_agl > 10000 and abs(vertical_speed) < 500:
+                self.current_phase = FlightPhase.CRUISE
+            elif altitude_agl > 10000 and vertical_speed < -500:
+                self.current_phase = FlightPhase.DESCENT
+            elif altitude_agl < 500:
+                # FIX-P1-3: LANDING must be checked before the broader APPROACH
+                # window (altitude_agl < 3000 and vertical_speed < 0), which
+                # previously shadowed LANDING for nearly all normal descending
+                # approaches below 500ft.
+                self.current_phase = FlightPhase.LANDING
+            elif altitude_agl < 3000 and vertical_speed < 0:
+                self.current_phase = FlightPhase.APPROACH
 
         if old_phase != self.current_phase:
             logger.info("Flight phase changed: %s -> %s", old_phase.value, self.current_phase.value)

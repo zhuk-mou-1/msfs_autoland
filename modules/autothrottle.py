@@ -4,9 +4,10 @@
 """
 
 import logging
+import math
 import time
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 from modules.base_controller import Controller
 from modules.engine_failure_detector import EngineFailureDetector
@@ -38,14 +39,26 @@ class AutothrottleConfig:
     weight_reference: float = 5000.0  # Референсный вес (фунты)
     weight_factor: float = 0.00002  # Коэффициент влияния веса
 
+    # PID timing
+    max_pid_dt_seconds: float = 2.0  # Максимальный допустимый dt для PID (секунды)
+
 
 class AutothrottleController(Controller):
     """PID контроллер автоматической тяги с поддержкой отказов двигателей"""
 
     def __init__(self, config: Optional[AutothrottleConfig] = None,
-                 engine_failure_detector: Optional[EngineFailureDetector] = None):
+                 engine_failure_detector: Optional[EngineFailureDetector] = None,
+                 *, clock: Optional[Callable[[], float]] = None):
         self.config = config or AutothrottleConfig()
         self.engine_failure_detector = engine_failure_detector
+        self._clock = clock or time.monotonic
+
+        # Validate config
+        if not math.isfinite(self.config.max_pid_dt_seconds) or self.config.max_pid_dt_seconds <= 0:
+            raise ValueError(
+                f"max_pid_dt_seconds must be a finite positive number, "
+                f"got {self.config.max_pid_dt_seconds!r}"
+            )
 
         # Состояние PID контроллера
         self.integral = 0.0
@@ -72,7 +85,7 @@ class AutothrottleController(Controller):
         """Активация автоматического контроллера тяги"""
         self.active = True
         self.current_throttle = initial_throttle
-        self.previous_time = time.time()
+        self.previous_time = self._clock()
         logger.info("Autothrottle activated at %.1f%%", initial_throttle*100)
 
     def deactivate(self):
@@ -273,11 +286,21 @@ class AutothrottleController(Controller):
         gear_down = config_data.get('gear_position', 1.0) > 0.5
 
         # Временной шаг
-        current_time = time.time()
-        if self.previous_time:
+        current_time = self._clock()
+        if self.previous_time is not None:
             dt = current_time - self.previous_time
         else:
             dt = 0.5
+
+        # Validate dt: skip I/D update on anomalous values
+        if not math.isfinite(dt) or dt <= 0 or dt > self.config.max_pid_dt_seconds:
+            logger.warning(
+                "Autothrottle: anomalous dt=%.3fs (max=%.1fs) — "
+                "freezing I/D for this frame",
+                dt, self.config.max_pid_dt_seconds,
+            )
+            dt = 0.0  # Safe value: integral unchanged, derivative = 0
+
         self.previous_time = current_time
 
         # 1. Базовая тяга (вес + конфигурация)
