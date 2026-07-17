@@ -8,7 +8,7 @@ B-AT-1:   Continuous flaps fraction in autothrottle
 """
 
 import pytest
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock
 
 from modules.control import MSFSControl, SDK_ONLY_EVENTS
 from modules.autothrottle import AutothrottleController, AutothrottleConfig
@@ -48,6 +48,42 @@ def _make_ae_with_catalog(event_names: list[str]) -> FakeAircraftEvents:
     """Create FakeAircraftEvents with a catalog of named FakeEvents."""
     catalog = {name: FakeEvent(name) for name in event_names}
     return FakeAircraftEvents(catalog)
+
+
+# ── Recording fake for dynamic Event (BLOCKER 2) ────────────────
+
+_SENTINEL = object()
+
+
+class RecordingEvent:
+    """Recording stand-in for SimConnect.EventList.Event.
+
+    Tracks constructor args, individual calls (no-arg vs explicit),
+    and call values for verifying execution order with catalogued events.
+    """
+
+    _instances: list["RecordingEvent"] = []
+
+    def __init__(self, deff, sm, _dec=""):
+        self.deff = deff
+        self.sm = sm
+        self._dec = _dec
+        self.call_count = 0
+        self.call_values: list = []
+        self.noarg_calls = 0
+        RecordingEvent._instances.append(self)
+
+    def __call__(self, value=_SENTINEL):
+        self.call_count += 1
+        if value is _SENTINEL:
+            self.noarg_calls += 1
+            self.call_values.append(None)
+        else:
+            self.call_values.append(value)
+
+    @classmethod
+    def reset(cls):
+        cls._instances.clear()
 
 
 # ── A-DISP-1: dispatcher tests ──────────────────────────────────
@@ -92,25 +128,32 @@ class TestADISP1Dispatcher:
         with pytest.raises(TypeError, match="is not callable"):
             ctrl._send_event("BROKEN")
 
-    def test_sdk_only_event_creates_and_calls(self):
-        """AP_VS_ON: find() returns None, Event created, called."""
+    def test_sdk_only_event_creates_and_calls(self, monkeypatch):
+        """AP_VS_ON: find() returns None, Event created, called without arg."""
+        RecordingEvent.reset()
+        monkeypatch.setattr("modules.control.Event", RecordingEvent)
         ae = FakeAircraftEvents({})
         ctrl = MSFSControl(ae)
         ctrl._send_event("AP_VS_ON")
         # Event was created and cached
         assert "AP_VS_ON" in ctrl._dynamic_events
-        # Event constructor was called with correct bytes
         event = ctrl._dynamic_events["AP_VS_ON"]
         assert event.deff == b"AP_VS_ON"
+        assert event.call_count == 1
+        assert event.noarg_calls == 1
 
-    def test_sdk_only_event_cached(self):
-        """SDK-only event: second call reuses cached Event."""
+    def test_sdk_only_event_cached(self, monkeypatch):
+        """SDK-only event: second call reuses cached Event (1 constructor, 2 calls)."""
+        RecordingEvent.reset()
+        monkeypatch.setattr("modules.control.Event", RecordingEvent)
         ae = FakeAircraftEvents({})
         ctrl = MSFSControl(ae)
         ctrl._send_event("AP_VS_ON")
         first_event = ctrl._dynamic_events["AP_VS_ON"]
         ctrl._send_event("AP_VS_ON")
         assert ctrl._dynamic_events["AP_VS_ON"] is first_event
+        assert len(RecordingEvent._instances) == 1
+        assert first_event.call_count == 2
 
     def test_sdk_only_no_sm_raises(self):
         """SDK-only fallback without ae.sm → RuntimeError."""
@@ -180,29 +223,107 @@ class TestACONF1Flaps:
 class TestACONF4VerticalSpeed:
     """A-CONF-4: AP_VS_ON (deterministic), not AP_VS_HOLD (toggle)."""
 
-    def test_vs_uses_ap_vs_on(self):
-        """set_vertical_speed calls AP_VS_ON, not AP_VS_HOLD."""
-        ae = _make_ae_with_catalog(["AP_VS_ON", "AP_VS_VAR_SET_ENGLISH"])
+    def test_vs_sdk_only_path(self, monkeypatch):
+        """set_vertical_speed: AP_VS_ON is SDK-only (not in catalog),
+        dynamic Event created and called without param, then catalogued
+        AP_VS_VAR_SET_ENGLISH called with 1500.
+        """
+        RecordingEvent.reset()
+        monkeypatch.setattr("modules.control.Event", RecordingEvent)
+        # Catalog has AP_VS_VAR_SET_ENGLISH but NOT AP_VS_ON
+        ae = _make_ae_with_catalog(["AP_VS_VAR_SET_ENGLISH"])
         ctrl = MSFSControl(ae)
         ctrl.set_vertical_speed(1500)
-        assert ae._catalog["AP_VS_ON"].calls == [None]
-        assert ae._catalog["AP_VS_VAR_SET_ENGLISH"].calls == [1500]
-
-    def test_vs_order_on_before_var(self):
-        """AP_VS_ON is called before AP_VS_VAR_SET_ENGLISH."""
-        ae = _make_ae_with_catalog(["AP_VS_ON", "AP_VS_VAR_SET_ENGLISH"])
-        ctrl = MSFSControl(ae)
-        ctrl.set_vertical_speed(1500)
-        # find() order confirms AP_VS_ON resolved first
+        # find() returns None for AP_VS_ON → SDK-only fallback
         assert ae.find_calls[0] == "AP_VS_ON"
         assert ae.find_calls[1] == "AP_VS_VAR_SET_ENGLISH"
+        # Dynamic AP_VS_ON Event was created and called without param
+        assert "AP_VS_ON" in ctrl._dynamic_events
+        vs_event = ctrl._dynamic_events["AP_VS_ON"]
+        assert vs_event.call_count == 1
+        assert vs_event.noarg_calls == 1
+        # Catalogued AP_VS_VAR_SET_ENGLISH called with 1500
+        assert ae._catalog["AP_VS_VAR_SET_ENGLISH"].calls == [1500]
+        # AP_VS_HOLD is never in play
+        assert ae._catalog.get("AP_VS_HOLD") is None
 
-    def test_vs_hold_not_called(self):
+    def test_vs_execution_order(self, monkeypatch):
+        """Execution order: dynamic AP_VS_ON() → catalogued AP_VS_VAR_SET_ENGLISH(1500)."""
+        RecordingEvent.reset()
+        monkeypatch.setattr("modules.control.Event", RecordingEvent)
+        ae = _make_ae_with_catalog(["AP_VS_VAR_SET_ENGLISH"])
+        ctrl = MSFSControl(ae)
+        ctrl.set_vertical_speed(1500)
+        vs_event = ctrl._dynamic_events["AP_VS_ON"]
+        # Verify order: VS_ON called first (call_values[0]=None),
+        # then VAR_SET called second (catalog calls=[1500])
+        assert vs_event.call_values == [None]
+        assert ae._catalog["AP_VS_VAR_SET_ENGLISH"].calls == [1500]
+
+    def test_vs_hold_not_called(self, monkeypatch):
         """AP_VS_HOLD must NOT be called."""
-        ae = _make_ae_with_catalog(["AP_VS_ON", "AP_VS_VAR_SET_ENGLISH", "AP_VS_HOLD"])
+        RecordingEvent.reset()
+        monkeypatch.setattr("modules.control.Event", RecordingEvent)
+        ae = _make_ae_with_catalog(["AP_VS_VAR_SET_ENGLISH", "AP_VS_HOLD"])
         ctrl = MSFSControl(ae)
         ctrl.set_vertical_speed(1500)
         assert ae._catalog["AP_VS_HOLD"].calls == []
+
+
+# ── NAV1/NAV2 SDK-only tests (BLOCKER 3) ───────────────────────
+
+
+class TestNAVSDKOnly:
+    """NAV1/NAV2 SDK-only: dynamic Event, integer Hz, caching."""
+
+    @pytest.mark.parametrize("nav_index,event_name", [
+        (1, "NAV1_RADIO_SET_HZ"),
+        (2, "NAV2_RADIO_SET_HZ"),
+    ])
+    def test_nav_sdk_only_path(self, nav_index, event_name, monkeypatch):
+        """find() returns None, Event created with bytes name, called with Hz."""
+        RecordingEvent.reset()
+        monkeypatch.setattr("modules.control.Event", RecordingEvent)
+        ae = FakeAircraftEvents({})
+        ctrl = MSFSControl(ae)
+        ctrl.set_nav_frequency(nav_index, 110_300_000)
+        # find() returned None → SDK-only fallback
+        assert ae.find_calls[0] == event_name
+        # Dynamic Event created with correct bytes name
+        assert event_name in ctrl._dynamic_events
+        event = ctrl._dynamic_events[event_name]
+        assert event.deff == event_name.encode("ascii")
+        # Event called with exact integer Hz
+        assert event.call_count == 1
+        assert event.call_values == [110_300_000]
+
+    @pytest.mark.parametrize("nav_index,event_name", [
+        (1, "NAV1_RADIO_SET_HZ"),
+        (2, "NAV2_RADIO_SET_HZ"),
+    ])
+    def test_nav_cached(self, nav_index, event_name, monkeypatch):
+        """Second call reuses cached Event: 1 constructor, 2 calls."""
+        RecordingEvent.reset()
+        monkeypatch.setattr("modules.control.Event", RecordingEvent)
+        ae = FakeAircraftEvents({})
+        ctrl = MSFSControl(ae)
+        ctrl.set_nav_frequency(nav_index, 110_300_000)
+        first_event = ctrl._dynamic_events[event_name]
+        ctrl.set_nav_frequency(nav_index, 110_300_000)
+        assert ctrl._dynamic_events[event_name] is first_event
+        assert len(RecordingEvent._instances) == 1
+        assert first_event.call_count == 2
+
+    def test_bcd_variants_not_resolved(self):
+        """BCD-variants NAV1_RADIO_SET / NAV2_RADIO_SET are not callable."""
+        # BCD variants are not in the SDK_ONLY_EVENTS allowlist,
+        # so they raise ValueError if not in catalog.
+        ae = FakeAircraftEvents({})
+        ctrl = MSFSControl(ae)
+        with pytest.raises(ValueError, match="Unknown SimConnect event"):
+            ctrl._send_event("NAV1_RADIO_SET")
+        with pytest.raises(ValueError, match="Unknown SimConnect event"):
+            ctrl._send_event("NAV2_RADIO_SET")
 
 
 # ── B-AT-1: continuous flaps fraction ───────────────────────────
@@ -293,23 +414,131 @@ class TestBAT1Autothrottle:
         assert config.flaps_drag_full_deployment == 0.6
 
 
-# ── Contract test against installed SimConnect library ───────────
+# ── B-AT-1: isolated calibration at max_throttle=2.0 (BLOCKER 5) ──
+
+
+class TestBAT1IsolatedCalibration:
+    """B-AT-1: Isolate flap correction 0.6 using max_throttle=2.0."""
+
+    def test_full_deployment_drag(self):
+        """fraction 1.0 → base 0.5 + drag 0.6 = 1.1 (no clamp at max_throttle=2.0)."""
+        config = AutothrottleConfig(max_throttle=2.0)
+        ctrl = AutothrottleController(config=config)
+        result = ctrl.calculate_base_throttle(
+            aircraft_weight=5000.0, flaps_fraction=1.0, gear_down=False
+        )
+        assert abs(result - 1.1) < 1e-9
+
+    def test_isolated_drag_difference(self):
+        """1.1 - 0.5 = 0.6 → proves correction factor exactly."""
+        config = AutothrottleConfig(max_throttle=2.0)
+        ctrl = AutothrottleController(config=config)
+        r_zero = ctrl.calculate_base_throttle(
+            aircraft_weight=5000.0, flaps_fraction=0.0, gear_down=False
+        )
+        r_full = ctrl.calculate_base_throttle(
+            aircraft_weight=5000.0, flaps_fraction=1.0, gear_down=False
+        )
+        assert abs((r_full - r_zero) - 0.6) < 1e-9
+
+    def test_fraction_0_drag(self):
+        """fraction 0.0 → flap correction 0.0."""
+        config = AutothrottleConfig(max_throttle=2.0)
+        ctrl = AutothrottleController(config=config)
+        result = ctrl.calculate_base_throttle(
+            aircraft_weight=5000.0, flaps_fraction=0.0, gear_down=False
+        )
+        base = 0.5  # reference weight
+        assert abs(result - base) < 1e-9
+
+    def test_fraction_half_drag(self):
+        """fraction 0.5 → flap correction 0.30."""
+        config = AutothrottleConfig(max_throttle=2.0)
+        ctrl = AutothrottleController(config=config)
+        result = ctrl.calculate_base_throttle(
+            aircraft_weight=5000.0, flaps_fraction=0.5, gear_down=False
+        )
+        assert abs(result - (0.5 + 0.30)) < 1e-9
+
+    def test_fraction_08_drag(self):
+        """fraction 0.8 → flap correction 0.48 (linearity)."""
+        config = AutothrottleConfig(max_throttle=2.0)
+        ctrl = AutothrottleController(config=config)
+        result = ctrl.calculate_base_throttle(
+            aircraft_weight=5000.0, flaps_fraction=0.8, gear_down=False
+        )
+        assert abs(result - (0.5 + 0.48)) < 1e-9
+
+    def test_negative_fraction_clamped(self):
+        """fraction < 0 → clamped to 0, correction 0.0."""
+        config = AutothrottleConfig(max_throttle=2.0)
+        ctrl = AutothrottleController(config=config)
+        result = ctrl.calculate_base_throttle(
+            aircraft_weight=5000.0, flaps_fraction=-0.5, gear_down=False
+        )
+        assert abs(result - 0.5) < 1e-9
+
+    def test_over_one_fraction_clamped(self):
+        """fraction > 1 → clamped to 1, correction 0.6."""
+        config = AutothrottleConfig(max_throttle=2.0)
+        ctrl = AutothrottleController(config=config)
+        result = ctrl.calculate_base_throttle(
+            aircraft_weight=5000.0, flaps_fraction=2.0, gear_down=False
+        )
+        assert abs(result - 1.1) < 1e-9
+
+    def test_output_clamp_at_normal_max_throttle(self):
+        """General output clamp at max_throttle=1.0."""
+        ctrl = AutothrottleController()  # default max_throttle=1.0
+        result = ctrl.calculate_base_throttle(
+            aircraft_weight=5000.0, flaps_fraction=1.0, gear_down=False
+        )
+        assert abs(result - 1.0) < 1e-9
+
+
+# ── Contract test against installed SimConnect library (BLOCKER 4) ──
 
 
 class TestSimConnectContract:
     """Verify static API shape of installed SimConnect v0.4.26.
 
-    In test environment, AircraftEvents is mocked by conftest.
-    These tests verify the real API only when SimConnect is installed.
+    Uses isolated subprocess to avoid conftest sys.modules mocks.
     """
 
     def test_event_import_path(self):
-        from SimConnect.EventList import Event
-        assert Event is not None
+        """Verify Event is importable from SimConnect.EventList in clean process."""
+        import subprocess
+        import sys
+        import textwrap
+
+        script = textwrap.dedent("""\
+            import sys
+            try:
+                from SimConnect.EventList import Event
+            except ImportError:
+                print("SKIP: SimConnect not installed")
+                sys.exit(2)
+            ok = True
+            ok = ok and callable(Event)
+            ok = ok and hasattr(Event, "__call__")
+            # Check signature: Event(_deff, _sm, _dec='')
+            import inspect
+            sig = inspect.signature(Event)
+            params = list(sig.parameters.keys())
+            ok = ok and len(params) >= 2
+            print("OK" if ok else "FAIL")
+        """)
+        result = subprocess.run(
+            [sys.executable, "-c", script],
+            capture_output=True, text=True, timeout=30,
+        )
+        if result.returncode == 2:
+            pytest.skip("SimConnect not installed in CI environment")
+        assert result.returncode == 0, f"subprocess failed: {result.stderr}"
+        assert result.stdout.strip() == "OK", f"contract check: {result.stdout.strip()}"
 
     def test_sdk_only_events_defined(self):
         """SDK_ONLY_EVENTS contains exactly the 3 confirmed SDK-only names."""
-        from modules.control import SDK_ONLY_EVENTS
         assert SDK_ONLY_EVENTS == frozenset({
             "AP_VS_ON", "NAV1_RADIO_SET_HZ", "NAV2_RADIO_SET_HZ",
         })
