@@ -14,6 +14,18 @@ from modules.control import MSFSControl, SDK_ONLY_EVENTS
 from modules.autothrottle import AutothrottleController, AutothrottleConfig
 
 
+# ── Shared execution trace ───────────────────────────────────────
+# Both FakeEvent (catalogued) and RecordingEvent (SDK-only) append
+# to this list so we can verify cross-type execution order.
+
+NO_ARG = object()
+_trace: list[tuple[str, object]] = []
+
+
+def reset_trace():
+    _trace.clear()
+
+
 # ── FakeEvents: models real AircraftEvents API (find + callable) ──
 
 
@@ -26,6 +38,7 @@ class FakeEvent:
 
     def __call__(self, value=None):
         self.calls.append(value)
+        _trace.append((self.name, NO_ARG if value is None else value))
 
 
 class FakeAircraftEvents:
@@ -75,11 +88,14 @@ class RecordingEvent:
 
     def __call__(self, value=_SENTINEL):
         self.call_count += 1
+        name = self.deff.decode("ascii") if isinstance(self.deff, bytes) else self.deff
         if value is _SENTINEL:
             self.noarg_calls += 1
             self.call_values.append(None)
+            _trace.append((name, NO_ARG))
         else:
             self.call_values.append(value)
+            _trace.append((name, value))
 
     @classmethod
     def reset(cls):
@@ -229,6 +245,7 @@ class TestACONF4VerticalSpeed:
         AP_VS_VAR_SET_ENGLISH called with 1500.
         """
         RecordingEvent.reset()
+        reset_trace()
         monkeypatch.setattr("modules.control.Event", RecordingEvent)
         # Catalog has AP_VS_VAR_SET_ENGLISH but NOT AP_VS_ON
         ae = _make_ae_with_catalog(["AP_VS_VAR_SET_ENGLISH"])
@@ -250,19 +267,21 @@ class TestACONF4VerticalSpeed:
     def test_vs_execution_order(self, monkeypatch):
         """Execution order: dynamic AP_VS_ON() → catalogued AP_VS_VAR_SET_ENGLISH(1500)."""
         RecordingEvent.reset()
+        reset_trace()
         monkeypatch.setattr("modules.control.Event", RecordingEvent)
         ae = _make_ae_with_catalog(["AP_VS_VAR_SET_ENGLISH"])
         ctrl = MSFSControl(ae)
         ctrl.set_vertical_speed(1500)
-        vs_event = ctrl._dynamic_events["AP_VS_ON"]
-        # Verify order: VS_ON called first (call_values[0]=None),
-        # then VAR_SET called second (catalog calls=[1500])
-        assert vs_event.call_values == [None]
-        assert ae._catalog["AP_VS_VAR_SET_ENGLISH"].calls == [1500]
+        # Shared trace proves exact cross-type execution order
+        assert _trace == [
+            ("AP_VS_ON", NO_ARG),
+            ("AP_VS_VAR_SET_ENGLISH", 1500),
+        ]
 
     def test_vs_hold_not_called(self, monkeypatch):
         """AP_VS_HOLD must NOT be called."""
         RecordingEvent.reset()
+        reset_trace()
         monkeypatch.setattr("modules.control.Event", RecordingEvent)
         ae = _make_ae_with_catalog(["AP_VS_VAR_SET_ENGLISH", "AP_VS_HOLD"])
         ctrl = MSFSControl(ae)
@@ -314,16 +333,27 @@ class TestNAVSDKOnly:
         assert len(RecordingEvent._instances) == 1
         assert first_event.call_count == 2
 
-    def test_bcd_variants_not_resolved(self):
-        """BCD-variants NAV1_RADIO_SET / NAV2_RADIO_SET are not callable."""
-        # BCD variants are not in the SDK_ONLY_EVENTS allowlist,
-        # so they raise ValueError if not in catalog.
-        ae = FakeAircraftEvents({})
+    @pytest.mark.parametrize("nav_index,hz_event,bcd_event", [
+        (1, "NAV1_RADIO_SET_HZ", "NAV1_RADIO_SET"),
+        (2, "NAV2_RADIO_SET_HZ", "NAV2_RADIO_SET"),
+    ])
+    def test_nav_uses_hz_not_bcd(self, nav_index, hz_event, bcd_event, monkeypatch):
+        """set_nav_frequency() uses only _HZ variant, never BCD variant."""
+        RecordingEvent.reset()
+        monkeypatch.setattr("modules.control.Event", RecordingEvent)
+        # Put BCD event in catalog — it should NOT be looked up
+        ae = _make_ae_with_catalog([bcd_event])
         ctrl = MSFSControl(ae)
-        with pytest.raises(ValueError, match="Unknown SimConnect event"):
-            ctrl._send_event("NAV1_RADIO_SET")
-        with pytest.raises(ValueError, match="Unknown SimConnect event"):
-            ctrl._send_event("NAV2_RADIO_SET")
+        ctrl.set_nav_frequency(nav_index, 110_300_000)
+        # _HZ event was resolved via SDK-only fallback
+        assert ae.find_calls[0] == hz_event
+        assert hz_event in ctrl._dynamic_events
+        event = ctrl._dynamic_events[hz_event]
+        assert event.call_values == [110_300_000]
+        # BCD event was never looked up
+        assert bcd_event not in ae.find_calls
+        # BCD event was never called
+        assert ae._catalog[bcd_event].calls == []
 
 
 # ── B-AT-1: continuous flaps fraction ───────────────────────────

@@ -5,7 +5,7 @@ from modules.connection_optimizer import ConnectionOptimizer
 from modules.control import MSFSControl
 from modules.control_ownership import ControlOwner, ControlOwnership
 
-from tests.test_p0_aconf1_aconf4_bat1 import FakeAircraftEvents, FakeEvent, _make_ae_with_catalog
+from tests.test_p0_aconf1_aconf4_bat1 import FakeAircraftEvents, _make_ae_with_catalog
 
 
 class FakeControl:
