@@ -100,3 +100,6 @@ logs/*.log
 !CONNECTION_OPTIMIZER.md
 !CURRENT_STATE.md
 !CHANGELOG.md
+
+# Local-only working directory (dev/test/audit intermediates) — do not track
+/TASKS/
