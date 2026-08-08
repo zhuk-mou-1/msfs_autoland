@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
 
 from modules.control_ownership import ControlOwner, compute_ownership
+from modules.units import kg_to_lbs
 
 if TYPE_CHECKING:
     from main import AutoLandSystem
@@ -533,7 +534,6 @@ class FinalPhaseState(ApproachPhaseState):
         gs_kt = max(gs_kt, cfg.min_gs_kt) if math.isfinite(gs_kt) else cfg.min_gs_kt
 
         # P-member: pitch_correction_deg = vs_error / (GS_kt * 101.3 * pi/180)
-        # Denominator ≈ GS_kt * 1.768 — pitch degree cost in fpm
         denominator = gs_kt * 101.3 * math.pi / 180.0
         pitch_correction_deg = vs_error / denominator if denominator > 0 else 0.0
 
@@ -568,9 +568,8 @@ class FinalPhaseState(ApproachPhaseState):
             else:
                 target_speed = self.system.approach_config.approach_speed
 
-            # Получение веса самолёта (kg -> lbs for autothrottle which expects lbs)
-            aircraft_weight_kg = self._get_aircraft_weight(telemetry)
-            aircraft_weight_lbs = aircraft_weight_kg * 2.20462  # kg to lbs
+            # Вес теперь приводится к lbs централизованно и без двойной конверсии.
+            aircraft_weight_lbs = self._get_aircraft_weight_lbs(telemetry)
 
             throttle_data = self.system.autothrottle.calculate_throttle(
                 telemetry,
@@ -598,23 +597,31 @@ class FinalPhaseState(ApproachPhaseState):
                     logger.debug("Autothrottle: %.1f%% (stable)", throttle_data['throttle']*100)
         # else: no autothrottle active — throttle stays with pilot/external
 
-    def _get_aircraft_weight(self, telemetry: dict) -> float:
-        """Получение веса самолёта"""
+    def _get_aircraft_weight_lbs(self, telemetry: dict) -> float:
+        """Получение веса самолёта в pounds (single source of truth для throttle)."""
 
         if self.system.approach_params:
-            aircraft_weight = self.system.approach_params['aircraft_weight_kg']
-            logger.debug("Using aircraft weight from VAPP calculator: %s kg", aircraft_weight)
-            return aircraft_weight
-        elif hasattr(self.system.approach_config, 'aircraft_weight'):
-            return self.system.approach_config.aircraft_weight
-        else:
-            weight_data = telemetry.get('weight', {})
-            if weight_data and 'total_weight' in weight_data:
-                aircraft_weight = weight_data['total_weight']
-                logger.debug("Using aircraft weight from SimConnect: %s lbs", aircraft_weight)
-                return aircraft_weight
+            aircraft_weight_lbs = kg_to_lbs(self.system.approach_params['aircraft_weight_kg'])
+            logger.debug("Using aircraft weight from VAPP calculator: %s lbs", aircraft_weight_lbs)
+            return aircraft_weight_lbs
 
-        return 5000.0  # Default
+        if hasattr(self.system.approach_config, 'aircraft_weight_lbs'):
+            return self.system.approach_config.aircraft_weight_lbs
+
+        if hasattr(self.system.approach_config, 'aircraft_weight'):
+            configured_weight = self.system.approach_config.aircraft_weight
+            if configured_weight is not None:
+                if configured_weight < 10000:
+                    return kg_to_lbs(configured_weight)
+                return configured_weight
+
+        weight_data = telemetry.get('weight', {})
+        if weight_data and 'total_weight' in weight_data:
+            aircraft_weight_lbs = weight_data['total_weight']
+            logger.debug("Using aircraft weight from SimConnect: %s lbs", aircraft_weight_lbs)
+            return aircraft_weight_lbs
+
+        return 5000.0
 
     def _check_stabilization(self, telemetry: dict, approach_data: dict, wind_data: dict, radio_height: float) -> bool:
         """

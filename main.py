@@ -31,6 +31,7 @@ from modules.stabilized_approach import (StabilizedApproachMonitor,
 from modules.structured_logger import LogCategory, init_logger
 from modules.telemetry import MSFSTelemetry
 from modules.turbulence_detector import TurbulenceDetector
+from modules.units import feet_to_meters, lbs_to_kg
 from modules.virtual_joystick import VirtualJoystick
 from modules.synthetic_glidepath import SyntheticGlidepath
 from modules.wind_correction import WindCorrection
@@ -267,9 +268,8 @@ class AutoLandSystem:
         telemetry = self.telemetry.get_all_data()
         weather = telemetry.get('weather', {})
 
-        # WP-6: ApproachConfig.runway_length is in FEET; convert to meters
         runway_length_ft = config.runway_length if hasattr(config, 'runway_length') else 8000
-        runway_length_m = runway_length_ft / 3.28084  # feet → meters
+        runway_length_m = feet_to_meters(runway_length_ft)
 
         recommended_distance, recommended_altitude = self.autopilot_takeover.get_recommended_takeover_point(
             approach_type=config.station.type,
@@ -447,14 +447,14 @@ class AutoLandSystem:
                 aircraft_title=aircraft.get('title', 'Unknown'),
                 # SimConnect TOTAL_WEIGHT is in pounds → convert to kg
                 aircraft_weight_kg=(
-                    weight_data.get('total_weight', 132277) * 0.453592
+                    lbs_to_kg(weight_data.get('total_weight', 132277))
                     if weight_data.get('total_weight') is not None
                     else 60000
                 ),
                 runway_length_m=(
-                    config.runway_length / 3.28084  # ApproachConfig.runway_length is in FEET
+                    feet_to_meters(config.runway_length)
                     if hasattr(config, 'runway_length')
-                    else 762  # ~2500 ft in meters
+                    else 762
                 ),
                 runway_elevation_ft=config.runway_elevation if hasattr(config, 'runway_elevation') else 0,
                 temperature_c=weather.get('ambient_temperature', 15),
