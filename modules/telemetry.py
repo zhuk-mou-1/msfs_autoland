@@ -4,6 +4,7 @@
 """
 
 import logging
+import time
 from typing import Dict, Optional
 
 from SimConnect import AircraftEvents, AircraftRequests, SimConnect
@@ -89,10 +90,10 @@ class MSFSTelemetry:
         except Exception as e:
             logger.error("Error getting g-force data: %s", e)
             return {
-                'g_force': 1.0,  # fallback значение
+                'g_force': 1.0,
                 'acceleration_body_x': 0.0,
                 'acceleration_body_y': 0.0,
-                'acceleration_body_z': 0.0
+                'acceleration_body_z': 0.0,
             }
 
     def get_speed(self) -> Dict[str, float]:
@@ -118,21 +119,16 @@ class MSFSTelemetry:
 
         try:
             return {
-                # NAV1 (обычно VOR)
                 'nav1_frequency': self.aq.get("NAV_ACTIVE_FREQUENCY:1"),
                 'nav1_radial': self.aq.get("NAV_RADIAL:1"),
                 'nav1_signal': self.aq.get("NAV_HAS_NAV:1"),
                 'nav1_dme_distance': self.aq.get("NAV_DME:1"),
                 'nav1_obs': self.aq.get("NAV_OBS:1"),
-
-                # NAV2
                 'nav2_frequency': self.aq.get("NAV_ACTIVE_FREQUENCY:2"),
                 'nav2_radial': self.aq.get("NAV_RADIAL:2"),
                 'nav2_signal': self.aq.get("NAV_HAS_NAV:2"),
                 'nav2_dme_distance': self.aq.get("NAV_DME:2"),
                 'nav2_obs': self.aq.get("NAV_OBS:2"),
-
-                # ADF (NDB)
                 'adf_frequency': self.aq.get("ADF_ACTIVE_FREQUENCY:1"),
                 'adf_signal': self.aq.get("ADF_SIGNAL:1"),
                 'adf_radial': self.aq.get("ADF_RADIAL:1"),
@@ -148,21 +144,14 @@ class MSFSTelemetry:
 
         try:
             return {
-                # Localizer (курсовой маяк)
                 'nav1_has_localizer': bool(self.aq.get("NAV_HAS_LOCALIZER:1")),
-                'nav1_localizer_crs': self.aq.get("NAV_LOCALIZER:1"),  # курс localizer
-                'nav1_cdi': self.aq.get("NAV_CDI:1"),  # отклонение от курса (-127 до +127)
-
-                # Glideslope (глиссада)
+                'nav1_localizer_crs': self.aq.get("NAV_LOCALIZER:1"),
+                'nav1_cdi': self.aq.get("NAV_CDI:1"),
                 'nav1_has_glideslope': bool(self.aq.get("NAV_HAS_GLIDE_SLOPE:1")),
-                'nav1_gsi': self.aq.get("NAV_GSI:1"),  # отклонение от глиссады (-127 до +127)
-                'nav1_gs_flag': bool(self.aq.get("NAV_GS_FLAG:1")),  # флаг глиссады
-
-                # Дополнительно
-                'nav1_to_from': self.aq.get("NAV_TOFROM:1"),  # 0=OFF, 1=TO, 2=FROM
-                'nav1_ident': self.aq.get("NAV_IDENT:1"),  # идентификатор станции
-
-                # NAV2 ILS (резервный)
+                'nav1_gsi': self.aq.get("NAV_GSI:1"),
+                'nav1_gs_flag': bool(self.aq.get("NAV_GS_FLAG:1")),
+                'nav1_to_from': self.aq.get("NAV_TOFROM:1"),
+                'nav1_ident': self.aq.get("NAV_IDENT:1"),
                 'nav2_has_localizer': bool(self.aq.get("NAV_HAS_LOCALIZER:2")),
                 'nav2_localizer_crs': self.aq.get("NAV_LOCALIZER:2"),
                 'nav2_cdi': self.aq.get("NAV_CDI:2"),
@@ -174,18 +163,50 @@ class MSFSTelemetry:
             return {}
 
     def get_weather_data(self) -> Dict[str, float]:
-        """Получить атмосферные данные"""
+        """Получить атмосферные данные.
+
+        Возвращает как canonical ambient_* keys, так и legacy aliases,
+        которые уже используются существующими consumer'ами.
+        """
         if not self.connected:
             return {}
 
         try:
+            barometer_pressure = self.aq.get("BAROMETER_PRESSURE")
+            sea_level_pressure = self.aq.get("SEA_LEVEL_PRESSURE")
+            kohlsman_setting = self.aq.get("KOHLSMAN_SETTING_MB")
+            ambient_temperature = self.aq.get("AMBIENT_TEMPERATURE")
+            ambient_wind_velocity = self.aq.get("AMBIENT_WIND_VELOCITY")
+            ambient_wind_direction = self.aq.get("AMBIENT_WIND_DIRECTION")
+
+            wind_velocity = (
+                ambient_wind_velocity
+                if ambient_wind_velocity is not None
+                else 0.0
+            )
+            wind_direction = (
+                ambient_wind_direction
+                if ambient_wind_direction is not None
+                else 0.0
+            )
+
             return {
-                'barometer_pressure': self.aq.get("BAROMETER_PRESSURE"),  # миллибары (hPa)
-                'sea_level_pressure': self.aq.get("SEA_LEVEL_PRESSURE"),  # миллибары
-                'kohlsman_setting': self.aq.get("KOHLSMAN_SETTING_MB"),  # установка альтиметра (мб)
-                'ambient_temperature': self.aq.get("AMBIENT_TEMPERATURE"),  # Цельсий
-                'ambient_wind_velocity': self.aq.get("AMBIENT_WIND_VELOCITY"),  # узлы
-                'ambient_wind_direction': self.aq.get("AMBIENT_WIND_DIRECTION"),  # градусы
+                'barometer_pressure': barometer_pressure,
+                'sea_level_pressure': sea_level_pressure,
+                'kohlsman_setting': kohlsman_setting,
+                'ambient_temperature': ambient_temperature,
+                'ambient_wind_velocity': wind_velocity,
+                'ambient_wind_direction': wind_direction,
+                # Legacy aliases kept for current consumers.
+                'wind_velocity': wind_velocity,
+                'wind_direction': wind_direction,
+                'wind_gust': 0.0,
+                'visibility': 10000.0,
+                # Explicit unit aliases for future cleanup.
+                'pressure_hpa': barometer_pressure,
+                'sea_level_pressure_hpa': sea_level_pressure,
+                'wind_speed_kt': wind_velocity,
+                'wind_direction_deg': wind_direction,
             }
         except Exception as e:
             logger.error("Error getting weather data: %s", e)
@@ -197,11 +218,14 @@ class MSFSTelemetry:
             return {}
 
         try:
+            total_weight = self.aq.get("TOTAL_WEIGHT")
+            empty_weight = self.aq.get("EMPTY_WEIGHT")
+            fuel_weight = self.aq.get("FUEL_TOTAL_QUANTITY_WEIGHT")
             return {
-                'total_weight': self.aq.get("TOTAL_WEIGHT"),  # фунты
-                'empty_weight': self.aq.get("EMPTY_WEIGHT"),  # фунты
-                'fuel_weight': self.aq.get("FUEL_TOTAL_QUANTITY_WEIGHT"),  # фунты
-                'payload_weight': self.aq.get("TOTAL_WEIGHT") - self.aq.get("EMPTY_WEIGHT") - self.aq.get("FUEL_TOTAL_QUANTITY_WEIGHT"),  # фунты
+                'total_weight': total_weight,
+                'empty_weight': empty_weight,
+                'fuel_weight': fuel_weight,
+                'payload_weight': total_weight - empty_weight - fuel_weight,
             }
         except Exception as e:
             logger.error("Error getting aircraft weight: %s", e)
@@ -214,16 +238,16 @@ class MSFSTelemetry:
 
         try:
             return {
-                'flaps_position': self.aq.get("FLAPS_HANDLE_PERCENT") / 100.0,  # 0.0-1.0
-                'gear_position': self.aq.get("GEAR_POSITION"),  # 0.0-1.0 (0=убрано, 1=выпущено)
-                'spoilers_position': self.aq.get("SPOILERS_HANDLE_POSITION") / 100.0,  # 0.0-1.0
+                'flaps_position': self.aq.get("FLAPS_HANDLE_PERCENT") / 100.0,
+                'gear_position': self.aq.get("GEAR_POSITION"),
+                'spoilers_position': self.aq.get("SPOILERS_HANDLE_POSITION") / 100.0,
             }
         except Exception as e:
             logger.error("Error getting aircraft configuration: %s", e)
             return {
                 'flaps_position': 0.0,
                 'gear_position': 0.0,
-                'spoilers_position': 0.0
+                'spoilers_position': 0.0,
             }
 
     def _decode_simconnect_string(self, raw_value) -> str:
@@ -233,15 +257,9 @@ class MSFSTelemetry:
         return str(raw_value) if raw_value else ""
 
     def _detect_custom_aircraft(self, title: str) -> tuple[str, str]:
-        """
-        Определить кастомный самолёт по названию
-
-        Returns:
-            (manufacturer, autopilot_type)
-        """
+        """Определить кастомный самолёт по названию"""
         title_lower = title.lower() if title else ""
 
-        # PMDG
         if "pmdg" in title_lower:
             if "737" in title_lower:
                 return "PMDG", "PMDG_737"
@@ -249,41 +267,30 @@ class MSFSTelemetry:
                 return "PMDG", "PMDG_777"
             elif "747" in title_lower:
                 return "PMDG", "PMDG_747"
-            else:
-                return "PMDG", "PMDG_CUSTOM"
+            return "PMDG", "PMDG_CUSTOM"
 
-        # Fenix
         if "fenix" in title_lower or ("a320" in title_lower and "fenix" in title_lower):
             return "FENIX", "FENIX_A320"
 
-        # FSLabs
         if "fslabs" in title_lower or "flight sim labs" in title_lower:
             if any(model in title_lower for model in ["a320", "a319", "a321"]):
                 return "FSLABS", "FSLABS_A32X"
             return "FSLABS", "FSLABS_CUSTOM"
 
-        # iniBuilds
         if "inibuilds" in title_lower or "ini builds" in title_lower:
             if "a300" in title_lower:
                 return "INIBUILDS", "INIBUILDS_A300"
             elif "a310" in title_lower:
                 return "INIBUILDS", "INIBUILDS_A310"
-            else:
-                return "INIBUILDS", "INIBUILDS_CUSTOM"
+            return "INIBUILDS", "INIBUILDS_CUSTOM"
 
-        # FlyByWire
         if "flybywire" in title_lower or "fbw" in title_lower:
             return "FLYBYWIRE", "FBW_A32NX"
 
         return "UNKNOWN", "NONE"
 
     def _detect_standard_autopilot(self, autopilot_max_bank: float) -> str:
-        """
-        Определить тип стандартного автопилота MSFS
-
-        Returns:
-            autopilot_type
-        """
+        """Определить тип стандартного автопилота MSFS"""
         has_approach = bool(self.aq.get("AUTOPILOT_APPROACH_HOLD"))
         has_nav = bool(self.aq.get("AUTOPILOT_NAV1_LOCK"))
         has_altitude = bool(self.aq.get("AUTOPILOT_ALTITUDE_LOCK"))
@@ -293,10 +300,9 @@ class MSFSTelemetry:
             if autopilot_max_bank and autopilot_max_bank > 25:
                 return "ADVANCED"
             return "STANDARD"
-        elif has_heading and has_altitude:
+        if has_heading and has_altitude:
             return "BASIC"
-        else:
-            return "LIMITED"
+        return "LIMITED"
 
     def get_aircraft_info(self) -> Dict[str, any]:
         """Получить информацию о самолёте и его системах"""
@@ -304,28 +310,18 @@ class MSFSTelemetry:
             return {}
 
         try:
-            # Базовая информация о самолёте
             title = self._decode_simconnect_string(self.aq.get("TITLE"))
             atc_type = self._decode_simconnect_string(self.aq.get("ATC_TYPE"))
             atc_model = self._decode_simconnect_string(self.aq.get("ATC_MODEL"))
-
-            # Информация о категории
             category = self.aq.get("CATEGORY")
             engine_type = self.aq.get("ENGINE_TYPE")
             number_of_engines = self.aq.get("NUMBER_OF_ENGINES")
-
-            # Возможности автопилота
             autopilot_available = bool(self.aq.get("AUTOPILOT_AVAILABLE"))
             autopilot_max_bank = self.aq.get("AUTOPILOT_MAX_BANK")
-
-            # Дополнительные системы
             is_gear_retractable = bool(self.aq.get("IS_GEAR_RETRACTABLE"))
             is_tail_dragger = bool(self.aq.get("IS_TAIL_DRAGGER"))
 
-            # Определение типа самолёта
             aircraft_manufacturer, autopilot_type = self._detect_custom_aircraft(title)
-
-            # Если не кастомный, определяем стандартный тип
             if aircraft_manufacturer == "UNKNOWN" and autopilot_available:
                 autopilot_type = self._detect_standard_autopilot(autopilot_max_bank)
 
@@ -357,7 +353,7 @@ class MSFSTelemetry:
             2: "None",
             3: "Helo Turbine",
             4: "Unsupported",
-            5: "Turboprop"
+            5: "Turboprop",
         }
         return engine_types.get(engine_type, "Unknown")
 
@@ -367,10 +363,8 @@ class MSFSTelemetry:
             return {}
 
         try:
-            # Проверка наличия autothrottle
             has_autothrottle = False
             try:
-                # Проверяем доступность autothrottle через несколько переменных
                 at_available = self.aq.get("AUTOPILOT_THROTTLE_ARM")
                 if at_available is not None:
                     has_autothrottle = True
@@ -379,42 +373,26 @@ class MSFSTelemetry:
 
             return {
                 'available': bool(self.aq.get("AUTOPILOT_AVAILABLE")),
-                'max_bank': self.aq.get("AUTOPILOT_MAX_BANK"),  # Максимальный крен
-                'has_autothrottle': has_autothrottle,  # Наличие автоматического управления тягой
+                'max_bank': self.aq.get("AUTOPILOT_MAX_BANK"),
+                'has_autothrottle': has_autothrottle,
             }
         except Exception as e:
             logger.error("Error getting autopilot capabilities: %s", e)
             return {}
 
     def get_gps_destination(self) -> Dict[str, any]:
-        """
-        Получить информацию о пункте назначения из GPS/FMC
-
-        Returns:
-            Dict с информацией о пункте назначения:
-            - airport_icao: ICAO код аэропорта
-            - runway_id: ID ВПП (например "07L", "25R")
-            - latitude: Широта точки назначения
-            - longitude: Долгота точки назначения
-            - altitude: Высота точки назначения (футы MSL)
-            - distance: Расстояние до точки назначения (NM)
-            - bearing: Пеленг на точку назначения (градусы)
-        """
+        """Получить информацию о пункте назначения из GPS/FMC"""
         if not self.connected:
             return {}
 
         try:
-            # GPS данные о следующей точке маршрута (обычно это пункт назначения)
             dest_lat = self.aq.get("GPS_WP_NEXT_LAT")
             dest_lon = self.aq.get("GPS_WP_NEXT_LON")
             dest_alt = self.aq.get("GPS_WP_NEXT_ALT")
             dest_id = self.aq.get("GPS_WP_NEXT_ID")
+            distance = self.aq.get("GPS_WP_DISTANCE")
+            bearing = self.aq.get("GPS_WP_BEARING")
 
-            # Расстояние и пеленг до пункта назначения
-            distance = self.aq.get("GPS_WP_DISTANCE")  # метры
-            bearing = self.aq.get("GPS_WP_BEARING")  # градусы
-
-            # Декодирование ID (может содержать ICAO + runway)
             dest_id_str = ""
             if dest_id:
                 if isinstance(dest_id, bytes):
@@ -422,24 +400,15 @@ class MSFSTelemetry:
                 else:
                     dest_id_str = str(dest_id).strip()
 
-            # Попытка разделить ICAO и runway ID
             airport_icao = ""
             runway_id = ""
+            if dest_id_str and len(dest_id_str) >= 4:
+                airport_icao = dest_id_str[:4].upper()
+                remainder = dest_id_str[4:].strip('-').strip()
+                if remainder:
+                    runway_id = remainder.upper()
 
-            if dest_id_str:
-                # Формат может быть "UUEE07C" или "UUEE-07C" или просто "UUEE"
-                # Пытаемся извлечь ICAO (первые 4 символа) и runway
-                if len(dest_id_str) >= 4:
-                    airport_icao = dest_id_str[:4].upper()
-
-                    # Остаток может быть runway ID
-                    remainder = dest_id_str[4:].strip('-').strip()
-                    if remainder:
-                        runway_id = remainder.upper()
-
-            # Конвертация расстояния из метров в морские мили
             distance_nm = (distance / 1852.0) if distance else 0.0
-
             result = {
                 'airport_icao': airport_icao,
                 'runway_id': runway_id,
@@ -448,75 +417,55 @@ class MSFSTelemetry:
                 'altitude': dest_alt if dest_alt else 0.0,
                 'distance_nm': distance_nm,
                 'bearing': bearing if bearing else 0.0,
-                'raw_id': dest_id_str
+                'raw_id': dest_id_str,
             }
 
             if airport_icao:
-                logger.debug(f"GPS destination: {airport_icao} RWY {runway_id if runway_id else 'N/A'}, "
-                           f"Distance: {distance_nm:.1f}nm")
+                logger.debug(
+                    "GPS destination: %s RWY %s, Distance: %.1fnm",
+                    airport_icao,
+                    runway_id if runway_id else 'N/A',
+                    distance_nm,
+                )
 
             return result
-
         except Exception as e:
             logger.error("Error getting GPS destination: %s", e)
             return {}
 
     def get_approach_info(self) -> Dict[str, any]:
-        """
-        Получить информацию об активном заходе на посадку
-
-        Returns:
-            Dict с информацией о заходе:
-            - approach_type: Тип захода (ILS, VOR, NDB, GPS, RNAV)
-            - decision_height: Decision Height (футы AGL)
-            - minimum_descent_altitude: MDA для non-precision заходов (футы MSL)
-            - approach_active: Активен ли режим захода
-            - ils_frequency: Частота ILS (Hz)
-            - localizer_valid: Валиден ли сигнал localizer
-            - glideslope_valid: Валиден ли сигнал glideslope
-        """
+        """Получить информацию об активном заходе на посадку"""
         if not self.connected:
             return {}
 
         try:
-            # Статус режима захода
             approach_active = bool(self.aq.get("AUTOPILOT_APPROACH_HOLD"))
-
-            # ILS данные
-            ils_frequency = self.aq.get("NAV_ACTIVE_FREQUENCY:1")  # Hz
+            ils_frequency = self.aq.get("NAV_ACTIVE_FREQUENCY:1")
             localizer_valid = bool(self.aq.get("NAV_HAS_LOCALIZER:1"))
             glideslope_valid = bool(self.aq.get("NAV_HAS_GLIDE_SLOPE:1"))
-
-            # Попытка получить Decision Height / MDA
-            # MSFS может предоставлять эти данные через разные переменные
             decision_height = None
             minimum_descent_altitude = None
 
             try:
-                # GPS_APPROACH_ALTITUDE1 - минимальная высота для GPS захода
                 gps_approach_alt = self.aq.get("GPS_APPROACH_ALTITUDE1")
                 if gps_approach_alt and gps_approach_alt > 0:
-                    # Это может быть DH или MDA в зависимости от типа захода
                     decision_height = gps_approach_alt
             except Exception:
                 pass
 
             try:
-                # Альтернативный способ - через DECISION_HEIGHT (если доступно)
                 dh = self.aq.get("DECISION_HEIGHT")
                 if dh and dh > 0:
                     decision_height = dh
             except Exception:
                 pass
 
-            # Определение типа захода
             approach_type = "UNKNOWN"
             if localizer_valid and glideslope_valid:
                 approach_type = "ILS"
             elif localizer_valid:
-                approach_type = "LOC"  # Localizer only
+                approach_type = "LOC"
             elif approach_active:
-                # Если approach mode активен, но нет ILS - возможно GPS/RNAV
                 approach_type = "GPS"
 
             result = {
@@ -526,14 +475,17 @@ class MSFSTelemetry:
                 'approach_active': approach_active,
                 'ils_frequency': ils_frequency if ils_frequency else 0,
                 'localizer_valid': localizer_valid,
-                'glideslope_valid': glideslope_valid
+                'glideslope_valid': glideslope_valid,
             }
 
             if approach_active:
-                logger.debug("Approach active: %s, DH: %s", approach_type, decision_height if decision_height else 'N/A')
+                logger.debug(
+                    "Approach active: %s, DH: %s",
+                    approach_type,
+                    decision_height if decision_height else 'N/A',
+                )
 
             return result
-
         except Exception as e:
             logger.error("Error getting approach info: %s", e)
             return {}
@@ -557,25 +509,44 @@ class MSFSTelemetry:
             return {}
 
     def get_all_data(self) -> Dict[str, any]:
-        """Получить все данные одним запросом"""
-        # Получаем базовые данные
+        """Получить все данные одним запросом с метаданными snapshot quality."""
+        snapshot_timestamp = time.time()
+
+        position_data = self.get_position()
         attitude_data = self.get_attitude()
         g_force_data = self.get_g_force_data()
+        speed_data = self.get_speed()
+        nav_data = self.get_nav_data()
+        ils_data = self.get_ils_data()
+        autopilot_data = self.get_autopilot_state()
+        weather_data = self.get_weather_data()
+        weight_data = self.get_aircraft_weight()
+        aircraft_data = self.get_aircraft_info()
+        configuration_data = self.get_aircraft_configuration()
+        gps_destination = self.get_gps_destination()
+        approach_info = self.get_approach_info()
+
+        snapshot_quality = "live"
+        if not position_data or not attitude_data or not speed_data:
+            snapshot_quality = "degraded"
 
         return {
-            'position': self.get_position(),
+            'position': position_data,
             'attitude': attitude_data,
-            'orientation': attitude_data,  # Алиас для совместимости
-            'speed': self.get_speed(),
-            'nav': self.get_nav_data(),
-            'ils': self.get_ils_data(),
-            'autopilot': self.get_autopilot_state(),
-            'weather': self.get_weather_data(),
-            'weight': self.get_aircraft_weight(),
-            'aircraft': self.get_aircraft_info(),
-            'configuration': self.get_aircraft_configuration(),  # Конфигурация (flaps/gear)
-            'g_force': g_force_data.get('g_force', 1.0),  # Для удобного доступа
+            'orientation': attitude_data,
+            'speed': speed_data,
+            'nav': nav_data,
+            'ils': ils_data,
+            'autopilot': autopilot_data,
+            'weather': weather_data,
+            'weight': weight_data,
+            'aircraft': aircraft_data,
+            'configuration': configuration_data,
+            'g_force': g_force_data.get('g_force', 1.0),
             'g_force_data': g_force_data,
-            'gps_destination': self.get_gps_destination(),  # Информация о пункте назначения
-            'approach_info': self.get_approach_info(),  # Информация о заходе
+            'gps_destination': gps_destination,
+            'approach_info': approach_info,
+            'snapshot_timestamp': snapshot_timestamp,
+            'snapshot_quality': snapshot_quality,
+            'snapshot_source': 'simconnect_sequential',
         }

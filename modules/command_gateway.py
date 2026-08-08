@@ -1,22 +1,28 @@
 """Fail-closed ownership gateway for SimConnect actuator commands."""
 from __future__ import annotations
+
 import logging
 from contextlib import contextmanager
 from contextvars import ContextVar
 from enum import Enum
+
 from modules.control_ownership import ControlOwner
 
 logger = logging.getLogger(__name__)
+
 
 class CommandSource(Enum):
     AIRCRAFT_AP = "aircraft_ap"
     EXTERNAL = "external"
     SAFETY = "safety"
 
+
 _SOURCE = ContextVar("autoland_command_source", default=None)
+
 
 class CommandRejected(RuntimeError):
     pass
+
 
 class CommandGateway:
     _CHANNELS = {
@@ -30,11 +36,12 @@ class CommandGateway:
         "set_approach_mode": "autopilot", "set_airspeed_hold": "autopilot",
     }
 
-    def __init__(self, control, ownership_provider):
+    def __init__(self, control, ownership_provider, *, strict_unscoped: bool = False):
         self._control = control
         self._ownership_provider = ownership_provider
         self._warned_methods: set[str] = set()
         self._unscoped_methods: set[str] = set()
+        self._strict_unscoped = strict_unscoped
 
     @contextmanager
     def source_scope(self, source: CommandSource):
@@ -46,28 +53,41 @@ class CommandGateway:
 
     def _expected_owner(self, channel: str):
         ownership = self._ownership_provider()
-        if channel == "roll": return ownership.roll
-        if channel == "pitch": return ownership.pitch
-        if channel == "throttle": return ownership.throttle
+        if channel == "roll":
+            return ownership.roll
+        if channel == "pitch":
+            return ownership.pitch
+        if channel == "throttle":
+            return ownership.throttle
         return ControlOwner.AIRCRAFT_AP
 
     def _authorize(self, name: str):
         source = _SOURCE.get()
         if source is None:
-            # Stage 1: unscoped call — treat as AIRCRAFT_AP (contract-preserving)
-            # but emit a rate-limited warning
             self._unscoped_methods.add(name)
+            if self._strict_unscoped:
+                message = f"Rejected {name}: missing explicit command source"
+                logger.critical(message)
+                raise CommandRejected(message)
+
+            # Compatibility mode for older call sites.
             if name not in self._warned_methods:
                 self._warned_methods.add(name)
                 logger.warning(
                     "Unscoped command '%s' using implicit AIRCRAFT_AP default — "
-                    "will become fail-closed in Stage 2",
+                    "strict mode is available for fail-closed execution",
                     name,
                 )
             source = CommandSource.AIRCRAFT_AP
+
         if source == CommandSource.SAFETY:
             return
-        actual = ControlOwner.AIRCRAFT_AP if source == CommandSource.AIRCRAFT_AP else ControlOwner.EXTERNAL
+
+        actual = (
+            ControlOwner.AIRCRAFT_AP
+            if source == CommandSource.AIRCRAFT_AP
+            else ControlOwner.EXTERNAL
+        )
         expected = self._expected_owner(self._CHANNELS[name])
         if actual != expected:
             message = f"Rejected {name}: source={source.value}, owner={expected.value}"
@@ -75,15 +95,17 @@ class CommandGateway:
             raise CommandRejected(message)
 
     def __getattr__(self, name):
-        # Intercept known attributes before delegating to _control
         if name == "unscoped_call_names":
             return frozenset(self._unscoped_methods)
+
         target = getattr(self._control, name)
         if name not in self._CHANNELS or not callable(target):
             return target
+
         def guarded(*args, **kwargs):
             self._authorize(name)
             return target(*args, **kwargs)
+
         return guarded
 
     @property
